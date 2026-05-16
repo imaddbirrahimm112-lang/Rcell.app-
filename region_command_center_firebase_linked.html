@@ -1,0 +1,1438 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Region Command Center</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <style>
+    :root{
+      --bg:#070812;
+      --bg2:#101323;
+      --glass:rgba(255,255,255,.088);
+      --glass2:rgba(255,255,255,.13);
+      --line:rgba(255,255,255,.16);
+      --line2:rgba(255,255,255,.25);
+      --text:#f7f8ff;
+      --muted:rgba(247,248,255,.68);
+      --muted2:rgba(247,248,255,.48);
+      --good:#70f0c4;
+      --warn:#ffd276;
+      --bad:#ff7e95;
+      --brand:#8fd7ff;
+      --brand2:#bd9cff;
+      --shadow:0 28px 80px rgba(0,0,0,.42);
+      --radius:28px;
+      --radius2:20px;
+      --font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Display", Tahoma, Arial, sans-serif;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--text);
+      font-family:var(--font);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(87, 151, 255,.35), transparent 34%),
+        radial-gradient(circle at 85% 15%, rgba(202, 121, 255,.28), transparent 35%),
+        radial-gradient(circle at 48% 90%, rgba(31, 225, 172,.18), transparent 35%),
+        linear-gradient(135deg, var(--bg), var(--bg2) 46%, #080a15);
+      overflow-x:hidden;
+    }
+    body:before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(115deg, rgba(255,255,255,.08), transparent 28%, rgba(255,255,255,.05) 54%, transparent 78%),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0 1px, transparent 1px 90px);
+      mask-image: radial-gradient(circle at center, #000 30%, transparent 95%);
+      opacity:.72;
+      z-index:-1;
+    }
+    body:after{
+      content:"";
+      position:fixed;
+      inset:-120px;
+      background: conic-gradient(from 120deg, transparent, rgba(135,220,255,.06), transparent, rgba(196,139,255,.06), transparent);
+      filter: blur(55px);
+      pointer-events:none;
+      animation: aurora 18s linear infinite;
+      z-index:-2;
+    }
+    @keyframes aurora{to{transform:rotate(360deg)}}
+
+    .app{
+      width:min(1480px, 100%);
+      margin:0 auto;
+      padding:22px;
+      padding-bottom:42px;
+    }
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:40;
+      display:flex;
+      gap:14px;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 0 18px;
+      backdrop-filter: blur(18px);
+    }
+    .brand{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      min-width:0;
+    }
+    .logo{
+      width:56px;
+      height:56px;
+      border-radius:20px;
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      letter-spacing:.5px;
+      background:
+        radial-gradient(circle at 28% 22%, rgba(255,255,255,.78), transparent 18%),
+        linear-gradient(145deg, rgba(143,215,255,.34), rgba(189,156,255,.22));
+      border:1px solid rgba(255,255,255,.25);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.38), 0 18px 42px rgba(0,0,0,.3);
+      overflow:hidden;
+      position:relative;
+    }
+    .logo:after{
+      content:"";
+      position:absolute;
+      inset:-80% -60%;
+      transform:rotate(35deg);
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.32), transparent);
+      animation: shine 4.5s ease-in-out infinite;
+    }
+    @keyframes shine{0%,42%{translate:-80% 0} 74%,100%{translate:80% 0}}
+    .titleBlock{min-width:0}
+    .titleBlock h1{
+      margin:0;
+      font-size:clamp(20px, 2.2vw, 32px);
+      line-height:1.1;
+      letter-spacing:-.4px;
+    }
+    .titleBlock p{
+      margin:7px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .btn,
+    button,
+    .selectLike{
+      appearance:none;
+      border:none;
+      color:var(--text);
+      background:linear-gradient(145deg, rgba(255,255,255,.16), rgba(255,255,255,.075));
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:16px;
+      padding:12px 14px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 10px 30px rgba(0,0,0,.18);
+      transition:.2s ease;
+      font-family:var(--font);
+    }
+    .btn:hover, button:hover{transform:translateY(-1px); border-color:rgba(255,255,255,.32); background:rgba(255,255,255,.15)}
+    .btn.primary{
+      background:linear-gradient(145deg, rgba(143,215,255,.34), rgba(189,156,255,.24));
+      border-color:rgba(183,225,255,.36);
+    }
+    .btn.good{background:linear-gradient(145deg, rgba(112,240,196,.30), rgba(143,215,255,.13)); border-color:rgba(112,240,196,.34)}
+    .btn.warn{background:linear-gradient(145deg, rgba(255,210,118,.26), rgba(255,255,255,.07)); border-color:rgba(255,210,118,.28)}
+    .btn.danger{background:linear-gradient(145deg, rgba(255,126,149,.22), rgba(255,255,255,.07)); border-color:rgba(255,126,149,.28)}
+
+    .glass{
+      background:linear-gradient(160deg, rgba(255,255,255,.13), rgba(255,255,255,.065));
+      border:1px solid var(--line);
+      box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.18);
+      backdrop-filter: blur(24px) saturate(1.15);
+      -webkit-backdrop-filter: blur(24px) saturate(1.15);
+      border-radius:var(--radius);
+      position:relative;
+      overflow:hidden;
+    }
+    .glass:before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:linear-gradient(135deg, rgba(255,255,255,.20), transparent 24%, transparent 72%, rgba(255,255,255,.06));
+      opacity:.65;
+    }
+    .glass > *{position:relative; z-index:1}
+
+    .hero{
+      display:grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr);
+      gap:18px;
+      margin-top:4px;
+    }
+    .controlPanel{padding:18px}
+    .miniTitle{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .miniTitle h2,.sectionTitle h2{margin:0; font-size:18px; letter-spacing:-.2px}
+    .miniTitle p,.sectionTitle p{margin:6px 0 0; color:var(--muted); font-size:13px; line-height:1.55}
+    .statusPill{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      border:1px solid rgba(255,255,255,.18);
+      padding:8px 11px;
+      border-radius:999px;
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+      background:rgba(255,255,255,.07);
+    }
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--bad);box-shadow:0 0 18px var(--bad)}
+    .dot.ok{background:var(--good);box-shadow:0 0 18px var(--good)}
+    .dot.warn{background:var(--warn);box-shadow:0 0 18px var(--warn)}
+
+    .fieldGrid{display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:12px}
+    .field{display:flex; flex-direction:column; gap:7px}
+    label{color:var(--muted); font-size:12px; font-weight:800}
+    input, select, textarea{
+      width:100%;
+      color:var(--text);
+      background:rgba(0,0,0,.20);
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:16px;
+      padding:12px 13px;
+      outline:none;
+      font-family:var(--font);
+      font-weight:750;
+      transition:.15s ease;
+    }
+    input:focus,select:focus,textarea:focus{border-color:rgba(143,215,255,.65); box-shadow:0 0 0 4px rgba(143,215,255,.10)}
+    textarea{min-height:108px; direction:ltr; text-align:left; line-height:1.55; resize:vertical; font-family:ui-monospace, SFMono-Regular, Consolas, monospace; font-weight:600}
+    select option{background:#121521;color:#fff}
+    .wide{grid-column:span 2}
+
+    .kpiGrid{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap:14px;
+      margin-top:18px;
+    }
+    .kpi{
+      padding:18px;
+      border-radius:24px;
+      background:linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.055));
+      border:1px solid rgba(255,255,255,.15);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+      min-height:124px;
+    }
+    .kpi .label{color:var(--muted); font-size:12px; font-weight:850; display:flex; justify-content:space-between; gap:8px}
+    .kpi .value{font-size:clamp(22px, 3vw, 34px); font-weight:950; margin-top:12px; letter-spacing:-1px; direction:ltr; text-align:right}
+    .kpi .sub{color:var(--muted2); margin-top:9px; font-size:12px; line-height:1.4}
+    .spark{
+      width:42px;height:42px;border-radius:16px;display:grid;place-items:center;
+      background:linear-gradient(145deg, rgba(143,215,255,.22), rgba(189,156,255,.14));
+      border:1px solid rgba(255,255,255,.16);
+    }
+
+    .regionGrid{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap:14px;
+      margin-top:18px;
+    }
+    .regionCard{
+      padding:18px;
+      border-radius:24px;
+      background:linear-gradient(150deg, rgba(255,255,255,.13), rgba(255,255,255,.055));
+      border:1px solid rgba(255,255,255,.15);
+      overflow:hidden;
+      position:relative;
+      min-height:170px;
+    }
+    .regionCard:before{
+      content:"";
+      position:absolute;
+      width:170px;height:170px;border-radius:50%;
+      left:-80px;top:-90px;
+      background:var(--accent);
+      filter:blur(26px);opacity:.38;
+    }
+    .regionName{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:950;font-size:18px}
+    .regionShare{color:var(--muted);font-size:12px;border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:6px 9px;background:rgba(0,0,0,.15)}
+    .regionAmount{margin-top:20px;font-size:26px;font-weight:950;letter-spacing:-.5px;direction:ltr;text-align:right}
+    .regionUSD{margin-top:8px;color:var(--muted);font-weight:850;direction:ltr;text-align:right}
+    .barShell{height:8px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;margin-top:17px}
+    .barFill{height:100%;width:0;background:linear-gradient(90deg, rgba(143,215,255,.85), rgba(189,156,255,.78));border-radius:999px;transition:width .5s ease}
+
+    .dashGrid{
+      display:grid;
+      grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+      gap:18px;
+      margin-top:18px;
+    }
+    .panel{padding:18px}
+    .chartBox{height:335px;position:relative;margin-top:10px}
+
+    .insightList{display:grid;gap:10px;margin-top:12px}
+    .insight{
+      display:flex;gap:10px;align-items:flex-start;
+      padding:13px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.13);
+      background:rgba(255,255,255,.062);
+      color:var(--muted);
+      line-height:1.55;
+      font-size:13px;
+    }
+    .badge{
+      min-width:30px;height:30px;border-radius:12px;display:grid;place-items:center;
+      background:rgba(143,215,255,.16);border:1px solid rgba(143,215,255,.25); color:#dff5ff;
+    }
+
+    .aiGrid{
+      display:grid;
+      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+      gap:18px;
+      margin-top:18px;
+    }
+    .chat{
+      height:410px;
+      overflow:auto;
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      border-radius:22px;
+      background:rgba(0,0,0,.16);
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .msg{
+      max-width:88%;
+      padding:12px 13px;
+      border-radius:18px;
+      line-height:1.65;
+      font-size:14px;
+      color:rgba(255,255,255,.9);
+      white-space:pre-wrap;
+    }
+    .msg.user{align-self:flex-start;background:rgba(143,215,255,.14);border:1px solid rgba(143,215,255,.22)}
+    .msg.ai{align-self:flex-end;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14)}
+    .aiInput{display:grid;grid-template-columns:1fr auto auto;gap:10px;margin-top:10px}
+    .quickAsk{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .chip{
+      border-radius:999px;
+      padding:9px 11px;
+      font-size:12px;
+      color:var(--muted);
+      background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.14);
+      cursor:pointer;
+      transition:.2s ease;
+      font-weight:800;
+    }
+    .chip:hover{color:var(--text);border-color:rgba(255,255,255,.28)}
+
+    .settings{
+      margin-top:18px;
+      padding:18px;
+      display:none;
+    }
+    .settings.open{display:block}
+    .settingsGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+    .note{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.65;
+      padding:12px;
+      border-radius:16px;
+      border:1px dashed rgba(255,255,255,.18);
+      background:rgba(0,0,0,.12);
+    }
+    .reportSurface{padding:0;margin:0}
+
+    .tableWrap{overflow:auto;margin-top:12px;border-radius:20px;border:1px solid rgba(255,255,255,.12)}
+    table{width:100%;border-collapse:collapse;min-width:640px;background:rgba(0,0,0,.08)}
+    th,td{padding:13px 12px;border-bottom:1px solid rgba(255,255,255,.10);text-align:right;font-size:13px}
+    th{color:var(--muted);font-weight:900;background:rgba(255,255,255,.06)}
+    td.num{direction:ltr;text-align:right;font-weight:900;color:#fff}
+    tr:last-child td{border-bottom:none}
+
+    .toast{
+      position:fixed;
+      bottom:22px;
+      right:22px;
+      z-index:100;
+      max-width:min(460px, calc(100vw - 44px));
+      padding:14px 15px;
+      border-radius:18px;
+      background:rgba(14,18,31,.82);
+      border:1px solid rgba(255,255,255,.18);
+      backdrop-filter:blur(18px);
+      color:var(--text);
+      box-shadow:0 16px 46px rgba(0,0,0,.35);
+      display:none;
+      line-height:1.6;
+      font-size:13px;
+    }
+    .toast.show{display:block;animation:pop .25s ease both}
+    @keyframes pop{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+
+    .loadingOverlay{
+      position:fixed;inset:0;z-index:120;display:none;place-items:center;
+      background:rgba(0,0,0,.38);backdrop-filter:blur(16px);
+    }
+    .loadingOverlay.show{display:grid}
+    .loaderCard{padding:22px;border-radius:24px;text-align:center;min-width:280px;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.16);box-shadow:var(--shadow)}
+    .spinner{width:44px;height:44px;border-radius:50%;border:4px solid rgba(255,255,255,.18);border-top-color:rgba(143,215,255,.95);margin:0 auto 12px;animation:spin .85s linear infinite}@keyframes spin{to{rotate:360deg}}
+
+    .printOnly{display:none}
+
+    @media (max-width:1180px){
+      .hero,.dashGrid,.aiGrid{grid-template-columns:1fr}
+      .fieldGrid,.kpiGrid,.regionGrid{grid-template-columns:repeat(2, minmax(0,1fr))}
+      .wide{grid-column:span 2}
+    }
+    @media (max-width:720px){
+      .app{padding:14px;padding-bottom:92px}
+      .topbar{position:relative;align-items:flex-start;flex-direction:column}
+      .actions{width:100%;justify-content:stretch}.actions .btn{flex:1;text-align:center}
+      .fieldGrid,.kpiGrid,.regionGrid,.settingsGrid{grid-template-columns:1fr}.wide{grid-column:auto}
+      .kpi .value{font-size:28px}
+      .chartBox{height:290px}
+      .aiInput{grid-template-columns:1fr}.msg{max-width:96%}
+      .titleBlock p{white-space:normal}
+      .regionCard{min-height:155px}
+      .logo{width:50px;height:50px}
+    }
+
+    @media print{
+      body{background:#101323;color:#fff}
+      .topbar,.settings,.aiGrid,.noPrint{display:none!important}
+      .app{padding:0;width:100%}
+      .glass{box-shadow:none;break-inside:avoid}
+      .printOnly{display:block}
+    }
+  </style>
+</head>
+<body>
+  <div class="loadingOverlay" id="loadingOverlay"><div class="loaderCard"><div class="spinner"></div><b id="loadingText">جاري تجهيز التقرير...</b></div></div>
+  <div class="toast" id="toast"></div>
+
+  <main class="app">
+    <header class="topbar noPrint">
+      <div class="brand">
+        <div class="logo">RC</div>
+        <div class="titleBlock">
+          <h1>لوحة تحكم المناطق</h1>
+          <p>مربوطة بمشروع mandob-app-82843 — تعرض Region 1 / Region 2 / Region 3 / Region 4 فقط</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="connectBtn">اتصال Firebase</button>
+        <button class="btn good" id="pdfBtn">تصدير PDF فخم</button>
+        <button class="btn" id="refreshBtn">تحديث</button>
+        <button class="btn warn" id="settingsBtn">الإعدادات</button>
+      </div>
+    </header>
+
+    <section class="settings glass noPrint" id="settingsPanel">
+      <div class="miniTitle">
+        <div>
+          <h2>إعدادات الربط والتحليل</h2>
+          <p>ضع Firebase Config واسم Collection. الواجهة الرئيسية لن تعرض أي اسم شخص؛ التجميع يبقى حسب المناطق فقط.</p>
+        </div>
+        <span class="statusPill"><span class="dot warn"></span> محفوظ محلياً على هذا الجهاز</span>
+      </div>
+
+      <div class="settingsGrid">
+        <div class="field">
+          <label>Firebase Config بصيغة JSON</label>
+          <textarea id="firebaseConfigInput" placeholder='Firebase Config جاهز'>{
+  "apiKey": "AIzaSyDoVPtyKtuY5LBRw6plvwDVJv4TDIk0Klk",
+  "authDomain": "mandob-app-82843.firebaseapp.com",
+  "projectId": "mandob-app-82843",
+  "storageBucket": "mandob-app-82843.firebasestorage.app",
+  "messagingSenderId": "749939721927",
+  "appId": "1:749939721927:web:4c1c63aacca39ec41fe0e2",
+  "measurementId": "G-40ZG8YVETG"
+}</textarea>
+        </div>
+        <div class="field">
+          <label>ربط داخلي للمناطق — JSON اختياري إذا البيانات لا تحتوي region</label>
+          <textarea id="regionMapInput" spellcheck="false"></textarea>
+        </div>
+      </div>
+
+      <div class="fieldGrid" style="margin-top:12px">
+        <div class="field">
+          <label>Collection Path</label>
+          <input id="collectionPathInput" placeholder="Auto أو اكتب اسم Collection مثل entries / revenues" />
+        </div>
+        <div class="field">
+          <label>سعر الصرف SYP لكل 1 USD</label>
+          <input id="exchangeRateInput" inputmode="numeric" placeholder="مثال: 15000" />
+        </div>
+        <div class="field">
+          <label>الفترة</label>
+          <select id="periodSelect">
+            <option value="all">كل البيانات</option>
+            <option value="today">اليوم</option>
+            <option value="yesterday">أمس</option>
+            <option value="week">آخر 7 أيام</option>
+            <option value="month">هذا الشهر</option>
+            <option value="year">هذه السنة</option>
+            <option value="custom">تاريخ مخصص</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>تشغيل تسجيل دخول مجهول في Firebase</label>
+          <select id="anonAuthInput">
+            <option value="off">إيقاف</option>
+            <option value="on">تشغيل</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>من تاريخ</label>
+          <input id="fromDateInput" type="date" />
+        </div>
+        <div class="field">
+          <label>إلى تاريخ</label>
+          <input id="toDateInput" type="date" />
+        </div>
+        <div class="field">
+          <label>OpenAI API Key للذكاء الحقيقي</label>
+          <input id="openaiKeyInput" type="password" placeholder="sk-... لا تنشره بمكان عام" />
+        </div>
+        <div class="field">
+          <label>AI Model</label>
+          <input id="aiModelInput" placeholder="gpt-4.1-mini" />
+        </div>
+        <div class="field wide">
+          <label>AI Proxy URL اختياري للأمان</label>
+          <input id="aiProxyInput" placeholder="اتركه فارغاً للتجربة المباشرة، أو ضع رابط proxy خاص بك" />
+        </div>
+        <div class="field wide">
+          <label>خيارات الصوت</label>
+          <select id="voiceInput">
+            <option value="on">الرد الصوتي العربي مفعل</option>
+            <option value="off">الرد الصوتي متوقف</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:12px">
+        ملاحظة مهمة: وضع OpenAI API Key داخل صفحة HTML عامة يعرّض المفتاح إذا نشرت الملف للعامة. الأفضل لاحقاً نعمل Proxy صغير. لكن حالياً وضعت لك خيار مباشر حتى يشتغل فوراً أثناء التجربة، وخيار Proxy إذا بدك نسخة إنتاجية أقوى.
+      </div>
+      <div class="actions" style="margin-top:12px;justify-content:flex-start">
+        <button class="btn good" id="saveSettingsBtn">حفظ الإعدادات</button>
+        <button class="btn" id="testLocalBtn">اختبار التحليل المحلي</button>
+        <button class="btn danger" id="clearSettingsBtn">مسح الإعدادات</button>
+      </div>
+    </section>
+
+    <div id="reportSurface" class="reportSurface">
+      <section class="hero">
+        <div class="glass controlPanel">
+          <div class="miniTitle">
+            <div>
+              <h2>Command Center</h2>
+              <p id="periodLabel">الفترة: كل البيانات</p>
+            </div>
+            <span class="statusPill" id="connectionPill"><span class="dot" id="connectionDot"></span><span id="connectionText">غير متصل</span></span>
+          </div>
+
+          <div class="fieldGrid noPrint">
+            <div class="field wide">
+              <label>سعر الصرف اليدوي</label>
+              <input id="quickRateInput" inputmode="numeric" placeholder="اكتب سعر الصرف" />
+            </div>
+            <div class="field">
+              <label>الفترة السريعة</label>
+              <select id="quickPeriodSelect">
+                <option value="all">كل البيانات</option>
+                <option value="today">اليوم</option>
+                <option value="yesterday">أمس</option>
+                <option value="week">آخر 7 أيام</option>
+                <option value="month">هذا الشهر</option>
+                <option value="year">هذه السنة</option>
+                <option value="custom">مخصص</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>آخر تحديث</label>
+              <input id="lastUpdateInput" readonly />
+            </div>
+          </div>
+
+          <div class="kpiGrid">
+            <article class="kpi">
+              <div class="label"><span>إجمالي SYP</span><span class="spark">ل.س</span></div>
+              <div class="value" id="totalSyp">0</div>
+              <div class="sub" id="totalSypSub">من 0 سجل مطابق</div>
+            </article>
+            <article class="kpi">
+              <div class="label"><span>إجمالي USD</span><span class="spark">$</span></div>
+              <div class="value" id="totalUsd">0</div>
+              <div class="sub" id="totalUsdSub">حسب سعر الصرف اليدوي</div>
+            </article>
+            <article class="kpi">
+              <div class="label"><span>أقوى منطقة</span><span class="spark">▲</span></div>
+              <div class="value" id="bestRegion">—</div>
+              <div class="sub" id="bestRegionSub">حسب إجمالي الفترة</div>
+            </article>
+            <article class="kpi">
+              <div class="label"><span>متوسط المنطقة</span><span class="spark">≈</span></div>
+              <div class="value" id="avgRegion">0</div>
+              <div class="sub">إجمالي المناطق ÷ 4</div>
+            </article>
+          </div>
+        </div>
+
+        <div class="glass panel">
+          <div class="miniTitle">
+            <div>
+              <h2>نبض المناطق</h2>
+              <p>قراءة مباشرة من Firebase مع تجميع نظيف حسب Region فقط.</p>
+            </div>
+          </div>
+          <div class="chartBox"><canvas id="shareChart"></canvas></div>
+        </div>
+      </section>
+
+      <section class="regionGrid" id="regionCards"></section>
+
+      <section class="dashGrid">
+        <div class="glass panel">
+          <div class="sectionTitle">
+            <h2>مقارنة المناطق</h2>
+            <p>المبالغ بالليرة السورية حسب الفترة المختارة.</p>
+          </div>
+          <div class="chartBox"><canvas id="barChart"></canvas></div>
+        </div>
+        <div class="glass panel">
+          <div class="sectionTitle">
+            <h2>ملخص المدير</h2>
+            <p>تنبيهات ذكية بدون كشف أي أسماء بالواجهة الرئيسية.</p>
+          </div>
+          <div class="insightList" id="insightList"></div>
+          <div class="tableWrap">
+            <table>
+              <thead><tr><th>المنطقة</th><th>SYP</th><th>USD</th><th>النسبة</th><th>عدد السجلات</th></tr></thead>
+              <tbody id="regionTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="aiGrid noPrint">
+      <div class="glass panel">
+        <div class="sectionTitle">
+          <h2>الذكاء الإداري الصوتي</h2>
+          <p>اسأله عن المناطق فقط: مقارنة، أقوى منطقة، ضعف الأداء، تقرير سريع، أو توصية للمدير.</p>
+        </div>
+        <div class="quickAsk">
+          <span class="chip" data-q="اعطني تقرير إداري مختصر عن المناطق اليوم">تقرير إداري</span>
+          <span class="chip" data-q="ما هي أقوى منطقة وما السبب بالأرقام؟">أقوى منطقة</span>
+          <span class="chip" data-q="قارن Region 1 مع Region 2">قارن 1 و 2</span>
+          <span class="chip" data-q="ما هي المنطقة الأضعف وما الإجراء المقترح؟">الأضعف</span>
+          <span class="chip" data-q="كم إجمالي الدولار والليرة؟">الإجمالي</span>
+        </div>
+        <div class="note" style="margin-top:12px">
+          إذا كان OpenAI API Key موجوداً، سيستخدم الذكاء الحقيقي. إذا لم يكن موجوداً أو فشل الاتصال، سيجيب بتحليل محلي من بيانات اللوحة نفسها.
+        </div>
+      </div>
+      <div class="glass panel">
+        <div class="chat" id="chatBox">
+          <div class="msg ai">أهلاً عماد. أنا جاهز أحلل لك المناطق الأربع فقط. اسألني مثلاً: «قارن Region 1 مع Region 3» أو «اعطني تقرير المدير».</div>
+        </div>
+        <div class="aiInput">
+          <input id="aiQuestionInput" placeholder="اكتب سؤالك عن المناطق..." />
+          <button class="btn primary" id="askBtn">اسأل</button>
+          <button class="btn" id="micBtn">🎙️</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const REGIONS = ["Region 1", "Region 2", "Region 3", "Region 4"];
+    const AUTO_COLLECTIONS = [
+      "arsal_data", "arsal_entries", "arsalEntries", "أرسل", "ارسال", "ersal",
+      "entries", "records", "revenues", "sales", "transactions", "submissions",
+      "mandob_entries", "mandobEntries", "delegate_entries", "daily_entries", "reports", "data"
+    ];
+    const REGION_ACCENTS = [
+      "radial-gradient(circle, rgba(143,215,255,.82), transparent 62%)",
+      "radial-gradient(circle, rgba(189,156,255,.78), transparent 62%)",
+      "radial-gradient(circle, rgba(112,240,196,.62), transparent 62%)",
+      "radial-gradient(circle, rgba(255,210,118,.62), transparent 62%)"
+    ];
+
+    const DEFAULT_REGION_MAP = {
+      "جفان":"Region 1", "Jevan":"Region 1", "Jafan":"Region 1", "علي":"Region 1", "كاوا":"Region 1", "دلخواز":"Region 1", "بشار":"Region 1", "صالة قامشلو 1":"Region 1", "صالة قامشلو 2":"Region 1", "صالة عامودا":"Region 1", "صالة درباسية":"Region 1", "صالة معبدة":"Region 1", "صالة ديريك":"Region 1",
+      "شريف":"Region 2", "يوسف":"Region 2", "كمال":"Region 2", "صالة حسكة 1":"Region 2", "صالة حسكة 2":"Region 2", "صالة تل تمر":"Region 2", "صالة الشدادي":"Region 2",
+      "جاسم حسو":"Region 3", "فرهاد خليل":"Region 3", "احمد اومري":"Region 3", "أحمد اومري":"Region 3", "صالة الرقة 1":"Region 3", "صالة الرقة 2":"Region 3", "احمد هنيدي":"Region 3", "أحمد هنيدي":"Region 3", "صالة الطبقة":"Region 3", "صالة دير الزور":"Region 3",
+      "شاهر ابو احمد":"Region 4", "شاهر أبو أحمد":"Region 4", "عبده جاسم":"Region 4", "صالة منبج":"Region 4", "عادل عبدالعزيز":"Region 4", "عادل عبد العزيز":"Region 4", "صالة كوباني":"Region 4"
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      settingsPanel: $("settingsPanel"), settingsBtn: $("settingsBtn"), connectBtn: $("connectBtn"), refreshBtn: $("refreshBtn"), pdfBtn: $("pdfBtn"),
+      firebaseConfigInput: $("firebaseConfigInput"), collectionPathInput: $("collectionPathInput"), exchangeRateInput: $("exchangeRateInput"), quickRateInput: $("quickRateInput"),
+      periodSelect: $("periodSelect"), quickPeriodSelect: $("quickPeriodSelect"), fromDateInput: $("fromDateInput"), toDateInput: $("toDateInput"), anonAuthInput: $("anonAuthInput"),
+      regionMapInput: $("regionMapInput"), openaiKeyInput: $("openaiKeyInput"), aiModelInput: $("aiModelInput"), aiProxyInput: $("aiProxyInput"), voiceInput: $("voiceInput"),
+      saveSettingsBtn: $("saveSettingsBtn"), clearSettingsBtn: $("clearSettingsBtn"), testLocalBtn: $("testLocalBtn"),
+      connectionPill: $("connectionPill"), connectionDot: $("connectionDot"), connectionText: $("connectionText"), lastUpdateInput: $("lastUpdateInput"), periodLabel: $("periodLabel"),
+      totalSyp: $("totalSyp"), totalUsd: $("totalUsd"), totalSypSub: $("totalSypSub"), totalUsdSub: $("totalUsdSub"), bestRegion: $("bestRegion"), bestRegionSub: $("bestRegionSub"), avgRegion: $("avgRegion"),
+      regionCards: $("regionCards"), regionTable: $("regionTable"), insightList: $("insightList"), reportSurface: $("reportSurface"),
+      chatBox: $("chatBox"), aiQuestionInput: $("aiQuestionInput"), askBtn: $("askBtn"), micBtn: $("micBtn"), toast: $("toast"), loadingOverlay: $("loadingOverlay"), loadingText: $("loadingText")
+    };
+
+    const storageKey = "region-command-center-v1";
+    let firebaseApp = null;
+    let db = null;
+    let unsubscribe = null;
+    let charts = {bar:null, share:null};
+    let rawDocs = [];
+    let current = emptyAggregation();
+
+    const state = {
+      settings:{
+        firebaseConfig:`{
+  "apiKey": "AIzaSyDoVPtyKtuY5LBRw6plvwDVJv4TDIk0Klk",
+  "authDomain": "mandob-app-82843.firebaseapp.com",
+  "projectId": "mandob-app-82843",
+  "storageBucket": "mandob-app-82843.firebasestorage.app",
+  "messagingSenderId": "749939721927",
+  "appId": "1:749939721927:web:4c1c63aacca39ec41fe0e2",
+  "measurementId": "G-40ZG8YVETG"
+}`,
+        collectionPath:"__auto__",
+        exchangeRate:"",
+        period:"all",
+        fromDate:"",
+        toDate:"",
+        anonAuth:"off",
+        regionMap: JSON.stringify(DEFAULT_REGION_MAP, null, 2),
+        openaiKey:"",
+        aiModel:"gpt-4.1-mini",
+        aiProxy:"",
+        voice:"on"
+      }
+    };
+
+    function emptyAggregation(){
+      const byRegion = Object.fromEntries(REGIONS.map(r => [r, {region:r, syp:0, usd:0, count:0, share:0}]));
+      return {byRegion, totalSyp:0, totalUsd:0, totalCount:0, exchangeRate:0, unmatched:0, filteredDocs:[], periodLabel:"كل البيانات"};
+    }
+
+    function saveSettings(){
+      state.settings.firebaseConfig = els.firebaseConfigInput.value.trim();
+      state.settings.collectionPath = els.collectionPathInput.value.trim();
+      state.settings.exchangeRate = normalizeNumber(els.exchangeRateInput.value || els.quickRateInput.value || "");
+      state.settings.period = els.periodSelect.value;
+      state.settings.fromDate = els.fromDateInput.value;
+      state.settings.toDate = els.toDateInput.value;
+      state.settings.anonAuth = els.anonAuthInput.value;
+      state.settings.regionMap = els.regionMapInput.value.trim() || "{}";
+      state.settings.openaiKey = els.openaiKeyInput.value.trim();
+      state.settings.aiModel = els.aiModelInput.value.trim() || "gpt-4.1-mini";
+      state.settings.aiProxy = els.aiProxyInput.value.trim();
+      state.settings.voice = els.voiceInput.value;
+      localStorage.setItem(storageKey, JSON.stringify(state.settings));
+      syncInputs();
+      render();
+      toast("تم حفظ الإعدادات.");
+    }
+
+    function loadSettings(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+        if(saved) Object.assign(state.settings, saved);
+      }catch(e){}
+      syncInputs();
+    }
+
+    function syncInputs(){
+      els.firebaseConfigInput.value = state.settings.firebaseConfig || "";
+      els.collectionPathInput.value = state.settings.collectionPath || "";
+      els.exchangeRateInput.value = state.settings.exchangeRate || "";
+      els.quickRateInput.value = state.settings.exchangeRate || "";
+      els.periodSelect.value = state.settings.period || "all";
+      els.quickPeriodSelect.value = state.settings.period || "all";
+      els.fromDateInput.value = state.settings.fromDate || "";
+      els.toDateInput.value = state.settings.toDate || "";
+      els.anonAuthInput.value = state.settings.anonAuth || "off";
+      els.regionMapInput.value = state.settings.regionMap || JSON.stringify(DEFAULT_REGION_MAP, null, 2);
+      els.openaiKeyInput.value = state.settings.openaiKey || "";
+      els.aiModelInput.value = state.settings.aiModel || "gpt-4.1-mini";
+      els.aiProxyInput.value = state.settings.aiProxy || "";
+      els.voiceInput.value = state.settings.voice || "on";
+    }
+
+    function normalizeNumber(value){
+      if(value == null) return "";
+      const arabic = "٠١٢٣٤٥٦٧٨٩";
+      const persian = "۰۱۲۳۴۵۶۷۸۹";
+      let s = String(value).trim();
+      s = s.replace(/[٠-٩]/g, d => arabic.indexOf(d)).replace(/[۰-۹]/g, d => persian.indexOf(d));
+      s = s.replace(/[^0-9.\-]/g, "");
+      const parts = s.split(".");
+      if(parts.length > 2) s = parts.shift() + "." + parts.join("");
+      return s;
+    }
+
+    function toNumber(value){
+      const n = Number(normalizeNumber(value));
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function fmt(n, decimals=0){
+      const value = Number.isFinite(Number(n)) ? Number(n) : 0;
+      return new Intl.NumberFormat("en-US", {maximumFractionDigits:decimals, minimumFractionDigits:decimals}).format(value);
+    }
+
+    function fmtMoney(n, suffix=""){
+      return `${fmt(n, 0)}${suffix ? " " + suffix : ""}`;
+    }
+
+    function toast(text, ms=3400){
+      els.toast.textContent = text;
+      els.toast.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(()=>els.toast.classList.remove("show"), ms);
+    }
+
+    function setLoading(show, text="جاري المعالجة..."){
+      els.loadingText.textContent = text;
+      els.loadingOverlay.classList.toggle("show", !!show);
+    }
+
+    function setConnection(status, text){
+      els.connectionText.textContent = text;
+      els.connectionDot.classList.remove("ok","warn");
+      if(status === "ok") els.connectionDot.classList.add("ok");
+      else if(status === "warn") els.connectionDot.classList.add("warn");
+    }
+
+    function parseFirebaseConfig(){
+      const txt = state.settings.firebaseConfig.trim();
+      if(!txt) throw new Error("Firebase Config فارغ. افتح الإعدادات وضع config المشروع.");
+      try{return JSON.parse(txt)} catch(e){
+        try{
+          const body = txt.replace(/const\s+firebaseConfig\s*=\s*/, "").replace(/;\s*$/, "");
+          return Function(`"use strict"; return (${body});`)();
+        } catch(err){
+          throw new Error("Firebase Config غير صحيح. استخدم JSON أو كود firebaseConfig الأصلي.");
+        }
+      }
+    }
+
+    function isAutoPath(path){
+      const p = String(path || "").trim().toLowerCase();
+      return !p || p === "auto" || p === "__auto__" || p === "تلقائي";
+    }
+
+    function quickDocScore(docs){
+      let score = 0;
+      for(const d of docs.slice(0, 80)){
+        if(extractRegion(d)) score += 4;
+        if(extractAmount(d) > 0) score += 3;
+        if(extractDate(d)) score += 1;
+      }
+      return score + Math.min(docs.length, 30);
+    }
+
+    async function findBestCollectionPath(requestedPath){
+      const path = String(requestedPath || "").trim();
+      if(!isAutoPath(path)) return path;
+      setConnection("warn", "أبحث عن Collection تلقائياً...");
+      let best = {path:null, docs:[], score:-1, denied:0};
+      for(const candidate of AUTO_COLLECTIONS){
+        try{
+          const snap = await getDocs(collection(db, candidate));
+          const docs = snap.docs.map(d => ({id:d.id, _collectionPath:candidate, ...d.data()}));
+          const score = quickDocScore(docs);
+          if(score > best.score) best = {path:candidate, docs, score, denied:best.denied};
+          if(score >= 8) break;
+        }catch(e){
+          best.denied++;
+          console.warn("Auto collection scan skipped:", candidate, e?.message || e);
+        }
+      }
+      if(best.path && best.docs.length){
+        state.settings.collectionPath = best.path;
+        els.collectionPathInput.value = best.path;
+        localStorage.setItem(storageKey, JSON.stringify(state.settings));
+        toast(`تم العثور على Collection تلقائياً: ${best.path}`);
+        return best.path;
+      }
+      if(best.path){
+        state.settings.collectionPath = best.path;
+        els.collectionPathInput.value = best.path;
+        localStorage.setItem(storageKey, JSON.stringify(state.settings));
+        toast(`تم اختيار ${best.path} لكن لا توجد سجلات ظاهرة حالياً.`);
+        return best.path;
+      }
+      throw new Error("لم أستطع تحديد Collection تلقائياً. اكتب اسم Collection الخاص بتطبيق أرسل في الإعدادات.");
+    }
+
+    async function connectFirebase(forceOnce=false){
+      saveSettings();
+      if(unsubscribe){unsubscribe(); unsubscribe=null;}
+      if(firebaseApp){try{await deleteApp(firebaseApp)}catch(e){} firebaseApp=null; db=null;}
+      const config = parseFirebaseConfig();
+      setConnection("warn", "جاري الاتصال...");
+      firebaseApp = initializeApp(config, "region-center-" + Date.now());
+      db = getFirestore(firebaseApp);
+      if(state.settings.anonAuth === "on"){
+        const auth = getAuth(firebaseApp);
+        await signInAnonymously(auth);
+      }
+      const path = await findBestCollectionPath(state.settings.collectionPath);
+      const ref = collection(db, path);
+      if(forceOnce){
+        const snap = await getDocs(ref);
+        rawDocs = snap.docs.map(d => ({id:d.id, _collectionPath:path, ...d.data()}));
+        setConnection("ok", `متصل — ${fmt(rawDocs.length)} سجل — ${path}`);
+        els.lastUpdateInput.value = new Date().toLocaleString("en-US");
+        render();
+        return;
+      }
+      unsubscribe = onSnapshot(ref, (snapshot)=>{
+        rawDocs = snapshot.docs.map(d => ({id:d.id, _collectionPath:path, ...d.data()}));
+        setConnection("ok", `متصل — ${fmt(rawDocs.length)} سجل — ${path}`);
+        els.lastUpdateInput.value = new Date().toLocaleString("en-US");
+        render();
+      }, (error)=>{
+        console.error(error);
+        setConnection("warn", "خطأ اتصال");
+        toast("تعذر قراءة Firebase: " + (error?.message || error));
+      });
+      toast("تم تشغيل القراءة المباشرة من Firebase.");
+    }
+
+    function getRegionMap(){
+      try{
+        const map = JSON.parse(state.settings.regionMap || "{}");
+        return {...DEFAULT_REGION_MAP, ...map};
+      }catch(e){
+        toast("ربط المناطق JSON غير صحيح؛ سيتم الاعتماد على field region فقط.");
+        return DEFAULT_REGION_MAP;
+      }
+    }
+
+    function pick(obj, keys){
+      for(const k of keys){
+        if(obj && Object.prototype.hasOwnProperty.call(obj, k) && obj[k] !== undefined && obj[k] !== null && obj[k] !== "") return obj[k];
+      }
+      return undefined;
+    }
+
+    function deepPick(obj, keys){
+      const direct = pick(obj, keys);
+      if(direct !== undefined) return direct;
+      for(const v of Object.values(obj || {})){
+        if(v && typeof v === "object" && !Array.isArray(v)){
+          const nested = pick(v, keys);
+          if(nested !== undefined) return nested;
+        }
+      }
+      return undefined;
+    }
+
+    function normalizeRegion(value){
+      if(value === undefined || value === null) return null;
+      const s = String(value).trim().toLowerCase().replace(/[_\-]/g," ").replace(/\s+/g," ");
+      if(!s) return null;
+      const n = s.match(/(?:region|reg|r|منطقة|المنطقة)\s*([1-4])/i) || s.match(/^([1-4])$/);
+      if(n) return `Region ${n[1]}`;
+      if(["region 1","reg 1","r1","reg1"].includes(s)) return "Region 1";
+      if(["region 2","reg 2","r2","reg2"].includes(s)) return "Region 2";
+      if(["region 3","reg 3","r3","reg3"].includes(s)) return "Region 3";
+      if(["region 4","reg 4","r4","reg4"].includes(s)) return "Region 4";
+      return null;
+    }
+
+    function extractDate(doc){
+      const v = deepPick(doc, ["date","day","createdAt","created_at","timestamp","time","ts","submittedAt","created","entryDate"]);
+      if(!v) return null;
+      if(typeof v?.toDate === "function") return v.toDate();
+      if(typeof v === "number") return new Date(v < 1e12 ? v * 1000 : v);
+      if(typeof v === "string"){
+        const cleaned = v.trim();
+        const d = new Date(cleaned);
+        if(!isNaN(d)) return d;
+        const m = cleaned.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if(m) return new Date(Number(m[3]), Number(m[2])-1, Number(m[1]));
+      }
+      if(v && typeof v === "object" && "seconds" in v) return new Date(v.seconds * 1000);
+      return null;
+    }
+
+    function extractAmount(doc){
+      const amount = deepPick(doc, [
+        "amountSyp","amount_syp","sypAmount","amountSYP","totalSyp","total_syp","syp","SYP","amount","value","total","salesSyp","sales_syp","sales","sale","mabe3","mabi3","revenue","income","paidSyp","مبيع","المبيع","مبلغ","المبلغ","القيمة","الإيراد","ايراد","اجمالي","الإجمالي"
+      ]);
+      return toNumber(amount);
+    }
+
+    function extractRegion(doc){
+      const regionValue = deepPick(doc, ["region","regionName","region_name","regionId","region_id","reg","area","group","zone","منطقة","المنطقة","الريجون"]);
+      const fromRegion = normalizeRegion(regionValue);
+      if(fromRegion) return fromRegion;
+      const regionMap = getRegionMap();
+      const name = deepPick(doc, ["delegateName","delegate_name","mandoub","mandoubName","rep","repName","userName","username","name","sellerName","employee","agent","مندوب","المندوب","الاسم","اسم المندوب"]);
+      if(name != null){
+        const raw = String(name).trim();
+        if(regionMap[raw]) return regionMap[raw];
+        const lowerKey = Object.keys(regionMap).find(k => k.trim().toLowerCase() === raw.toLowerCase());
+        if(lowerKey) return regionMap[lowerKey];
+      }
+      return null;
+    }
+
+    function periodRange(period){
+      const now = new Date();
+      const startOfDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      let start=null, end=null, label="كل البيانات";
+      if(period === "today") {start=startOfDay(now); end=new Date(start); end.setDate(end.getDate()+1); label="اليوم";}
+      if(period === "yesterday") {end=startOfDay(now); start=new Date(end); start.setDate(start.getDate()-1); label="أمس";}
+      if(period === "week") {end=new Date(); start=startOfDay(now); start.setDate(start.getDate()-6); label="آخر 7 أيام";}
+      if(period === "month") {start=new Date(now.getFullYear(), now.getMonth(), 1); end=new Date(now.getFullYear(), now.getMonth()+1, 1); label="هذا الشهر";}
+      if(period === "year") {start=new Date(now.getFullYear(), 0, 1); end=new Date(now.getFullYear()+1, 0, 1); label="هذه السنة";}
+      if(period === "custom") {
+        start = state.settings.fromDate ? new Date(state.settings.fromDate + "T00:00:00") : null;
+        end = state.settings.toDate ? new Date(state.settings.toDate + "T23:59:59") : null;
+        label = `مخصص ${state.settings.fromDate || "البداية"} → ${state.settings.toDate || "النهاية"}`;
+      }
+      return {start,end,label};
+    }
+
+    function inPeriod(docDate, range){
+      if(!range.start && !range.end) return true;
+      if(!docDate) return false;
+      if(range.start && docDate < range.start) return false;
+      if(range.end && docDate > range.end) return false;
+      return true;
+    }
+
+    function aggregate(){
+      const out = emptyAggregation();
+      const exchangeRate = toNumber(state.settings.exchangeRate);
+      out.exchangeRate = exchangeRate;
+      const range = periodRange(state.settings.period);
+      out.periodLabel = range.label;
+
+      for(const doc of rawDocs){
+        const date = extractDate(doc);
+        if(!inPeriod(date, range)) continue;
+        const region = extractRegion(doc);
+        const amount = extractAmount(doc);
+        if(!region || !REGIONS.includes(region)) { out.unmatched++; continue; }
+        if(!amount) continue;
+        out.byRegion[region].syp += amount;
+        out.byRegion[region].usd += exchangeRate > 0 ? amount / exchangeRate : 0;
+        out.byRegion[region].count += 1;
+        out.totalSyp += amount;
+        out.totalCount += 1;
+        out.filteredDocs.push({region, amount, date});
+      }
+      out.totalUsd = exchangeRate > 0 ? out.totalSyp / exchangeRate : 0;
+      REGIONS.forEach(r => out.byRegion[r].share = out.totalSyp > 0 ? (out.byRegion[r].syp / out.totalSyp) * 100 : 0);
+      return out;
+    }
+
+    function render(){
+      current = aggregate();
+      els.periodLabel.textContent = `الفترة: ${current.periodLabel}`;
+      els.totalSyp.textContent = fmtMoney(current.totalSyp);
+      els.totalUsd.textContent = current.exchangeRate > 0 ? fmt(current.totalUsd, 2) : "0";
+      els.totalSypSub.textContent = `من ${fmt(current.totalCount)} سجل مطابق`;
+      els.totalUsdSub.textContent = current.exchangeRate > 0 ? `على سعر ${fmt(current.exchangeRate)} SYP` : "اكتب سعر الصرف اليدوي";
+      const rows = REGIONS.map(r => current.byRegion[r]);
+      const best = [...rows].sort((a,b)=>b.syp-a.syp)[0];
+      const worst = [...rows].sort((a,b)=>a.syp-b.syp)[0];
+      els.bestRegion.textContent = best && best.syp > 0 ? best.region : "—";
+      els.bestRegionSub.textContent = best && best.syp > 0 ? `${fmt(best.share,1)}% من الإجمالي` : "لا توجد بيانات بعد";
+      els.avgRegion.textContent = fmt(current.totalSyp / 4);
+      renderRegions(rows);
+      renderTable(rows);
+      renderInsights(rows, best, worst);
+      renderCharts(rows);
+    }
+
+    function renderRegions(rows){
+      els.regionCards.innerHTML = rows.map((r, i)=>`
+        <article class="regionCard" style="--accent:${REGION_ACCENTS[i]}">
+          <div class="regionName"><span>${r.region}</span><span class="regionShare">${fmt(r.share,1)}%</span></div>
+          <div class="regionAmount">${fmtMoney(r.syp)}</div>
+          <div class="regionUSD">${current.exchangeRate > 0 ? fmt(r.usd,2) : "0.00"} USD</div>
+          <div class="barShell"><div class="barFill" style="width:${Math.min(100, r.share)}%"></div></div>
+          <div class="sub" style="color:var(--muted);margin-top:12px;font-size:12px">${fmt(r.count)} سجل ضمن الفترة</div>
+        </article>
+      `).join("");
+    }
+
+    function renderTable(rows){
+      els.regionTable.innerHTML = rows.map(r=>`
+        <tr>
+          <td><b>${r.region}</b></td>
+          <td class="num">${fmt(r.syp)}</td>
+          <td class="num">${current.exchangeRate > 0 ? fmt(r.usd,2) : "0.00"}</td>
+          <td class="num">${fmt(r.share,1)}%</td>
+          <td class="num">${fmt(r.count)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderInsights(rows, best, worst){
+      const avg = current.totalSyp / 4;
+      const active = rows.filter(r=>r.syp>0).length;
+      const gap = best && worst ? best.syp - worst.syp : 0;
+      const insights = [];
+      if(current.totalSyp === 0){
+        insights.push(["تنبيه", "لا توجد مبالغ مطابقة للفترة الحالية. تأكد من Collection Path أو الفترة أو حقول region/amount."]);
+      } else {
+        insights.push(["إجمالي", `الإجمالي الحالي ${fmt(current.totalSyp)} SYP، ويعادل ${current.exchangeRate > 0 ? fmt(current.totalUsd,2) : "0.00"} USD حسب السعر اليدوي.`]);
+        insights.push(["أفضل", `${best.region} هي الأقوى حالياً بنسبة ${fmt(best.share,1)}% من إجمالي المناطق.`]);
+        if(worst.syp === 0) insights.push(["ضعف", `${worst.region} لا تحتوي مبالغ ضمن الفترة المختارة. راقب مصدر البيانات أو الفترة.`]);
+        else insights.push(["فجوة", `الفارق بين الأقوى والأضعف هو ${fmt(gap)} SYP. هذا مهم للمتابعة الإدارية.`]);
+        if(active < 4) insights.push(["تغطية", `عدد المناطق النشطة ${active}/4. هناك منطقة أو أكثر بدون حركة ضمن الفترة.`]);
+        if(avg > 0) insights.push(["متوسط", `متوسط كل منطقة ${fmt(avg)} SYP. أي منطقة تحت هذا الرقم تحتاج مراجعة أداء.`]);
+      }
+      if(current.unmatched > 0) insights.push(["ربط", `${fmt(current.unmatched)} سجل لم يتم ربطه بمنطقة. أضف region داخل البيانات أو حدّث الربط الداخلي.`]);
+      els.insightList.innerHTML = insights.map(([b,t])=>`<div class="insight"><span class="badge">${b}</span><span>${t}</span></div>`).join("");
+    }
+
+    function renderCharts(rows){
+      const labels = rows.map(r=>r.region);
+      const data = rows.map(r=>r.syp);
+      const commonOptions = {
+        responsive:true,
+        maintainAspectRatio:false,
+        animation:{duration:500},
+        plugins:{
+          legend:{labels:{color:"rgba(255,255,255,.78)", font:{family:"Tahoma", weight:"bold"}}},
+          tooltip:{callbacks:{label:(ctx)=>`${ctx.label || ""}: ${fmt(ctx.raw)} SYP`}}
+        },
+        scales:{
+          x:{ticks:{color:"rgba(255,255,255,.72)", font:{weight:"bold"}}, grid:{color:"rgba(255,255,255,.06)"}},
+          y:{ticks:{color:"rgba(255,255,255,.62)", callback:(v)=>fmt(v)}, grid:{color:"rgba(255,255,255,.07)"}}
+        }
+      };
+      if(charts.bar) charts.bar.destroy();
+      charts.bar = new Chart($("barChart"), {
+        type:"bar",
+        data:{labels, datasets:[{label:"SYP", data, borderRadius:18, borderSkipped:false, backgroundColor:["rgba(143,215,255,.75)","rgba(189,156,255,.72)","rgba(112,240,196,.68)","rgba(255,210,118,.68)"]}]},
+        options:commonOptions
+      });
+      if(charts.share) charts.share.destroy();
+      charts.share = new Chart($("shareChart"), {
+        type:"doughnut",
+        data:{labels, datasets:[{data, borderWidth:1, borderColor:"rgba(255,255,255,.18)", backgroundColor:["rgba(143,215,255,.78)","rgba(189,156,255,.74)","rgba(112,240,196,.70)","rgba(255,210,118,.70)"]}]},
+        options:{responsive:true, maintainAspectRatio:false, cutout:"68%", plugins:{legend:{position:"bottom", labels:{color:"rgba(255,255,255,.75)", font:{weight:"bold"}}}, tooltip:{callbacks:{label:(ctx)=>`${ctx.label}: ${fmt(ctx.raw)} SYP`}}}}
+      });
+    }
+
+    function buildDataSnapshot(){
+      const rows = REGIONS.map(r=>current.byRegion[r]);
+      const best = [...rows].sort((a,b)=>b.syp-a.syp)[0];
+      const worst = [...rows].sort((a,b)=>a.syp-b.syp)[0];
+      return {
+        period: current.periodLabel,
+        exchangeRate: current.exchangeRate,
+        totalSyp: current.totalSyp,
+        totalUsd: current.totalUsd,
+        totalRecords: current.totalCount,
+        unmatchedRecords: current.unmatched,
+        bestRegion: best?.region || null,
+        worstRegion: worst?.region || null,
+        regions: rows.map(r=>({region:r.region, syp:Math.round(r.syp), usd:Number(r.usd.toFixed(2)), share:Number(r.share.toFixed(2)), records:r.count}))
+      };
+    }
+
+    function localAIAnswer(question){
+      const q = (question || "").toLowerCase();
+      const snap = buildDataSnapshot();
+      const rows = snap.regions;
+      const best = [...rows].sort((a,b)=>b.syp-a.syp)[0];
+      const worst = [...rows].sort((a,b)=>a.syp-b.syp)[0];
+      const avg = snap.totalSyp / 4;
+      const findRegion = (num)=>rows.find(r=>r.region.endsWith(String(num)));
+      let response = "";
+
+      const comparisonMatch = q.match(/region\s*([1-4]).*region\s*([1-4])|([1-4]).*(?:مع|و)\s*([1-4])/i);
+      if(comparisonMatch){
+        const aNum = comparisonMatch[1] || comparisonMatch[3];
+        const bNum = comparisonMatch[2] || comparisonMatch[4];
+        const a = findRegion(aNum), b = findRegion(bNum);
+        const diff = Math.abs((a?.syp||0) - (b?.syp||0));
+        const winner = (a?.syp||0) >= (b?.syp||0) ? a : b;
+        response = `مقارنة ${a.region} مع ${b.region}:\n\n${a.region}: ${fmt(a.syp)} SYP (${fmt(a.usd,2)} USD) — نسبة ${fmt(a.share,1)}%.\n${b.region}: ${fmt(b.syp)} SYP (${fmt(b.usd,2)} USD) — نسبة ${fmt(b.share,1)}%.\n\nالأقوى بينهما: ${winner.region}. الفارق: ${fmt(diff)} SYP.\n\nإدارياً: إذا الفارق كبير خلال نفس الفترة، راقب المنطقة الأقل وراجع سبب انخفاض الحركة أو تأخر الإدخال.`;
+      } else if(q.includes("أقوى") || q.includes("افضل") || q.includes("أفضل") || q.includes("best")){
+        response = `أقوى منطقة حالياً هي ${best.region}.\n\nالقيمة: ${fmt(best.syp)} SYP، أي ${fmt(best.usd,2)} USD.\nحصتها من الإجمالي: ${fmt(best.share,1)}%.\n\nالقراءة الإدارية: هذه المنطقة تقود الأداء ضمن الفترة المختارة. لا أقول السبب خارج البيانات، لكن رقمياً هي الأعلى مساهمة.`;
+      } else if(q.includes("أضعف") || q.includes("اضعف") || q.includes("ضعف") || q.includes("worst")){
+        response = `أضعف منطقة حالياً هي ${worst.region}.\n\nالقيمة: ${fmt(worst.syp)} SYP، أي ${fmt(worst.usd,2)} USD.\nحصتها: ${fmt(worst.share,1)}%.\n\nالإجراء المقترح: راجع هل الفترة صحيحة، وهل بيانات هذه المنطقة تصل إلى Firebase، ثم قارنها بمتوسط المناطق ${fmt(avg)} SYP.`;
+      } else if(q.includes("دولار") || q.includes("usd") || q.includes("إجمالي") || q.includes("اجمالي") || q.includes("total")){
+        response = `إجمالي الفترة ${snap.period}:\n\nSYP: ${fmt(snap.totalSyp)}\nUSD: ${fmt(snap.totalUsd,2)}\nسعر الصرف اليدوي: ${fmt(snap.exchangeRate)} SYP لكل 1 USD\nعدد السجلات المحسوبة: ${fmt(snap.totalRecords)}.`;
+      } else if(q.includes("تقرير") || q.includes("ملخص") || q.includes("مدير")){
+        const lines = rows.map(r=>`- ${r.region}: ${fmt(r.syp)} SYP / ${fmt(r.usd,2)} USD / ${fmt(r.share,1)}%`).join("\n");
+        response = `تقرير إداري مختصر — ${snap.period}\n\nالإجمالي: ${fmt(snap.totalSyp)} SYP (${fmt(snap.totalUsd,2)} USD).\nأقوى منطقة: ${best.region} بنسبة ${fmt(best.share,1)}%.\nأضعف منطقة: ${worst.region} بنسبة ${fmt(worst.share,1)}%.\n\nتفصيل المناطق:\n${lines}\n\nالخلاصة: ركّز على رفع المنطقة الأقل من متوسط ${fmt(avg)} SYP، وحافظ على زخم المنطقة الأقوى.`;
+      } else {
+        response = `حسب بيانات المناطق الحالية:\n\nالإجمالي ${fmt(snap.totalSyp)} SYP، ويعادل ${fmt(snap.totalUsd,2)} USD.\nالأقوى: ${best.region}.\nالأضعف: ${worst.region}.\nمتوسط المنطقة: ${fmt(avg)} SYP.\n\nاسألني بصيغة أدق مثل: قارن Region 1 مع Region 3، أو اعطني تقرير إداري.`;
+      }
+      if(snap.unmatchedRecords > 0) response += `\n\nملاحظة: يوجد ${fmt(snap.unmatchedRecords)} سجل غير مربوط بمنطقة، وهذا قد يؤثر على الدقة.`;
+      return response;
+    }
+
+    function appendMsg(role, text){
+      const div = document.createElement("div");
+      div.className = `msg ${role}`;
+      div.textContent = text;
+      els.chatBox.appendChild(div);
+      els.chatBox.scrollTop = els.chatBox.scrollHeight;
+    }
+
+    function speakArabic(text){
+      if(state.settings.voice !== "on") return;
+      if(!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text.replace(/[\*#_`]/g,""));
+      utter.lang = "ar-SA";
+      utter.rate = .95;
+      utter.pitch = 1.02;
+      const voices = window.speechSynthesis.getVoices();
+      const arVoice = voices.find(v => /^ar/i.test(v.lang)) || voices.find(v => /Arabic|العربية/i.test(v.name));
+      if(arVoice) utter.voice = arVoice;
+      window.speechSynthesis.speak(utter);
+    }
+
+    async function askAI(question){
+      const q = question.trim();
+      if(!q) return;
+      appendMsg("user", q);
+      els.aiQuestionInput.value = "";
+      appendMsg("ai", "أحلل الأرقام الآن...");
+      const lastMsg = els.chatBox.lastElementChild;
+      let answer = "";
+      try{
+        if(state.settings.openaiKey || state.settings.aiProxy){
+          answer = await askOpenAI(q);
+        } else {
+          answer = localAIAnswer(q);
+        }
+      } catch(e){
+        console.warn(e);
+        answer = localAIAnswer(q) + "\n\nملاحظة تقنية: تعذر الاتصال بالذكاء السحابي، لذلك استخدمت التحليل المحلي من بيانات اللوحة.";
+      }
+      lastMsg.textContent = answer;
+      speakArabic(answer);
+    }
+
+    async function askOpenAI(question){
+      const snapshot = buildDataSnapshot();
+      const instructions = `أنت مساعد إداري عربي للوحة مناطق فقط. لا تكشف ولا تخمّن أسماء أشخاص أو مندوبين. اعتمد فقط على JSON المرفق. أجب باحتراف، مختصر، واضح، وبأرقام. إذا البيانات ناقصة قل ذلك. لا تذكر مكاتب ولا صفحات مندوبين. ركّز على Region 1 و Region 2 و Region 3 و Region 4.`;
+      const inputText = `سؤال المستخدم: ${question}\n\nبيانات اللوحة JSON:\n${JSON.stringify(snapshot, null, 2)}`;
+
+      if(state.settings.aiProxy){
+        const res = await fetch(state.settings.aiProxy, {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({instructions, input:inputText, model:state.settings.aiModel || "gpt-4.1-mini", snapshot, question})
+        });
+        if(!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        return data.answer || data.output_text || data.text || JSON.stringify(data);
+      }
+
+      const res = await fetch("https://api.openai.com/v1/responses", {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":"Bearer " + state.settings.openaiKey
+        },
+        body:JSON.stringify({
+          model: state.settings.aiModel || "gpt-4.1-mini",
+          instructions,
+          input: [{role:"user", content:[{type:"input_text", text: inputText}]}],
+          max_output_tokens: 650
+        })
+      });
+      if(!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      if(data.output_text) return data.output_text;
+      const chunks = [];
+      for(const item of data.output || []){
+        for(const c of item.content || []){
+          if(c.text) chunks.push(c.text);
+        }
+      }
+      return chunks.join("\n") || "وصل رد فارغ من خدمة الذكاء.";
+    }
+
+    function setupMic(){
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if(!SpeechRecognition){
+        toast("المتصفح لا يدعم الإملاء الصوتي هنا. جرّب Chrome أو Edge.");
+        return;
+      }
+      const rec = new SpeechRecognition();
+      rec.lang = "ar-SA";
+      rec.interimResults = false;
+      rec.maxAlternatives = 1;
+      rec.onstart = ()=>toast("عم اسمعك... احكي سؤالك عن المناطق.", 1800);
+      rec.onerror = ()=>toast("تعذر تشغيل الميكروفون. تأكد من السماح للمتصفح.");
+      rec.onresult = e => {
+        const text = e.results?.[0]?.[0]?.transcript || "";
+        els.aiQuestionInput.value = text;
+        askAI(text);
+      };
+      rec.start();
+    }
+
+    async function exportPDF(){
+      try{
+        setLoading(true, "جاري تجهيز PDF فخم...");
+        await new Promise(r=>setTimeout(r,250));
+        if(document.fonts?.ready) await document.fonts.ready;
+        const target = els.reportSurface;
+        const canvas = await html2canvas(target, {
+          scale: Math.min(2.4, window.devicePixelRatio || 2),
+          useCORS:true,
+          allowTaint:true,
+          backgroundColor:"#080a15",
+          logging:false,
+          windowWidth: document.documentElement.scrollWidth
+        });
+        const imgData = canvas.toDataURL("image/png", 1.0);
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "FAST");
+        heightLeft -= pageHeight;
+        while(heightLeft > 0){
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "FAST");
+          heightLeft -= pageHeight;
+        }
+        const date = new Date().toISOString().slice(0,10);
+        pdf.save(`Region_Command_Center_${date}.pdf`);
+        toast("تم تصدير PDF بنجاح.");
+      } catch(e){
+        console.error(e);
+        toast("فشل تصدير PDF: " + (e?.message || e));
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function wireEvents(){
+      els.settingsBtn.addEventListener("click", ()=>els.settingsPanel.classList.toggle("open"));
+      els.saveSettingsBtn.addEventListener("click", saveSettings);
+      els.clearSettingsBtn.addEventListener("click", ()=>{
+        localStorage.removeItem(storageKey);
+        location.reload();
+      });
+      els.connectBtn.addEventListener("click", async()=>{
+        try{ await connectFirebase(false); }
+        catch(e){ setConnection("warn", "غير متصل"); toast(e.message || String(e)); els.settingsPanel.classList.add("open"); }
+      });
+      els.refreshBtn.addEventListener("click", async()=>{
+        try{ await connectFirebase(true); toast("تم التحديث مرة واحدة."); }
+        catch(e){ toast(e.message || String(e)); }
+      });
+      els.pdfBtn.addEventListener("click", exportPDF);
+      els.testLocalBtn.addEventListener("click", ()=>{
+        const answer = localAIAnswer("اعطني تقرير إداري مختصر");
+        appendMsg("ai", answer);
+        speakArabic(answer);
+        toast("تم اختبار التحليل المحلي.");
+      });
+      els.quickRateInput.addEventListener("change", ()=>{
+        state.settings.exchangeRate = normalizeNumber(els.quickRateInput.value);
+        els.exchangeRateInput.value = state.settings.exchangeRate;
+        localStorage.setItem(storageKey, JSON.stringify(state.settings));
+        render();
+      });
+      els.exchangeRateInput.addEventListener("change", ()=>{
+        state.settings.exchangeRate = normalizeNumber(els.exchangeRateInput.value);
+        els.quickRateInput.value = state.settings.exchangeRate;
+        localStorage.setItem(storageKey, JSON.stringify(state.settings));
+        render();
+      });
+      els.periodSelect.addEventListener("change", ()=>{
+        state.settings.period = els.periodSelect.value;
+        els.quickPeriodSelect.value = state.settings.period;
+        localStorage.setItem(storageKey, JSON.stringify(state.settings));
+        render();
+      });
+      els.quickPeriodSelect.addEventListener("change", ()=>{
+        state.settings.period = els.quickPeriodSelect.value;
+        els.periodSelect.value = state.settings.period;
+        localStorage.setItem(storageKey, JSON.stringify(state.settings));
+        render();
+      });
+      [els.fromDateInput, els.toDateInput].forEach(el=>el.addEventListener("change", ()=>{
+        state.settings.fromDate = els.fromDateInput.value;
+        state.settings.toDate = els.toDateInput.value;
+        state.settings.period = "custom";
+        els.periodSelect.value = "custom";
+        els.quickPeriodSelect.value = "custom";
+        localStorage.setItem(storageKey, JSON.stringify(state.settings));
+        render();
+      }));
+      els.askBtn.addEventListener("click", ()=>askAI(els.aiQuestionInput.value));
+      els.aiQuestionInput.addEventListener("keydown", e=>{if(e.key === "Enter") askAI(els.aiQuestionInput.value)});
+      els.micBtn.addEventListener("click", setupMic);
+      document.querySelectorAll(".chip[data-q]").forEach(chip=>chip.addEventListener("click", ()=>askAI(chip.dataset.q)));
+    }
+
+    function init(){
+      loadSettings();
+      wireEvents();
+      render();
+      setConnection("warn", state.settings.firebaseConfig && state.settings.collectionPath ? "جاهز للاتصال" : "أدخل إعدادات Firebase");
+      window.speechSynthesis?.getVoices?.();
+    }
+
+    init();
+  </script>
+</body>
+</html>
