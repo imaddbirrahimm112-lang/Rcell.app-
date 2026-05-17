@@ -1329,16 +1329,72 @@
       const rows = REGIONS.map(r=>current.byRegion[r]);
       const best = [...rows].sort((a,b)=>b.syp-a.syp)[0];
       const worst = [...rows].sort((a,b)=>a.syp-b.syp)[0];
+      const exchange = Number(current.exchangeRate) || 0;
+      const weekdays = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+      const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+      const makeBucket = (label, sortKey="") => ({label, sortKey, syp:0, usd:0, records:0, regions:Object.fromEntries(REGIONS.map(r=>[r,{syp:0, usd:0, records:0}]))});
+      const byDate = {};
+      const byWeekday = {};
+      const byMonth = {};
+      const latest = [];
+
+      for(const row of current.filteredDocs || []){
+        const d = row.date instanceof Date && !isNaN(row.date) ? row.date : null;
+        const region = row.region;
+        const amount = Number(row.amount) || 0;
+        if(!region || !REGIONS.includes(region) || amount <= 0) continue;
+        const usd = exchange > 0 ? amount / exchange : 0;
+        const dateKey = d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}` : "بدون تاريخ";
+        const dateLabel = d ? `${weekdays[d.getDay()]} ${dateKey}` : "بدون تاريخ";
+        const weekdayLabel = d ? weekdays[d.getDay()] : "بدون تاريخ";
+        const monthKey = d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}` : "بدون شهر";
+        const monthLabel = d ? `${monthNames[d.getMonth()]} ${d.getFullYear()}` : "بدون شهر";
+        if(!byDate[dateKey]) byDate[dateKey] = makeBucket(dateLabel, dateKey);
+        if(!byWeekday[weekdayLabel]) byWeekday[weekdayLabel] = makeBucket(weekdayLabel, String(d ? d.getDay() : 99));
+        if(!byMonth[monthKey]) byMonth[monthKey] = makeBucket(monthLabel, monthKey);
+        for(const bucket of [byDate[dateKey], byWeekday[weekdayLabel], byMonth[monthKey]]){
+          bucket.syp += amount;
+          bucket.usd += usd;
+          bucket.records += 1;
+          bucket.regions[region].syp += amount;
+          bucket.regions[region].usd += usd;
+          bucket.regions[region].records += 1;
+        }
+        latest.push({date:dateKey, day:weekdayLabel, region, syp:Math.round(amount), usd:Number(usd.toFixed(2))});
+      }
+
+      const finalizeBucket = (b) => ({
+        label:b.label,
+        sortKey:b.sortKey,
+        syp:Math.round(b.syp),
+        usd:Number(b.usd.toFixed(2)),
+        records:b.records,
+        regions:Object.fromEntries(REGIONS.map(r=>[r,{syp:Math.round(b.regions[r].syp), usd:Number(b.regions[r].usd.toFixed(2)), records:b.regions[r].records}]))
+      });
+      const daily = Object.values(byDate).sort((a,b)=>String(a.sortKey).localeCompare(String(b.sortKey))).map(finalizeBucket);
+      const weekdayOrder = {"الأحد":0,"الاثنين":1,"الثلاثاء":2,"الأربعاء":3,"الخميس":4,"الجمعة":5,"السبت":6,"بدون تاريخ":99};
+      const weekdaySummary = Object.values(byWeekday).sort((a,b)=>(weekdayOrder[a.label]??99)-(weekdayOrder[b.label]??99)).map(finalizeBucket);
+      const monthly = Object.values(byMonth).sort((a,b)=>String(a.sortKey).localeCompare(String(b.sortKey))).map(finalizeBucket);
+      const topDays = [...daily].sort((a,b)=>b.syp-a.syp).slice(0,7);
+      const weakDays = [...daily].filter(d=>d.syp>0).sort((a,b)=>a.syp-b.syp).slice(0,7);
+
       return {
         period: current.periodLabel,
-        exchangeRate: current.exchangeRate,
-        totalSyp: current.totalSyp,
-        totalUsd: current.totalUsd,
+        exchangeRate: exchange,
+        totalSyp: Math.round(current.totalSyp),
+        totalUsd: Number(current.totalUsd.toFixed(2)),
         totalRecords: current.totalCount,
         unmatchedRecords: current.unmatched,
+        skippedDeleted: current.skippedDeleted,
         bestRegion: best?.region || null,
         worstRegion: worst?.region || null,
-        regions: rows.map(r=>({region:r.region, syp:Math.round(r.syp), usd:Number(r.usd.toFixed(2)), share:Number(r.share.toFixed(2)), records:r.count}))
+        regions: rows.map(r=>({region:r.region, syp:Math.round(r.syp), usd:Number(r.usd.toFixed(2)), share:Number(r.share.toFixed(2)), records:r.count})),
+        daily,
+        weekdaySummary,
+        monthly,
+        topDays,
+        weakDays,
+        latestRecords: latest.sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,25)
       };
     }
 
@@ -1584,8 +1640,17 @@
 
     async function askOpenAI(question){
       const snapshot = buildDataSnapshot();
-      const instructions = `أنت مساعد إداري عربي للوحة مناطق فقط. لا تكشف ولا تخمّن أسماء أشخاص أو مندوبين. اعتمد فقط على JSON المرفق. أجب باحتراف، مختصر، واضح، وبأرقام. إذا البيانات ناقصة قل ذلك. لا تذكر مكاتب ولا صفحات مندوبين. ركّز على Region 1 و Region 2 و Region 3 و Region 4.`;
-      const inputText = `سؤال المستخدم: ${question}\n\nبيانات اللوحة JSON:\n${JSON.stringify(snapshot, null, 2)}`;
+      const instructions = `أنت مساعد عربي ذكي داخل لوحة تحكم مالية.
+أجب على أي سؤال عادي للمستخدم بشكل طبيعي ومباشر.
+إذا كان السؤال عن الإيرادات أو الأيام أو المناطق أو التقرير: اعتمد فقط على JSON المرفق، واستخدم الأرقام كما هي.
+مسموح لك استخدام بيانات: Region 1 و Region 2 و Region 3 و Region 4، ملخص الأيام، ملخص أسماء الأيام، الأشهر، الإجمالي، الدولار، سعر الصرف، عدد السجلات، والمحذوفات المستثناة.
+ممنوع تماماً ذكر أسماء مندوبين أو مكاتب أو تخمينها. لا تقل إن لديك أسماء؛ البيانات المسموحة هي المناطق والأيام فقط.
+إذا سأل عن يوم مثل الأحد/الاثنين/الثلاثاء فارجع قيمة ذلك اليوم من weekdaySummary أو daily حسب السؤال.
+إذا البيانات ناقصة قل ذلك بوضوح. أجب بالعربية، مختصر، عملي، ودافئ بدون حشو.`;
+      const inputText = `سؤال المستخدم: ${question}
+
+بيانات اللوحة JSON المخفية عن الواجهة، مسموحة للذكاء فقط:
+${JSON.stringify(snapshot, null, 2)}`;
 
       if(state.settings.aiProxy){
         const res = await fetch(state.settings.aiProxy, {
