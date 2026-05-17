@@ -363,6 +363,20 @@
       display:none;
     }
     .settings.open{display:block}
+    .settings.adminSecret{
+      position:fixed;
+      z-index:80;
+      left:max(16px, env(safe-area-inset-left));
+      right:max(16px, env(safe-area-inset-right));
+      top:max(16px, env(safe-area-inset-top));
+      max-height:calc(100vh - 32px - env(safe-area-inset-top));
+      overflow:auto;
+      backdrop-filter:blur(26px) saturate(1.35);
+      -webkit-backdrop-filter:blur(26px) saturate(1.35);
+      box-shadow:0 35px 120px rgba(0,0,0,.62);
+    }
+    .hiddenAdminField{display:none!important}
+    #settingsBtn,#connectBtn{display:none!important}
     .settingsGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
     .note{
       color:var(--muted);
@@ -446,33 +460,31 @@
   <main class="app">
     <header class="topbar noPrint">
       <div class="brand">
-        <div class="logo">RC</div>
+        <div class="logo" id="adminLogo" title="Admin Settings">RC</div>
         <div class="titleBlock">
           <h1>لوحة تحكم المناطق</h1>
-          <p>مربوطة بمشروع mandob-app-82843 — تعرض Region 1 / Region 2 / Region 3 / Region 4 فقط</p>
+          <p>مزامنة تلقائية من Firebase — تعرض Region 1 / Region 2 / Region 3 / Region 4 فقط</p>
         </div>
       </div>
       <div class="actions">
-        <button class="btn primary" id="connectBtn">اتصال Firebase</button>
+        <button class="btn primary" id="connectBtn">إعادة مزامنة</button>
         <button class="btn good" id="pdfBtn">تصدير PDF فخم</button>
         <button class="btn" id="refreshBtn">تحديث</button>
-        <button class="btn warn" id="settingsBtn">الإعدادات</button>
+        <button class="btn warn" id="settingsBtn">إدارة AI</button>
       </div>
     </header>
 
-    <section class="settings glass noPrint" id="settingsPanel">
+    <section class="settings glass noPrint adminSecret" id="settingsPanel">
       <div class="miniTitle">
         <div>
-          <h2>إعدادات الربط والتحليل</h2>
-          <p>ضع Firebase Config واسم Collection. الواجهة الرئيسية لن تعرض أي اسم شخص؛ التجميع يبقى حسب المناطق فقط.</p>
+          <h2>إعدادات الإدارة المخفية</h2>
+          <p>الربط مع Firebase ثابت داخل الكود. هنا فقط تضع مفتاح OpenAI للذكاء الحقيقي، وسعر الصرف، وخيارات الصوت.</p>
         </div>
-        <span class="statusPill"><span class="dot warn"></span> محفوظ محلياً على هذا الجهاز</span>
+        <span class="statusPill"><span class="dot warn"></span> Admin فقط</span>
       </div>
 
-      <div class="settingsGrid">
-        <div class="field">
-          <label>Firebase Config بصيغة JSON</label>
-          <textarea id="firebaseConfigInput" placeholder='Firebase Config جاهز'>{
+      <!-- حقول مخفية ضرورية للكود: لا تظهر للواجهة -->
+      <textarea id="firebaseConfigInput" class="hiddenAdminField">{
   "apiKey": "AIzaSyDoVPtyKtuY5LBRw6plvwDVJv4TDIk0Klk",
   "authDomain": "mandob-app-82843.firebaseapp.com",
   "projectId": "mandob-app-82843",
@@ -481,17 +493,30 @@
   "appId": "1:749939721927:web:4c1c63aacca39ec41fe0e2",
   "measurementId": "G-40ZG8YVETG"
 }</textarea>
-        </div>
-        <div class="field">
-          <label>ربط داخلي للمناطق — JSON اختياري إذا البيانات لا تحتوي region</label>
-          <textarea id="regionMapInput" spellcheck="false"></textarea>
-        </div>
-      </div>
+      <textarea id="regionMapInput" class="hiddenAdminField"></textarea>
+      <input id="collectionPathInput" class="hiddenAdminField" value="__auto__" />
+      <input id="aiProxyInput" class="hiddenAdminField" value="" />
+      <input id="anonAuthInput" class="hiddenAdminField" value="off" />
+      <input id="autoAdminLoginInput" class="hiddenAdminField" value="on" />
+      <input id="fromDateInput" class="hiddenAdminField" type="date" />
+      <input id="toDateInput" class="hiddenAdminField" type="date" />
 
-      <div class="fieldGrid" style="margin-top:12px">
+      <div class="fieldGrid" style="margin-top:14px">
+        <div class="field wide">
+          <label>OpenAI API Key — للذكاء الحقيقي</label>
+          <input id="openaiKeyInput" type="password" autocomplete="off" placeholder="الصق المفتاح هنا، ثم حفظ" />
+        </div>
         <div class="field">
-          <label>Collection Path</label>
-          <input id="collectionPathInput" placeholder="Auto أو اكتب اسم Collection مثل entries / revenues" />
+          <label>AI Model</label>
+          <input id="aiModelInput" placeholder="gpt-4.1-mini" />
+        </div>
+        <div class="field">
+          <label>بريد الإدارة للقراءة من Firebase</label>
+          <input id="adminEmailInput" type="email" autocomplete="username" placeholder="admin@rcell.app" />
+        </div>
+        <div class="field">
+          <label>كلمة مرور الإدارة</label>
+          <input id="adminPasswordInput" type="password" autocomplete="current-password" placeholder="123456 أو كلمة المرور الحالية" />
         </div>
         <div class="field">
           <label>سعر الصرف SYP لكل 1 USD</label>
@@ -510,48 +535,22 @@
           </select>
         </div>
         <div class="field">
-          <label>تشغيل تسجيل دخول مجهول في Firebase</label>
-          <select id="anonAuthInput">
-            <option value="off">إيقاف</option>
-            <option value="on">تشغيل</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>من تاريخ</label>
-          <input id="fromDateInput" type="date" />
-        </div>
-        <div class="field">
-          <label>إلى تاريخ</label>
-          <input id="toDateInput" type="date" />
-        </div>
-        <div class="field">
-          <label>OpenAI API Key للذكاء الحقيقي</label>
-          <input id="openaiKeyInput" type="password" placeholder="sk-... لا تنشره بمكان عام" />
-        </div>
-        <div class="field">
-          <label>AI Model</label>
-          <input id="aiModelInput" placeholder="gpt-4.1-mini" />
-        </div>
-        <div class="field wide">
-          <label>AI Proxy URL اختياري للأمان</label>
-          <input id="aiProxyInput" placeholder="اتركه فارغاً للتجربة المباشرة، أو ضع رابط proxy خاص بك" />
-        </div>
-        <div class="field wide">
-          <label>خيارات الصوت</label>
+          <label>الصوت العربي</label>
           <select id="voiceInput">
-            <option value="on">الرد الصوتي العربي مفعل</option>
-            <option value="off">الرد الصوتي متوقف</option>
+            <option value="on">مفعل</option>
+            <option value="off">متوقف</option>
           </select>
         </div>
       </div>
 
       <div class="note" style="margin-top:12px">
-        ملاحظة مهمة: وضع OpenAI API Key داخل صفحة HTML عامة يعرّض المفتاح إذا نشرت الملف للعامة. الأفضل لاحقاً نعمل Proxy صغير. لكن حالياً وضعت لك خيار مباشر حتى يشتغل فوراً أثناء التجربة، وخيار Proxy إذا بدك نسخة إنتاجية أقوى.
+        تنبيه سريع: المفتاح هنا محفوظ على هذا الجهاز فقط داخل المتصفح. لا تنشر الملف للناس وفيه مفتاح محفوظ، لأن أي مفتاح API داخل صفحة أمامية ممكن ينكشف لو شخص وصل للملف أو التخزين المحلي.
       </div>
       <div class="actions" style="margin-top:12px;justify-content:flex-start">
-        <button class="btn good" id="saveSettingsBtn">حفظ الإعدادات</button>
+        <button class="btn good" id="saveSettingsBtn">حفظ وتفعيل الذكاء الحقيقي</button>
         <button class="btn" id="testLocalBtn">اختبار التحليل المحلي</button>
-        <button class="btn danger" id="clearSettingsBtn">مسح الإعدادات</button>
+        <button class="btn danger" id="clearSettingsBtn">مسح المفتاح والإعدادات</button>
+        <button class="btn" id="closeSettingsBtn">إغلاق</button>
       </div>
     </section>
 
@@ -657,19 +656,20 @@
           <p>اسأله عن المناطق فقط: مقارنة، أقوى منطقة، ضعف الأداء، تقرير سريع، أو توصية للمدير.</p>
         </div>
         <div class="quickAsk">
-          <span class="chip" data-q="اعطني تقرير إداري مختصر عن المناطق اليوم">تقرير إداري</span>
-          <span class="chip" data-q="ما هي أقوى منطقة وما السبب بالأرقام؟">أقوى منطقة</span>
+          <span class="chip" data-q="اعطني تقرير إداري مختصر عن المناطق">تقرير إداري</span>
+          <span class="chip" data-q="ليش أضعف منطقة نازلة؟ أعطني السبب بالأرقام">تشخيص مشكلة</span>
+          <span class="chip" data-q="رتّب المناطق من الأقوى للأضعف">ترتيب المناطق</span>
           <span class="chip" data-q="قارن Region 1 مع Region 2">قارن 1 و 2</span>
-          <span class="chip" data-q="ما هي المنطقة الأضعف وما الإجراء المقترح؟">الأضعف</span>
-          <span class="chip" data-q="كم إجمالي الدولار والليرة؟">الإجمالي</span>
+          <span class="chip" data-q="اعمل رسالة واتساب للمدير عن المناطق">واتساب</span>
+          <span class="chip" data-q="كم ناقص كل منطقة لتوصل لمتوسط المناطق؟">هدف</span>
         </div>
         <div class="note" style="margin-top:12px">
-          إذا كان OpenAI API Key موجوداً، سيستخدم الذكاء الحقيقي. إذا لم يكن موجوداً أو فشل الاتصال، سيجيب بتحليل محلي من بيانات اللوحة نفسها.
+          المساعد يقرأ أرقام المناطق الحالية، يقارن، يرتّب، يشخّص الضعف، ويجهز ملخص مدير بصوت عربي — بدون كشف أسماء.
         </div>
       </div>
       <div class="glass panel">
         <div class="chat" id="chatBox">
-          <div class="msg ai">أهلاً عماد. أنا جاهز أحلل لك المناطق الأربع فقط. اسألني مثلاً: «قارن Region 1 مع Region 3» أو «اعطني تقرير المدير».</div>
+          <div class="msg ai">أهلاً عماد. إذا وضعت مفتاح OpenAI من إعدادات الإدارة المخفية أجاوب بذكاء حقيقي، وإذا ما في مفتاح أشتغل بتحليل محلي. التحليل يبقى حسب المناطق فقط بدون أسماء.</div>
         </div>
         <div class="aiInput">
           <input id="aiQuestionInput" placeholder="اكتب سؤالك عن المناطق..." />
@@ -683,13 +683,18 @@
   <script type="module">
     import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, signInAnonymously, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const REGIONS = ["Region 1", "Region 2", "Region 3", "Region 4"];
     const AUTO_COLLECTIONS = [
-      "arsal_data", "arsal_entries", "arsalEntries", "أرسل", "ارسال", "ersal",
-      "entries", "records", "revenues", "sales", "transactions", "submissions",
-      "mandob_entries", "mandobEntries", "delegate_entries", "daily_entries", "reports", "data"
+      // المسار الحقيقي في تطبيق أرسل للمبيع + مسارات احتياطية
+      "sales_reports", "representatives", "deliveries", "office_withdrawals", "manual_amounts",
+      // أسماء محتملة لتطبيق أرسل / المندوبين — اللوحة تفحصها تلقائياً بدون ما تظهر للمستخدم
+      "arsal_data", "arsal_entries", "arsalEntries", "arsal", "أرسل", "ارسال", "ersal", "send", "sent",
+      "entries", "entry", "records", "record", "revenues", "revenue", "sales", "sale", "transactions", "transaction", "submissions", "submission",
+      "mandob_entries", "mandobEntries", "mandob_data", "mandobData", "mandob", "mandobs", "delegates", "delegate_entries", "delegateEntries",
+      "daily_entries", "dailyEntries", "daily_reports", "dailyReports", "payments", "amounts", "cash", "reports", "report", "data",
+      "imad", "imad_data", "region_data", "regionData", "region_entries", "regionEntries"
     ];
     const REGION_ACCENTS = [
       "radial-gradient(circle, rgba(143,215,255,.82), transparent 62%)",
@@ -707,10 +712,10 @@
 
     const $ = (id) => document.getElementById(id);
     const els = {
-      settingsPanel: $("settingsPanel"), settingsBtn: $("settingsBtn"), connectBtn: $("connectBtn"), refreshBtn: $("refreshBtn"), pdfBtn: $("pdfBtn"),
+      settingsPanel: $("settingsPanel"), settingsBtn: $("settingsBtn"), connectBtn: $("connectBtn"), refreshBtn: $("refreshBtn"), pdfBtn: $("pdfBtn"), adminLogo: $("adminLogo"), closeSettingsBtn: $("closeSettingsBtn"),
       firebaseConfigInput: $("firebaseConfigInput"), collectionPathInput: $("collectionPathInput"), exchangeRateInput: $("exchangeRateInput"), quickRateInput: $("quickRateInput"),
       periodSelect: $("periodSelect"), quickPeriodSelect: $("quickPeriodSelect"), fromDateInput: $("fromDateInput"), toDateInput: $("toDateInput"), anonAuthInput: $("anonAuthInput"),
-      regionMapInput: $("regionMapInput"), openaiKeyInput: $("openaiKeyInput"), aiModelInput: $("aiModelInput"), aiProxyInput: $("aiProxyInput"), voiceInput: $("voiceInput"),
+      regionMapInput: $("regionMapInput"), openaiKeyInput: $("openaiKeyInput"), aiModelInput: $("aiModelInput"), aiProxyInput: $("aiProxyInput"), voiceInput: $("voiceInput"), adminEmailInput: $("adminEmailInput"), adminPasswordInput: $("adminPasswordInput"), autoAdminLoginInput: $("autoAdminLoginInput"),
       saveSettingsBtn: $("saveSettingsBtn"), clearSettingsBtn: $("clearSettingsBtn"), testLocalBtn: $("testLocalBtn"),
       connectionPill: $("connectionPill"), connectionDot: $("connectionDot"), connectionText: $("connectionText"), lastUpdateInput: $("lastUpdateInput"), periodLabel: $("periodLabel"),
       totalSyp: $("totalSyp"), totalUsd: $("totalUsd"), totalSypSub: $("totalSypSub"), totalUsdSub: $("totalUsdSub"), bestRegion: $("bestRegion"), bestRegionSub: $("bestRegionSub"), avgRegion: $("avgRegion"),
@@ -718,12 +723,14 @@
       chatBox: $("chatBox"), aiQuestionInput: $("aiQuestionInput"), askBtn: $("askBtn"), micBtn: $("micBtn"), toast: $("toast"), loadingOverlay: $("loadingOverlay"), loadingText: $("loadingText")
     };
 
-    const storageKey = "region-command-center-v1";
+    const storageKey = "region-command-center-auto-sync-v4-sales-reports";
     let firebaseApp = null;
     let db = null;
     let unsubscribe = null;
     let charts = {bar:null, share:null};
     let rawDocs = [];
+    let representativeRegionById = new Map();
+    let representativeRegionByName = new Map();
     let current = emptyAggregation();
 
     const state = {
@@ -737,12 +744,15 @@
   "appId": "1:749939721927:web:4c1c63aacca39ec41fe0e2",
   "measurementId": "G-40ZG8YVETG"
 }`,
-        collectionPath:"__auto__",
+        collectionPath:"sales_reports",
         exchangeRate:"",
         period:"all",
         fromDate:"",
         toDate:"",
         anonAuth:"off",
+        autoAdminLogin:"on",
+        adminEmail:"admin@rcell.app",
+        adminPassword:"123456",
         regionMap: JSON.stringify(DEFAULT_REGION_MAP, null, 2),
         openaiKey:"",
         aiModel:"gpt-4.1-mini",
@@ -753,7 +763,7 @@
 
     function emptyAggregation(){
       const byRegion = Object.fromEntries(REGIONS.map(r => [r, {region:r, syp:0, usd:0, count:0, share:0}]));
-      return {byRegion, totalSyp:0, totalUsd:0, totalCount:0, exchangeRate:0, unmatched:0, filteredDocs:[], periodLabel:"كل البيانات"};
+      return {byRegion, totalSyp:0, totalUsd:0, totalCount:0, exchangeRate:0, unmatched:0, skippedDeleted:0, filteredDocs:[], periodLabel:"كل البيانات"};
     }
 
     function saveSettings(){
@@ -764,6 +774,9 @@
       state.settings.fromDate = els.fromDateInput.value;
       state.settings.toDate = els.toDateInput.value;
       state.settings.anonAuth = els.anonAuthInput.value;
+      state.settings.autoAdminLogin = els.autoAdminLoginInput?.value || "on";
+      state.settings.adminEmail = els.adminEmailInput?.value.trim() || "admin@rcell.app";
+      state.settings.adminPassword = els.adminPasswordInput?.value || "123456";
       state.settings.regionMap = els.regionMapInput.value.trim() || "{}";
       state.settings.openaiKey = els.openaiKeyInput.value.trim();
       state.settings.aiModel = els.aiModelInput.value.trim() || "gpt-4.1-mini";
@@ -772,7 +785,7 @@
       localStorage.setItem(storageKey, JSON.stringify(state.settings));
       syncInputs();
       render();
-      toast("تم حفظ الإعدادات.");
+      toast(state.settings.openaiKey ? "تم حفظ الإعدادات وتفعيل الذكاء الحقيقي." : "تم حفظ الإعدادات. الذكاء المحلي مفعل بدون مفتاح.");
     }
 
     function loadSettings(){
@@ -793,6 +806,9 @@
       els.fromDateInput.value = state.settings.fromDate || "";
       els.toDateInput.value = state.settings.toDate || "";
       els.anonAuthInput.value = state.settings.anonAuth || "off";
+      if(els.autoAdminLoginInput) els.autoAdminLoginInput.value = state.settings.autoAdminLogin || "on";
+      if(els.adminEmailInput) els.adminEmailInput.value = state.settings.adminEmail || "admin@rcell.app";
+      if(els.adminPasswordInput) els.adminPasswordInput.value = state.settings.adminPassword || "123456";
       els.regionMapInput.value = state.settings.regionMap || JSON.stringify(DEFAULT_REGION_MAP, null, 2);
       els.openaiKeyInput.value = state.settings.openaiKey || "";
       els.aiModelInput.value = state.settings.aiModel || "gpt-4.1-mini";
@@ -866,6 +882,7 @@
     function quickDocScore(docs){
       let score = 0;
       for(const d of docs.slice(0, 80)){
+        if(isDeletedDoc(d)) continue;
         if(extractRegion(d)) score += 4;
         if(extractAmount(d) > 0) score += 3;
         if(extractDate(d)) score += 1;
@@ -873,12 +890,95 @@
       return score + Math.min(docs.length, 30);
     }
 
+    async function discoverRootCollections(config){
+      // محاولة اكتشاف أسماء Collections من Firestore REST. إذا رفضت الصلاحيات نرجع لقائمة التخمينات بهدوء.
+      try{
+        const url = `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(config.projectId)}/databases/(default)/documents:listCollectionIds?key=${encodeURIComponent(config.apiKey)}`;
+        const res = await fetch(url, {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({pageSize:100})
+        });
+        if(!res.ok) return [];
+        const data = await res.json();
+        return Array.isArray(data.collectionIds) ? data.collectionIds : [];
+      }catch(e){
+        return [];
+      }
+    }
+
+    async function waitForAuthReady(auth){
+      await new Promise(resolve => {
+        let done = false;
+        const finish = () => { if(done) return; done = true; try{unsub?.()}catch(_){} resolve(); };
+        let unsub = onAuthStateChanged(auth, finish, finish);
+        setTimeout(finish, 900);
+      });
+    }
+
+    async function ensureFirebaseAuth(){
+      const auth = getAuth(firebaseApp);
+      try{ await setPersistence(auth, browserLocalPersistence); }catch(_){}
+      await waitForAuthReady(auth);
+      if(auth.currentUser){
+        setConnection("warn", `تسجيل دخول موجود — جاري قراءة المبيع...`);
+        return auth.currentUser;
+      }
+      let adminError = null;
+      const email = state.settings.adminEmail || "admin@rcell.app";
+      const pass = state.settings.adminPassword || "123456";
+      if((state.settings.autoAdminLogin || "on") !== "off" && email && pass){
+        try{
+          const cred = await signInWithEmailAndPassword(auth, email, pass);
+          setConnection("warn", "تم دخول الإدارة — جاري قراءة sales_reports...");
+          return cred.user;
+        }catch(e){
+          adminError = e;
+          console.warn("Admin auth failed:", e?.code || e?.message || e);
+        }
+      }
+      if(state.settings.anonAuth === "on" || state.settings.anonAuth === "auto"){
+        try{
+          const cred = await signInAnonymously(auth);
+          setConnection("warn", "دخول مجهول — جاري القراءة...");
+          return cred.user;
+        }catch(e){
+          console.warn("Anonymous auth unavailable:", e?.message || e);
+        }
+      }
+      if(adminError){
+        throw new Error("فشل دخول الإدارة للقراءة من Firebase. افتح RC خمس مرات وضع بريد/كلمة مرور الإدارة الصحيحة.");
+      }
+      return null;
+    }
+
+    async function loadRepresentativeRegionMaps(){
+      representativeRegionById = new Map();
+      representativeRegionByName = new Map();
+      try{
+        const snap = await getDocs(collection(db, "representatives"));
+        snap.docs.forEach(d => {
+          const data = {id:d.id, ...d.data()};
+          const reg = normalizeRegion(data.region);
+          if(!reg) return;
+          if(data.id) representativeRegionById.set(String(data.id), reg);
+          if(d.id) representativeRegionById.set(String(d.id), reg);
+          if(data.name) representativeRegionByName.set(String(data.name).trim().toLowerCase(), reg);
+          if(data.email) representativeRegionByName.set(String(data.email).trim().toLowerCase(), reg);
+        });
+      }catch(e){
+        console.warn("Could not load representatives map:", e?.message || e);
+      }
+    }
+
     async function findBestCollectionPath(requestedPath){
       const path = String(requestedPath || "").trim();
       if(!isAutoPath(path)) return path;
-      setConnection("warn", "أبحث عن Collection تلقائياً...");
+      setConnection("warn", "مزامنة تلقائية: أبحث عن البيانات...");
+      const discovered = await discoverRootCollections(parseFirebaseConfig());
+      const candidates = [...new Set([...discovered, ...AUTO_COLLECTIONS])];
       let best = {path:null, docs:[], score:-1, denied:0};
-      for(const candidate of AUTO_COLLECTIONS){
+      for(const candidate of candidates){
         try{
           const snap = await getDocs(collection(db, candidate));
           const docs = snap.docs.map(d => ({id:d.id, _collectionPath:candidate, ...d.data()}));
@@ -904,7 +1004,7 @@
         toast(`تم اختيار ${best.path} لكن لا توجد سجلات ظاهرة حالياً.`);
         return best.path;
       }
-      throw new Error("لم أستطع تحديد Collection تلقائياً. اكتب اسم Collection الخاص بتطبيق أرسل في الإعدادات.");
+      throw new Error("لم أستطع تحديد Collection تلقائياً. الواجهة مربوطة صح، لكن يلزم معرفة اسم الـ Collection الحقيقي أو تعديل Firestore Rules للقراءة.");
     }
 
     async function connectFirebase(forceOnce=false){
@@ -915,23 +1015,21 @@
       setConnection("warn", "جاري الاتصال...");
       firebaseApp = initializeApp(config, "region-center-" + Date.now());
       db = getFirestore(firebaseApp);
-      if(state.settings.anonAuth === "on"){
-        const auth = getAuth(firebaseApp);
-        await signInAnonymously(auth);
-      }
+      await ensureFirebaseAuth();
+      await loadRepresentativeRegionMaps();
       const path = await findBestCollectionPath(state.settings.collectionPath);
       const ref = collection(db, path);
       if(forceOnce){
         const snap = await getDocs(ref);
         rawDocs = snap.docs.map(d => ({id:d.id, _collectionPath:path, ...d.data()}));
-        setConnection("ok", `متصل — ${fmt(rawDocs.length)} سجل — ${path}`);
+        setConnection("ok", `متصل — ${fmt(rawDocs.filter(d => !isDeletedDoc(d)).length)} سجل نشط — ${path}`);
         els.lastUpdateInput.value = new Date().toLocaleString("en-US");
         render();
         return;
       }
       unsubscribe = onSnapshot(ref, (snapshot)=>{
         rawDocs = snapshot.docs.map(d => ({id:d.id, _collectionPath:path, ...d.data()}));
-        setConnection("ok", `متصل — ${fmt(rawDocs.length)} سجل — ${path}`);
+        setConnection("ok", `متصل — ${fmt(rawDocs.filter(d => !isDeletedDoc(d)).length)} سجل نشط — ${path}`);
         els.lastUpdateInput.value = new Date().toLocaleString("en-US");
         render();
       }, (error)=>{
@@ -1001,22 +1099,83 @@
     }
 
     function extractAmount(doc){
-      const amount = deepPick(doc, [
-        "amountSyp","amount_syp","sypAmount","amountSYP","totalSyp","total_syp","syp","SYP","amount","value","total","salesSyp","sales_syp","sales","sale","mabe3","mabi3","revenue","income","paidSyp","مبيع","المبيع","مبلغ","المبلغ","القيمة","الإيراد","ايراد","اجمالي","الإجمالي"
+      // تطبيق أرسل يحفظ المبيع الأساسي في amountSyp. لا نجمع التسليمات، المكاتب، أو رسوم التحويل.
+      const primarySalesAmount = deepPick(doc, [
+        "amountSyp", "amount_syp", "amountSYP", "salesSyp", "sales_syp", "saleSyp", "sale_syp",
+        "salesEmployeeRevenue", "employeeRevenueSyp", "revenueSyp", "netRevenueSyp",
+        "مبيع", "المبيع", "مبلغ المبيع", "إيراد المندوب", "ايراد المندوب"
       ]);
-      return toNumber(amount);
+      const primary = toNumber(primarySalesAmount);
+      if(primary > 0) return primary;
+
+      // احتياط للنسخ القديمة فقط، وليس لحقول التسليم أو المكاتب.
+      const fallbackAmount = deepPick(doc, [
+        "amount", "syp", "SYP", "totalSyp", "total_syp", "revenue", "income", "مبلغ", "المبلغ", "الإيراد", "ايراد"
+      ]);
+      return toNumber(fallbackAmount);
+    }
+
+    function isTruthyFlag(value){
+      if(value === true) return true;
+      if(value === false || value === undefined || value === null || value === "") return false;
+      const s = String(value).trim().toLowerCase();
+      return ["true", "1", "yes", "y", "on", "deleted", "trashed", "removed", "محذوف", "محذوفة", "نعم"].includes(s);
+    }
+
+    function hasValue(value){
+      return value !== undefined && value !== null && String(value).trim() !== "";
+    }
+
+    function isDeletedDoc(doc){
+      // مهم: تطبيق أرسل يحذف غالباً حذفاً ناعماً، لذلك الوثيقة تبقى في sales_reports مع علامة حذف.
+      const boolFlags = [
+        "deleted", "isDeleted", "is_deleted", "softDeleted", "soft_deleted",
+        "removed", "isRemoved", "is_removed", "trashed", "inTrash", "in_trash", "trash",
+        "archived", "isArchived", "is_archived", "cancelled", "canceled", "void", "voided"
+      ];
+      for(const f of boolFlags){
+        if(Object.prototype.hasOwnProperty.call(doc, f) && isTruthyFlag(doc[f])) return true;
+      }
+
+      const inactiveFlags = ["active", "isActive", "is_active", "enabled", "visible"];
+      for(const f of inactiveFlags){
+        if(Object.prototype.hasOwnProperty.call(doc, f) && doc[f] === false) return true;
+      }
+
+      const deleteTimeFields = [
+        "deletedAt", "deleted_at", "removedAt", "removed_at", "trashedAt", "trashed_at",
+        "archivedAt", "archived_at", "cancelledAt", "canceledAt", "voidedAt", "deletedBy", "deleted_by"
+      ];
+      for(const f of deleteTimeFields){
+        if(hasValue(doc[f])) return true;
+      }
+
+      const status = String(deepPick(doc, ["status", "state", "recordStatus", "record_status", "docStatus", "doc_status", "حالة", "الحالة"]) ?? "").trim().toLowerCase();
+      if(status){
+        const deletedStatuses = [
+          "deleted", "delete", "trash", "trashed", "removed", "archived", "inactive",
+          "cancelled", "canceled", "void", "voided", "rejected",
+          "محذوف", "محذوفة", "سلة المحذوفات", "ملغي", "ملغى", "مرفوض", "مؤرشف"
+        ];
+        if(deletedStatuses.includes(status)) return true;
+      }
+      return false;
     }
 
     function extractRegion(doc){
       const regionValue = deepPick(doc, ["region","regionName","region_name","regionId","region_id","reg","area","group","zone","منطقة","المنطقة","الريجون"]);
       const fromRegion = normalizeRegion(regionValue);
       if(fromRegion) return fromRegion;
+      const repId = deepPick(doc, ["representativeId","repId","delegateId","mandobId","userId","createdBy"]);
+      if(repId != null && representativeRegionById.has(String(repId))) return representativeRegionById.get(String(repId));
       const regionMap = getRegionMap();
-      const name = deepPick(doc, ["delegateName","delegate_name","mandoub","mandoubName","rep","repName","userName","username","name","sellerName","employee","agent","مندوب","المندوب","الاسم","اسم المندوب"]);
+      const name = deepPick(doc, ["representativeName","delegateName","delegate_name","mandoub","mandoubName","rep","repName","userName","username","name","sellerName","employee","agent","email","مندوب","المندوب","الاسم","اسم المندوب"]);
       if(name != null){
         const raw = String(name).trim();
+        const low = raw.toLowerCase();
+        if(representativeRegionByName.has(low)) return representativeRegionByName.get(low);
         if(regionMap[raw]) return regionMap[raw];
-        const lowerKey = Object.keys(regionMap).find(k => k.trim().toLowerCase() === raw.toLowerCase());
+        const lowerKey = Object.keys(regionMap).find(k => k.trim().toLowerCase() === low);
         if(lowerKey) return regionMap[lowerKey];
       }
       return null;
@@ -1055,6 +1214,7 @@
       out.periodLabel = range.label;
 
       for(const doc of rawDocs){
+        if(isDeletedDoc(doc)) { out.skippedDeleted++; continue; }
         const date = extractDate(doc);
         if(!inPeriod(date, range)) continue;
         const region = extractRegion(doc);
@@ -1078,7 +1238,7 @@
       els.periodLabel.textContent = `الفترة: ${current.periodLabel}`;
       els.totalSyp.textContent = fmtMoney(current.totalSyp);
       els.totalUsd.textContent = current.exchangeRate > 0 ? fmt(current.totalUsd, 2) : "0";
-      els.totalSypSub.textContent = `من ${fmt(current.totalCount)} سجل مطابق`;
+      els.totalSypSub.textContent = current.skippedDeleted ? `من ${fmt(current.totalCount)} سجل نشط — تم استثناء ${fmt(current.skippedDeleted)} محذوف` : `من ${fmt(current.totalCount)} سجل نشط`;
       els.totalUsdSub.textContent = current.exchangeRate > 0 ? `على سعر ${fmt(current.exchangeRate)} SYP` : "اكتب سعر الصرف اليدوي";
       const rows = REGIONS.map(r => current.byRegion[r]);
       const best = [...rows].sort((a,b)=>b.syp-a.syp)[0];
@@ -1183,37 +1343,199 @@
     }
 
     function localAIAnswer(question){
-      const q = (question || "").toLowerCase();
+      const original = (question || "").trim();
+      const q = normalizeArabicText(original);
       const snap = buildDataSnapshot();
-      const rows = snap.regions;
-      const best = [...rows].sort((a,b)=>b.syp-a.syp)[0];
-      const worst = [...rows].sort((a,b)=>a.syp-b.syp)[0];
+      const rows = snap.regions.map(r => ({...r}));
+      const sortedDesc = [...rows].sort((a,b)=>b.syp-a.syp);
+      const sortedAsc = [...rows].sort((a,b)=>a.syp-b.syp);
+      const best = sortedDesc[0] || rows[0];
+      const worst = sortedAsc[0] || rows[0];
       const avg = snap.totalSyp / 4;
-      const findRegion = (num)=>rows.find(r=>r.region.endsWith(String(num)));
-      let response = "";
+      const active = rows.filter(r=>r.syp>0).length;
+      const inactive = rows.filter(r=>r.syp<=0);
+      const aboveAvg = rows.filter(r=>r.syp>=avg && avg>0).map(r=>r.region);
+      const belowAvg = rows.filter(r=>r.syp<avg && avg>0).map(r=>r.region);
+      const gap = Math.max(0, (best?.syp||0) - (worst?.syp||0));
+      const exchangeReady = Number(snap.exchangeRate) > 0;
 
-      const comparisonMatch = q.match(/region\s*([1-4]).*region\s*([1-4])|([1-4]).*(?:مع|و)\s*([1-4])/i);
-      if(comparisonMatch){
-        const aNum = comparisonMatch[1] || comparisonMatch[3];
-        const bNum = comparisonMatch[2] || comparisonMatch[4];
-        const a = findRegion(aNum), b = findRegion(bNum);
-        const diff = Math.abs((a?.syp||0) - (b?.syp||0));
-        const winner = (a?.syp||0) >= (b?.syp||0) ? a : b;
-        response = `مقارنة ${a.region} مع ${b.region}:\n\n${a.region}: ${fmt(a.syp)} SYP (${fmt(a.usd,2)} USD) — نسبة ${fmt(a.share,1)}%.\n${b.region}: ${fmt(b.syp)} SYP (${fmt(b.usd,2)} USD) — نسبة ${fmt(b.share,1)}%.\n\nالأقوى بينهما: ${winner.region}. الفارق: ${fmt(diff)} SYP.\n\nإدارياً: إذا الفارق كبير خلال نفس الفترة، راقب المنطقة الأقل وراجع سبب انخفاض الحركة أو تأخر الإدخال.`;
-      } else if(q.includes("أقوى") || q.includes("افضل") || q.includes("أفضل") || q.includes("best")){
-        response = `أقوى منطقة حالياً هي ${best.region}.\n\nالقيمة: ${fmt(best.syp)} SYP، أي ${fmt(best.usd,2)} USD.\nحصتها من الإجمالي: ${fmt(best.share,1)}%.\n\nالقراءة الإدارية: هذه المنطقة تقود الأداء ضمن الفترة المختارة. لا أقول السبب خارج البيانات، لكن رقمياً هي الأعلى مساهمة.`;
-      } else if(q.includes("أضعف") || q.includes("اضعف") || q.includes("ضعف") || q.includes("worst")){
-        response = `أضعف منطقة حالياً هي ${worst.region}.\n\nالقيمة: ${fmt(worst.syp)} SYP، أي ${fmt(worst.usd,2)} USD.\nحصتها: ${fmt(worst.share,1)}%.\n\nالإجراء المقترح: راجع هل الفترة صحيحة، وهل بيانات هذه المنطقة تصل إلى Firebase، ثم قارنها بمتوسط المناطق ${fmt(avg)} SYP.`;
-      } else if(q.includes("دولار") || q.includes("usd") || q.includes("إجمالي") || q.includes("اجمالي") || q.includes("total")){
-        response = `إجمالي الفترة ${snap.period}:\n\nSYP: ${fmt(snap.totalSyp)}\nUSD: ${fmt(snap.totalUsd,2)}\nسعر الصرف اليدوي: ${fmt(snap.exchangeRate)} SYP لكل 1 USD\nعدد السجلات المحسوبة: ${fmt(snap.totalRecords)}.`;
-      } else if(q.includes("تقرير") || q.includes("ملخص") || q.includes("مدير")){
-        const lines = rows.map(r=>`- ${r.region}: ${fmt(r.syp)} SYP / ${fmt(r.usd,2)} USD / ${fmt(r.share,1)}%`).join("\n");
-        response = `تقرير إداري مختصر — ${snap.period}\n\nالإجمالي: ${fmt(snap.totalSyp)} SYP (${fmt(snap.totalUsd,2)} USD).\nأقوى منطقة: ${best.region} بنسبة ${fmt(best.share,1)}%.\nأضعف منطقة: ${worst.region} بنسبة ${fmt(worst.share,1)}%.\n\nتفصيل المناطق:\n${lines}\n\nالخلاصة: ركّز على رفع المنطقة الأقل من متوسط ${fmt(avg)} SYP، وحافظ على زخم المنطقة الأقوى.`;
-      } else {
-        response = `حسب بيانات المناطق الحالية:\n\nالإجمالي ${fmt(snap.totalSyp)} SYP، ويعادل ${fmt(snap.totalUsd,2)} USD.\nالأقوى: ${best.region}.\nالأضعف: ${worst.region}.\nمتوسط المنطقة: ${fmt(avg)} SYP.\n\nاسألني بصيغة أدق مثل: قارن Region 1 مع Region 3، أو اعطني تقرير إداري.`;
+      const mentioned = extractMentionedRegions(q);
+      const hasAny = (words)=>words.some(w=>q.includes(w));
+      const wantsCompare = hasAny(["قارن", "مقارنه", "مقارنة", "فرق", "الفارق", "بين", "افضل من", "اقوى من", "اضعف من"]);
+      const wantsBest = hasAny(["اقوى", "أقوى", "افضل", "أفضل", "الاول", "الأول", "متصدر", "اعلى", "أعلى", "best"]);
+      const wantsWorst = hasAny(["اضعف", "أضعف", "اقل", "أقل", "الاخير", "الأخير", "نازل", "ضعيف", "worst"]);
+      const wantsTotal = hasAny(["اجمالي", "إجمالي", "المجموع", "مجموع", "كل المناطق", "total", "كامل"]);
+      const wantsUsd = hasAny(["دولار", "usd", "صرف", "الصرف", "سعر"]);
+      const wantsReport = hasAny(["تقرير", "ملخص", "خلاصه", "خلاصة", "مدير", "اداري", "إداري", "brief"]);
+      const wantsWhy = hasAny(["ليش", "لماذا", "سبب", "السبب", "شو المشكلة", "ما المشكلة", "وين المشكلة", "مشكله", "مشكلة"]);
+      const wantsAdvice = hasAny(["شو اعمل", "ماذا افعل", "حل", "توصيه", "توصية", "اقتراح", "اجراء", "إجراء", "خطة"]);
+      const wantsRank = hasAny(["رتب", "ترتيب", "ranking", "من الاول للاخير", "من الأعلى", "من الاعلى"]);
+      const wantsShare = hasAny(["نسبه", "نسبة", "حصه", "حصة", "share", "%"]);
+      const wantsRecords = hasAny(["عدد", "سجلات", "حركات", "records", "entries"]);
+      const wantsWhatsApp = hasAny(["واتساب", "whatsapp", "رساله", "رسالة"]);
+      const wantsRisk = hasAny(["خطر", "مخاطر", "تنبيه", "انذار", "إنذار", "شاذ", "غير طبيعي", "مراقبه", "مراقبة"]);
+      const wantsTarget = hasAny(["هدف", "تارغت", "target", "ناقص", "كم يحتاج", "كم لازم"]);
+      const wantsForecast = hasAny(["توقع", "تنبؤ", "بكره", "غدا", "غداً", "forecast"]);
+      const wantsPdf = hasAny(["pdf", "بي دي اف", "تصدير", "طباعة", "طباعه"]);
+      const wantsVoice = hasAny(["صوت", "احكي", "اقرا", "اقرأ", "اسمع"]);
+
+      function normalizeArabicText(text){
+        return String(text || "")
+          .toLowerCase()
+          .replace(/[ًٌٍَُِّْـ]/g, "")
+          .replace(/[أإآ]/g, "ا")
+          .replace(/ى/g, "ي")
+          .replace(/ة/g, "ه")
+          .replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d))
+          .replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
       }
-      if(snap.unmatchedRecords > 0) response += `\n\nملاحظة: يوجد ${fmt(snap.unmatchedRecords)} سجل غير مربوط بمنطقة، وهذا قد يؤثر على الدقة.`;
-      return response;
+
+      function extractMentionedRegions(text){
+        const set = new Set();
+        const patterns = [
+          /region\s*([1-4])/g,
+          /reg\s*([1-4])/g,
+          /r\s*([1-4])/g,
+          /منطقه\s*([1-4])/g,
+          /المنطقه\s*([1-4])/g,
+          /منطقة\s*([1-4])/g,
+          /([1-4])\s*(?:و|مع|ضد|مقابل)/g,
+          /(?:و|مع|ضد|مقابل)\s*([1-4])/g
+        ];
+        for(const pat of patterns){
+          let m;
+          while((m = pat.exec(text))) set.add(`Region ${m[1]}`);
+        }
+        const wordMap = {
+          "الاولى":"Region 1", "الاولي":"Region 1", "الاول":"Region 1", "واحد":"Region 1",
+          "الثانيه":"Region 2", "الثاني":"Region 2", "اثنين":"Region 2", "اتنين":"Region 2",
+          "الثالثه":"Region 3", "الثالث":"Region 3", "ثلاثه":"Region 3", "تلاته":"Region 3",
+          "الرابعه":"Region 4", "الرابع":"Region 4", "اربعه":"Region 4"
+        };
+        for(const [w,r] of Object.entries(wordMap)) if(text.includes(w)) set.add(r);
+        return [...set].filter(r=>REGIONS.includes(r));
+      }
+
+      function getRegion(name){ return rows.find(r=>r.region === name) || rows[0]; }
+      function percentOfAvg(r){ return avg > 0 ? (r.syp / avg) * 100 : 0; }
+      function lineRegion(r){ return `${r.region}: ${fmt(r.syp)} SYP / ${fmt(r.usd,2)} USD / ${fmt(r.share,1)}% / ${fmt(r.records)} سجل`; }
+      function statusForRegion(r){
+        if(snap.totalSyp <= 0) return "لا يوجد إجمالي حتى نحكم على الأداء.";
+        if(r.syp <= 0) return "بدون حركة ضمن الفترة المختارة.";
+        if(r.region === best.region) return "الأقوى حالياً بين المناطق.";
+        if(r.region === worst.region) return "الأضعف حالياً ويحتاج متابعة.";
+        if(r.syp >= avg) return "فوق متوسط المناطق.";
+        return "تحت متوسط المناطق ويحتاج رفع حركة أو التأكد من وصول البيانات.";
+      }
+      function recommendationForRegion(r){
+        if(snap.totalSyp <= 0) return "ابدأ بتأكيد الربط واسم Collection والفترة، لأن اللوحة لا ترى مبالغ حالياً.";
+        if(r.syp <= 0) return `راجع أولاً هل ${r.region} أرسلت بيانات لهذه الفترة، وهل حقل المنطقة/المبلغ مقروء صح.`;
+        if(r.syp < avg) return `ركّز على ${r.region}: تحتاج تقريباً ${fmt(avg-r.syp)} SYP لتصل لمتوسط المناطق.`;
+        if(r.region === best.region) return `حافظ على زخم ${r.region} ولا تجعلها تغطي ضعف باقي المناطق وحدها.`;
+        return `${r.region} وضعها مقبول رقمياً، راقب الثبات بدل تغيير الخطة بسرعة.`;
+      }
+
+      function header(){
+        return `الفترة: ${snap.period}\nالإجمالي: ${fmt(snap.totalSyp)} SYP${exchangeReady ? ` / ${fmt(snap.totalUsd,2)} USD` : " / USD غير محسوب لأن سعر الصرف فارغ"}`;
+      }
+
+      if(snap.totalSyp === 0){
+        let msg = `ما عندي أرقام محسوبة حالياً لهذه الفترة.\n\nالأسباب المحتملة:\n1) اسم Collection غير صحيح.\n2) الفترة المختارة لا تحتوي بيانات.\n3) الحقول داخل Firebase لا تحمل region أو amount بشكل واضح.\n4) يوجد سجلات غير مربوطة: ${fmt(snap.unmatchedRecords)}.\n\nاسألني بعد الاتصال أو غيّر الفترة إلى «كل البيانات» للتأكد.`;
+        if(wantsPdf) msg = `تصدير PDF شغال، لكن التقرير سيكون فاضي تقريباً لأن إجمالي المناطق حالياً صفر. الأفضل أولاً تأكيد قراءة Firebase ثم تصدير PDF.`;
+        if(wantsVoice) msg += `\n\nالصوت العربي مفعل إذا المتصفح يدعم Speech Synthesis العربي.`;
+        return msg;
+      }
+
+      if(wantsPdf){
+        return `PDF جاهز من زر «تصدير PDF فخم».\n\n${header()}\n\nقبل التصدير تأكد من سعر الصرف اليدوي لأن الدولار يعتمد عليه. التقرير سيعرض المناطق الأربع فقط بدون أسماء مندوبين.`;
+      }
+
+      if(wantsVoice){
+        return `الصوت العربي مفعل حالياً من إعدادات اللوحة.\n\n${header()}\n\nإذا ما سمعت صوت، المشكلة عادة من المتصفح أو عدم وجود صوت عربي مثبت، وليس من بيانات Firebase.`;
+      }
+
+      if(wantsCompare || mentioned.length >= 2){
+        const a = getRegion(mentioned[0] || "Region 1");
+        const b = getRegion(mentioned[1] || "Region 2");
+        const diff = Math.abs(a.syp - b.syp);
+        const winner = a.syp >= b.syp ? a : b;
+        const loser = a.syp >= b.syp ? b : a;
+        return `مقارنة مباشرة:\n\n${lineRegion(a)}\n${lineRegion(b)}\n\nالأقوى بينهما: ${winner.region}.\nالفارق: ${fmt(diff)} SYP (${exchangeReady ? fmt(diff / snap.exchangeRate,2) + " USD" : "USD غير محسوب"}).\n\nقراءة إدارية: ${loser.region} أقل من ${winner.region} بنسبة ${winner.syp>0 ? fmt((diff / winner.syp)*100,1) : "0.0"}%. ${recommendationForRegion(loser)}`;
+      }
+
+      if(mentioned.length === 1){
+        const r = getRegion(mentioned[0]);
+        const needToBest = Math.max(0, best.syp - r.syp);
+        const needToAvg = Math.max(0, avg - r.syp);
+        return `${r.region} حالياً:\n\n${lineRegion(r)}\nالحالة: ${statusForRegion(r)}\nمقارنة بالمتوسط: ${fmt(percentOfAvg(r),1)}% من متوسط المناطق.\nتحتاج للوصول للمتوسط: ${fmt(needToAvg)} SYP.\nتحتاج لمساواة الأقوى (${best.region}): ${fmt(needToBest)} SYP.\n\nتوصيتي: ${recommendationForRegion(r)}`;
+      }
+
+      if(wantsRank){
+        return `ترتيب المناطق من الأقوى للأضعف:\n\n${sortedDesc.map((r,i)=>`${i+1}) ${lineRegion(r)}`).join("\n")}\n\nالخلاصة: الفارق بين الأول والأخير ${fmt(gap)} SYP. ${gap > avg ? "الفارق كبير ويحتاج متابعة." : "الفارق مقبول نسبياً مقارنة بالمتوسط."}`;
+      }
+
+      if(wantsBest){
+        return `أقوى منطقة هي ${best.region}.\n\n${lineRegion(best)}\n\nليش هي الأقوى؟ لأنها أعلى قيمة SYP وحصتها ${fmt(best.share,1)}% من إجمالي المناطق.\nالفارق بينها وبين ثاني منطقة: ${fmt(Math.max(0, best.syp - (sortedDesc[1]?.syp || 0)))} SYP.\n\nإدارياً: لا تعتمد عليها وحدها؛ قارن المناطق الأقل حتى لا يصير الأداء مركز بمنطقة واحدة.`;
+      }
+
+      if(wantsWorst){
+        return `أضعف منطقة هي ${worst.region}.\n\n${lineRegion(worst)}\n\nليش اعتبرتها الأضعف؟ لأنها الأقل SYP ضمن الفترة المختارة.\nالفرق بينها وبين متوسط المناطق: ${fmt(Math.max(0, avg-worst.syp))} SYP.\n\nالإجراء: ${recommendationForRegion(worst)}`;
+      }
+
+      if(wantsWhy || wantsRisk){
+        const warnings = [];
+        if(!exchangeReady) warnings.push("سعر الصرف غير مضبوط، لذلك USD غير دقيق.");
+        if(snap.unmatchedRecords > 0) warnings.push(`${fmt(snap.unmatchedRecords)} سجل غير مربوط بمنطقة، وهذا قد يخفي جزءاً من الإيراد.`);
+        if(inactive.length) warnings.push(`${inactive.map(r=>r.region).join("، ")} بدون حركة ضمن الفترة.`);
+        if(best.share >= 55) warnings.push(`${best.region} تحمل ${fmt(best.share,1)}% من الإجمالي؛ التركيز عالي على منطقة واحدة.`);
+        if(worst.syp < avg * .55) warnings.push(`${worst.region} تحت المتوسط بفارق واضح.`);
+        if(!warnings.length) warnings.push("لا توجد مشكلة رقمية حادة ظاهرة من بيانات المناطق الحالية.");
+        return `تشخيص المشكلة بالأرقام:\n\n${warnings.map((w,i)=>`${i+1}) ${w}`).join("\n")}\n\n${header()}\n\nأول خطوة عملية: ${recommendationForRegion(worst)}`;
+      }
+
+      if(wantsAdvice){
+        return `خطة سريعة للمدير:\n\n1) ركّز على ${worst.region}: ${recommendationForRegion(worst)}\n2) حافظ على ${best.region} لأنها تقود الأداء حالياً.\n3) راقب المناطق تحت المتوسط: ${belowAvg.length ? belowAvg.join("، ") : "لا يوجد"}.\n4) إذا يوجد سجلات غير مربوطة (${fmt(snap.unmatchedRecords)}) أصلح ربط المنطقة حتى لا يطلع التقرير ناقص.\n\n${header()}`;
+      }
+
+      if(wantsTarget){
+        const target = extractTargetNumber(q);
+        if(target > 0){
+          const lines = rows.map(r=>`${r.region}: ناقصها ${fmt(Math.max(0, target-r.syp))} SYP للوصول إلى ${fmt(target)} SYP`).join("\n");
+          return `مقارنة المناطق مع الهدف ${fmt(target)} SYP:\n\n${lines}\n\nالأقرب للهدف: ${sortedDesc[0].region}.`;
+        }
+        return `إذا اعتبرنا متوسط المناطق هدفاً مؤقتاً (${fmt(avg)} SYP):\n\n${rows.map(r=>`${r.region}: ${r.syp>=avg ? "واصل للهدف" : "ناقصها " + fmt(avg-r.syp) + " SYP"}`).join("\n")}\n\nالأفضل وضع هدف يدوي لكل منطقة لاحقاً بدل الاعتماد على المتوسط فقط.`;
+      }
+
+      if(wantsShare){
+        return `نِسَب المناطق من الإجمالي:\n\n${rows.map(r=>`${r.region}: ${fmt(r.share,1)}% — ${fmt(r.syp)} SYP`).join("\n")}\n\nأكبر حصة: ${best.region}. أقل حصة: ${worst.region}.`;
+      }
+
+      if(wantsRecords){
+        return `عدد السجلات المحسوبة:\n\n${rows.map(r=>`${r.region}: ${fmt(r.records)} سجل`).join("\n")}\n\nالإجمالي المحسوب: ${fmt(snap.totalRecords)} سجل.\nغير مربوط بمنطقة: ${fmt(snap.unmatchedRecords)} سجل.`;
+      }
+
+      if(wantsUsd || wantsTotal){
+        return `${header()}\n\nتفصيل المناطق:\n${rows.map(lineRegion).join("\n")}\n\nملاحظة: USD محسوب من سعر الصرف اليدوي الموجود في اللوحة، وليس من Firebase.`;
+      }
+
+      if(wantsWhatsApp){
+        return `ملخص واتساب للمدير:\n\nتقرير المناطق — ${snap.period}\nالإجمالي: ${fmt(snap.totalSyp)} SYP${exchangeReady ? ` / ${fmt(snap.totalUsd,2)} USD` : ""}\nسعر الصرف: ${exchangeReady ? fmt(snap.exchangeRate) : "غير محدد"}\nالأقوى: ${best.region} (${fmt(best.syp)} SYP)\nالأضعف: ${worst.region} (${fmt(worst.syp)} SYP)\n\n${rows.map(r=>`${r.region}: ${fmt(r.syp)} SYP`).join("\n")}`;
+      }
+
+      if(wantsForecast){
+        return `توقع حقيقي يحتاج بيانات أيام سابقة كثيرة، وأنا حالياً أحلل الفترة الظاهرة فقط.\n\nقراءة تقريبية غير مؤكدة: إذا بقي نفس النمط، ${best.region} مرشحة تبقى الأقوى، و${worst.region} تحتاج تدخل أسرع.\n\nلجعل التوقع قوي لاحقاً لازم نخزن تاريخ يومي ونحسب متوسط 7 أيام و30 يوم لكل Region.`;
+      }
+
+      if(wantsReport){
+        return `تقرير إداري للمناطق — ${snap.period}\n\n${header()}\nأقوى منطقة: ${best.region} بنسبة ${fmt(best.share,1)}%.\nأضعف منطقة: ${worst.region} بنسبة ${fmt(worst.share,1)}%.\nالمناطق النشطة: ${active}/4.\nالفارق بين الأقوى والأضعف: ${fmt(gap)} SYP.\n\nتفصيل:\n${sortedDesc.map(lineRegion).join("\n")}\n\nقرار مقترح: ${recommendationForRegion(worst)}`;
+      }
+
+      return `فهمت سؤالك كتحليل عام للمناطق.\n\n${header()}\n\nالأقوى: ${best.region} (${fmt(best.syp)} SYP).\nالأضعف: ${worst.region} (${fmt(worst.syp)} SYP).\nتحت المتوسط: ${belowAvg.length ? belowAvg.join("، ") : "لا يوجد"}.\nفوق أو على المتوسط: ${aboveAvg.length ? aboveAvg.join("، ") : "لا يوجد"}.\n\nجوابي العملي: ${recommendationForRegion(worst)}\n\nاكتب أي سؤال بحرّية مثل: ليش Region 3 ضعيفة؟ كم ناقص Region 2؟ رتّب المناطق؟ اعمل رسالة واتساب؟`;
+
+      function extractTargetNumber(text){
+        const m = text.replace(/,/g, "").match(/(\d+(?:\.\d+)?)/);
+        return m ? Number(m[1]) : 0;
+      }
     }
 
     function appendMsg(role, text){
@@ -1243,7 +1565,7 @@
       if(!q) return;
       appendMsg("user", q);
       els.aiQuestionInput.value = "";
-      appendMsg("ai", "أحلل الأرقام الآن...");
+      appendMsg("ai", (state.settings.openaiKey || state.settings.aiProxy) ? "أحلل عبر الذكاء الحقيقي الآن..." : "أحلل الأرقام محلياً الآن...");
       const lastMsg = els.chatBox.lastElementChild;
       let answer = "";
       try{
@@ -1364,15 +1686,30 @@
     }
 
     function wireEvents(){
-      els.settingsBtn.addEventListener("click", ()=>els.settingsPanel.classList.toggle("open"));
+      if(els.settingsBtn) els.settingsBtn.addEventListener("click", ()=>els.settingsPanel.classList.toggle("open"));
+      if(els.closeSettingsBtn) els.closeSettingsBtn.addEventListener("click", ()=>els.settingsPanel.classList.remove("open"));
+      let adminTapCount = 0;
+      let adminTapTimer = null;
+      if(els.adminLogo){
+        els.adminLogo.addEventListener("click", ()=>{
+          adminTapCount += 1;
+          clearTimeout(adminTapTimer);
+          adminTapTimer = setTimeout(()=>{ adminTapCount = 0; }, 1600);
+          if(adminTapCount >= 5){
+            adminTapCount = 0;
+            els.settingsPanel.classList.toggle("open");
+            toast(els.settingsPanel.classList.contains("open") ? "تم فتح إعدادات الإدارة المخفية." : "تم إغلاق إعدادات الإدارة.");
+          }
+        });
+      }
       els.saveSettingsBtn.addEventListener("click", saveSettings);
       els.clearSettingsBtn.addEventListener("click", ()=>{
         localStorage.removeItem(storageKey);
         location.reload();
       });
-      els.connectBtn.addEventListener("click", async()=>{
+      if(els.connectBtn) els.connectBtn.addEventListener("click", async()=>{
         try{ await connectFirebase(false); }
-        catch(e){ setConnection("warn", "غير متصل"); toast(e.message || String(e)); els.settingsPanel.classList.add("open"); }
+        catch(e){ setConnection("warn", "تعذر الاتصال"); toast(e.message || String(e), 6500); }
       });
       els.refreshBtn.addEventListener("click", async()=>{
         try{ await connectFirebase(true); toast("تم التحديث مرة واحدة."); }
@@ -1426,10 +1763,35 @@
 
     function init(){
       loadSettings();
+      // تثبيت الربط داخل الكود: لا نفتح إعدادات ولا نطلب Config من المستخدم
+      state.settings.firebaseConfig = `{
+  "apiKey": "AIzaSyDoVPtyKtuY5LBRw6plvwDVJv4TDIk0Klk",
+  "authDomain": "mandob-app-82843.firebaseapp.com",
+  "projectId": "mandob-app-82843",
+  "storageBucket": "mandob-app-82843.firebasestorage.app",
+  "messagingSenderId": "749939721927",
+  "appId": "1:749939721927:web:4c1c63aacca39ec41fe0e2",
+  "measurementId": "G-40ZG8YVETG"
+}`;
+      state.settings.collectionPath = "sales_reports";
+      state.settings.regionMap = JSON.stringify(DEFAULT_REGION_MAP, null, 2);
+      state.settings.anonAuth = "off";
+      state.settings.autoAdminLogin = state.settings.autoAdminLogin || "on";
+      state.settings.adminEmail = state.settings.adminEmail || "admin@rcell.app";
+      state.settings.adminPassword = state.settings.adminPassword || "123456";
+      syncInputs();
       wireEvents();
       render();
-      setConnection("warn", state.settings.firebaseConfig && state.settings.collectionPath ? "جاهز للاتصال" : "أدخل إعدادات Firebase");
+      setConnection("warn", "مزامنة تلقائية قيد التشغيل...");
       window.speechSynthesis?.getVoices?.();
+      setTimeout(async()=>{
+        try{ await connectFirebase(false); }
+        catch(e){
+          console.error(e);
+          setConnection("warn", "تعذر قراءة sales_reports — راجع دخول الإدارة");
+          toast(e.message || String(e), 7500);
+        }
+      }, 300);
     }
 
     init();
