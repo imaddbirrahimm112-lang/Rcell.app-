@@ -3,1863 +3,861 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Region Command Center</title>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <title>لوحة الإيرادات</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <style>
-    :root{
-      --bg:#070812;
-      --bg2:#101323;
-      --glass:rgba(255,255,255,.088);
-      --glass2:rgba(255,255,255,.13);
-      --line:rgba(255,255,255,.16);
-      --line2:rgba(255,255,255,.25);
-      --text:#f7f8ff;
-      --muted:rgba(247,248,255,.68);
-      --muted2:rgba(247,248,255,.48);
-      --good:#70f0c4;
-      --warn:#ffd276;
-      --bad:#ff7e95;
-      --brand:#8fd7ff;
-      --brand2:#bd9cff;
-      --shadow:0 28px 80px rgba(0,0,0,.42);
-      --radius:28px;
-      --radius2:20px;
-      --font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Display", Tahoma, Arial, sans-serif;
+    /* ── VARIABLES ─────────────────────────────────────────── */
+    :root {
+      --bg:       #030405;
+      --sidebar:  #060809;
+      --amber:    #ff9f1a;
+      --amber2:   #ff6200;
+      --gold:     #ffc87a;
+      --blue:     #55aaff;
+      --green:    #2ecc71;
+      --red:      #ff5252;
+      --muted:    #857d74;
+      --soft:     #d4c9bf;
+      --text:     #fff6ea;
+      --card-bg:  rgba(18,20,25,0.85);
+      --cb:       rgba(255,255,255,0.10);
+      --cb-h:     rgba(255,159,26,0.40);
+      --shadow:   0 24px 80px rgba(0,0,0,.64);
+      --r:        22px;
     }
 
-    *{box-sizing:border-box}
+    /* ── RESET ─────────────────────────────────────────────── */
+    *,*::before,*::after{box-sizing:border-box}
     html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      min-height:100vh;
-      color:var(--text);
-      font-family:var(--font);
-      background:
-        radial-gradient(circle at 12% 10%, rgba(87, 151, 255,.35), transparent 34%),
-        radial-gradient(circle at 85% 15%, rgba(202, 121, 255,.28), transparent 35%),
-        radial-gradient(circle at 48% 90%, rgba(31, 225, 172,.18), transparent 35%),
-        linear-gradient(135deg, var(--bg), var(--bg2) 46%, #080a15);
-      overflow-x:hidden;
-    }
-    body:before{
-      content:"";
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      background:
-        linear-gradient(115deg, rgba(255,255,255,.08), transparent 28%, rgba(255,255,255,.05) 54%, transparent 78%),
-        repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0 1px, transparent 1px 90px);
-      mask-image: radial-gradient(circle at center, #000 30%, transparent 95%);
-      opacity:.72;
-      z-index:-1;
-    }
-    body:after{
-      content:"";
-      position:fixed;
-      inset:-120px;
-      background: conic-gradient(from 120deg, transparent, rgba(135,220,255,.06), transparent, rgba(196,139,255,.06), transparent);
-      filter: blur(55px);
-      pointer-events:none;
-      animation: aurora 18s linear infinite;
-      z-index:-2;
-    }
-    @keyframes aurora{to{transform:rotate(360deg)}}
+    body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);
+      font-family:'Segoe UI',Tahoma,system-ui,-apple-system,Arial,sans-serif;
+      overflow-x:hidden}
 
-    .app{
-      width:min(1480px, 100%);
-      margin:0 auto;
-      padding:22px;
-      padding-bottom:42px;
+    /* ── GLOBAL BACKGROUND ─────────────────────────────────── */
+    body::before{content:"";position:fixed;inset:0;pointer-events:none;
+      background:
+        radial-gradient(ellipse at 56% 0%, rgba(255,140,0,.24) 0%, transparent 28%),
+        radial-gradient(ellipse at 92% 8%,  rgba(255,78,0,.16) 0%,  transparent 22%),
+        radial-gradient(ellipse at 18% 96%, rgba(255,130,0,.11) 0%, transparent 22%),
+        linear-gradient(165deg, #070a0d 0%, #030405 100%);
+      z-index:-3}
+    body::after{content:"";position:fixed;inset:0;pointer-events:none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.021) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.019) 1px,transparent 1px);
+      background-size:52px 52px;
+      mask-image:radial-gradient(ellipse at 50% 28%, #000 0%, transparent 78%);
+      z-index:-2}
+
+    /* ── LAYOUT ────────────────────────────────────────────── */
+    .shell{width:100%;min-height:100vh;display:grid;grid-template-columns:190px 1fr}
+
+    /* ── SIDEBAR ───────────────────────────────────────────── */
+    .side{
+      background:linear-gradient(180deg,rgba(7,9,12,.98) 0%,rgba(5,7,10,.96) 100%);
+      border-left:1px solid rgba(255,255,255,.07);
+      display:flex;flex-direction:column;padding:26px 14px;
+      position:sticky;top:0;height:100vh;overflow:hidden;
     }
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:40;
-      display:flex;
-      gap:14px;
-      align-items:center;
-      justify-content:space-between;
-      padding:14px 0 18px;
-      backdrop-filter: blur(18px);
-    }
-    .brand{
-      display:flex;
-      gap:14px;
-      align-items:center;
-      min-width:0;
-    }
+    /* logo */
     .logo{
-      width:56px;
-      height:56px;
-      border-radius:20px;
-      display:grid;
-      place-items:center;
-      font-weight:900;
-      letter-spacing:.5px;
+      width:52px;height:52px;margin:0 auto 26px;border-radius:14px;
+      background:conic-gradient(from 45deg, #ff6200, #ffc87a, #ff9f1a, #ff6200);
+      box-shadow:0 0 32px rgba(255,159,26,.48), 0 0 70px rgba(255,100,0,.18);
+      display:flex;align-items:center;justify-content:center;position:relative;
+    }
+    .logo::after{content:"";width:24px;height:24px;background:var(--bg);transform:rotate(45deg);border-radius:5px}
+    /* nav */
+    .nav{flex:1;display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+    .nav button{
+      display:flex;align-items:center;gap:11px;padding:12px 14px;
+      border-radius:13px;border:1px solid transparent;background:transparent;
+      color:#7a7267;font-size:13.5px;font-weight:700;cursor:pointer;
+      text-align:right;direction:rtl;width:100%;transition:all .18s ease;box-shadow:none;min-height:0;
+    }
+    .nav button:hover{color:#c0b8b0;background:rgba(255,255,255,.04)}
+    .nav button.active{
+      color:#fff;
+      background:linear-gradient(135deg,rgba(255,159,26,.28),rgba(255,107,0,.14));
+      border-color:rgba(255,159,26,.45);
+      box-shadow:0 0 24px rgba(255,145,20,.22),inset 0 0 18px rgba(255,159,26,.07);
+    }
+    .ico{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    /* sidebar footer */
+    .sideFooter{
+      border:1px solid rgba(255,255,255,.08);border-radius:15px;
+      padding:13px 14px;background:rgba(255,255,255,.028);font-size:12px;color:var(--muted);
+    }
+    .sideFooter .dot{display:inline-block;width:8px;height:8px;border-radius:50%;
+      background:var(--amber);box-shadow:0 0 10px var(--amber);margin-left:6px;vertical-align:middle}
+    .sideFooter b{display:block;color:var(--gold);margin-top:3px}
+    .sideFooter .copy{font-size:11px;color:#5a544e;margin-top:4px}
+
+    /* ── GLASS CARD ────────────────────────────────────────── */
+    .card{
+      position:relative;border:1px solid var(--cb);border-radius:var(--r);
+      background:linear-gradient(148deg,rgba(255,255,255,.068),rgba(255,255,255,.018));
+      box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.14);
+      backdrop-filter:blur(20px);overflow:hidden;
+      transition:border-color .22s,box-shadow .22s;
+    }
+    .card::before{content:"";position:absolute;inset:0;border-radius:inherit;
       background:
-        radial-gradient(circle at 28% 22%, rgba(255,255,255,.78), transparent 18%),
-        linear-gradient(145deg, rgba(143,215,255,.34), rgba(189,156,255,.22));
-      border:1px solid rgba(255,255,255,.25);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.38), 0 18px 42px rgba(0,0,0,.3);
-      overflow:hidden;
+        radial-gradient(circle at 14% 14%,rgba(255,159,26,.12),transparent 28%),
+        linear-gradient(118deg,rgba(255,255,255,.11),transparent 20%,transparent 80%,rgba(255,159,26,.08));
+      pointer-events:none}
+    .card:hover{border-color:rgba(255,159,26,.36);box-shadow:var(--shadow),0 0 26px rgba(255,122,0,.08),inset 0 1px 0 rgba(255,255,255,.17)}
+
+    /* ── MAIN ──────────────────────────────────────────────── */
+    .main{padding:22px 24px;display:flex;flex-direction:column;gap:15px;min-height:100vh;
+      background:radial-gradient(ellipse at 50% -5%,rgba(255,145,30,.16),transparent 22%),
+                 linear-gradient(140deg,rgba(13,15,19,.90),rgba(4,5,7,.84));}
+
+    /* ── TOP BAR ───────────────────────────────────────────── */
+    .topbar{display:grid;grid-template-columns:290px 1fr 220px;align-items:center;gap:16px;position:relative}
+    .dateBox{display:flex;align-items:center;gap:9px;
+      background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);
+      border-radius:15px;padding:10px 15px;font-size:13.5px;font-weight:700;color:var(--soft)}
+    .dateBox input[type=date]{background:transparent;border:none;color:var(--text);
+      font-size:13.5px;font-family:inherit;outline:none;cursor:pointer;min-height:0;padding:0;width:auto;font-weight:700}
+    .titleWrap{display:flex;align-items:center;justify-content:center;gap:20px}
+    .titleLine{height:2px;width:110px;background:linear-gradient(90deg,transparent,var(--amber),transparent);
+      position:relative;flex-shrink:0}
+    .titleLine::after{content:"";position:absolute;top:50%;left:50%;
+      transform:translate(-50%,-50%);width:8px;height:8px;
+      background:var(--amber);border-radius:50%;box-shadow:0 0 14px var(--amber)}
+    .title{font-size:44px;font-weight:900;margin:0;color:#fff4e6;white-space:nowrap;
+      text-shadow:0 0 36px rgba(255,153,35,.22),0 2px 10px rgba(0,0,0,.72)}
+    .topActions{display:flex;align-items:center;justify-content:flex-start;gap:10px}
+    .btnIcon{
+      width:46px;height:46px;border-radius:13px;
+      background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);
+      display:flex;align-items:center;justify-content:center;font-size:18px;
+      cursor:pointer;color:var(--text);transition:all .18s;box-shadow:none;min-height:0;padding:0;
+    }
+    .btnIcon:hover{background:rgba(255,255,255,.09);border-color:rgba(255,159,26,.35)}
+    .btnFilter{
+      display:flex;align-items:center;gap:8px;padding:0 18px;height:46px;
+      background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);
+      border-radius:13px;font-size:13.5px;font-weight:800;cursor:pointer;
+      color:var(--text);transition:all .18s;box-shadow:none;min-height:0;
+    }
+    .btnFilter:hover{border-color:rgba(255,159,26,.35)}
+    /* filter panel */
+    .filterPanel{display:none;position:absolute;top:62px;left:0;z-index:20;
+      width:min(400px,calc(100% - 0px));padding:20px}
+    .filterPanel.show{display:block}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .full{grid-column:1/-1}
+    label{display:block;color:var(--muted);font-size:12px;margin:0 2px 6px}
+    input,select{width:100%;min-height:44px;border-radius:13px;border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.055);color:var(--text);outline:none;padding:0 12px;font-family:inherit;font-size:13px}
+    select option{background:#111;color:#fff}
+    input:focus,select:focus{border-color:rgba(255,159,26,.65);box-shadow:0 0 0 3px rgba(255,159,26,.12)}
+    button{font:inherit;cursor:pointer;transition:all .18s}
+    .btnPrimary{min-height:44px;padding:0 20px;border-radius:13px;border:none;
+      background:linear-gradient(135deg,rgba(255,159,26,.96),rgba(255,107,0,.90));
+      color:#fff;font-weight:800;font-size:13.5px;cursor:pointer;
+      box-shadow:0 10px 28px rgba(255,122,0,.24)}
+    .btnPrimary:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(255,122,0,.30)}
+    .btnSecondary{min-height:44px;padding:0 16px;border-radius:13px;
+      border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);
+      color:var(--text);font-weight:700;font-size:13px;box-shadow:none}
+
+    /* ── STATUS BAR ────────────────────────────────────────── */
+    .statusBar{display:flex;align-items:center;justify-content:space-between;
+      padding:9px 16px;background:rgba(255,159,26,.05);
+      border:1px solid rgba(255,159,26,.18);border-radius:13px;font-size:13px;color:var(--soft)}
+    .dot{display:inline-block;width:8px;height:8px;border-radius:50%;
+      background:var(--amber);box-shadow:0 0 10px var(--amber);margin-left:7px;vertical-align:middle}
+
+    /* ── KPI CARDS ─────────────────────────────────────────── */
+    .kpiGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .kpi{padding:20px 18px 18px;display:flex;flex-direction:column;gap:10px;min-height:0}
+    .kpiTop{display:flex;align-items:center;gap:10px}
+    .kpiIcon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+      font-size:18px;flex-shrink:0;
+      background:radial-gradient(circle,rgba(255,159,26,.26),rgba(255,255,255,.03));
+      border:1px solid rgba(255,159,26,.34);
+      box-shadow:0 0 18px rgba(255,159,26,.18),inset 0 0 12px rgba(255,159,26,.08)}
+    .kpiLabel{color:#d4c9bf;font-size:13px;font-weight:800;line-height:1.3}
+    .kpiAmounts{display:flex;flex-direction:column;gap:5px}
+    .kpiSypRow{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+    .kpiSypVal{font-size:clamp(16px,1.9vw,28px);font-weight:900;color:#fff;direction:ltr;line-height:1.1;word-break:break-all}
+    .kpiSypCur{font-size:11px;font-weight:700;color:var(--muted);flex-shrink:0}
+    .kpiUsdRow{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;
+      background:rgba(255,159,26,.07);border-radius:8px;padding:4px 8px;border:1px solid rgba(255,159,26,.15)}
+    .kpiUsdVal{font-size:clamp(13px,1.5vw,20px);font-weight:900;color:var(--amber);direction:ltr;line-height:1.1;word-break:break-all}
+    .kpiUsdCur{font-size:11px;font-weight:700;color:var(--gold);flex-shrink:0}
+    .kpiSub{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-top:2px}
+    .up{color:var(--green);font-weight:900;font-size:11px}
+    .spark{height:22px;width:80px}
+    .amount{direction:ltr;text-align:right;white-space:nowrap}
+    .muted{color:var(--muted)}
+    .hide{display:none!important}
+    .ltr{direction:ltr;text-align:left}
+
+    /* ── REGION CARDS ──────────────────────────────────────── */
+    .regionGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .regionCard{padding:18px 16px;display:flex;flex-direction:column;gap:14px}
+    .regionHead{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:900}
+    .regionDot{width:10px;height:10px;border-radius:50%;display:inline-block;
+      box-shadow:0 0 14px currentColor;flex-shrink:0}
+    /* Saudi-ish map shape */
+    .mapShape{
+      width:110px;height:72px;flex-shrink:0;align-self:center;
+      background:linear-gradient(140deg,rgba(255,159,26,.90),rgba(100,48,14,.78));
+      clip-path:polygon(
+        6% 46%, 10% 30%, 16% 18%, 24% 12%, 34% 10%, 43% 16%, 51% 22%,
+        58% 17%, 66% 14%, 74% 20%, 80% 30%, 86% 40%, 88% 52%,
+        82% 64%, 74% 74%, 62% 82%, 50% 86%, 40% 80%, 30% 76%,
+        20% 78%, 12% 68%, 7% 56%
+      );
+      transform:perspective(560px) rotateX(48deg) rotateZ(-9deg);
+      filter:drop-shadow(0 14px 18px rgba(255,107,0,.30));
       position:relative;
     }
-    .logo:after{
-      content:"";
-      position:absolute;
-      inset:-80% -60%;
-      transform:rotate(35deg);
-      background:linear-gradient(90deg, transparent, rgba(255,255,255,.32), transparent);
-      animation: shine 4.5s ease-in-out infinite;
-    }
-    @keyframes shine{0%,42%{translate:-80% 0} 74%,100%{translate:80% 0}}
-    .titleBlock{min-width:0}
-    .titleBlock h1{
-      margin:0;
-      font-size:clamp(20px, 2.2vw, 32px);
-      line-height:1.1;
-      letter-spacing:-.4px;
-    }
-    .titleBlock p{
-      margin:7px 0 0;
-      color:var(--muted);
-      font-size:13px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .actions{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-    .btn,
-    button,
-    .selectLike{
-      appearance:none;
-      border:none;
-      color:var(--text);
-      background:linear-gradient(145deg, rgba(255,255,255,.16), rgba(255,255,255,.075));
-      border:1px solid rgba(255,255,255,.18);
-      border-radius:16px;
-      padding:12px 14px;
-      font-weight:800;
-      cursor:pointer;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 10px 30px rgba(0,0,0,.18);
-      transition:.2s ease;
-      font-family:var(--font);
-    }
-    .btn:hover, button:hover{transform:translateY(-1px); border-color:rgba(255,255,255,.32); background:rgba(255,255,255,.15)}
-    .btn.primary{
-      background:linear-gradient(145deg, rgba(143,215,255,.34), rgba(189,156,255,.24));
-      border-color:rgba(183,225,255,.36);
-    }
-    .btn.good{background:linear-gradient(145deg, rgba(112,240,196,.30), rgba(143,215,255,.13)); border-color:rgba(112,240,196,.34)}
-    .btn.warn{background:linear-gradient(145deg, rgba(255,210,118,.26), rgba(255,255,255,.07)); border-color:rgba(255,210,118,.28)}
-    .btn.danger{background:linear-gradient(145deg, rgba(255,126,149,.22), rgba(255,255,255,.07)); border-color:rgba(255,126,149,.28)}
+    .mapShape::after{content:"";position:absolute;inset:6px 0 -14px 0;
+      background:rgba(0,0,0,.30);filter:blur(14px);z-index:-1;transform:translateY(22px)}
+    .regionCard:nth-child(1) .mapShape{background:linear-gradient(140deg,rgba(255,140,20,.92),rgba(100,48,14,.80));filter:drop-shadow(0 14px 18px rgba(255,107,0,.32))}
+    .regionCard:nth-child(2) .mapShape{background:linear-gradient(140deg,rgba(255,185,32,.90),rgba(105,65,0,.78));filter:drop-shadow(0 14px 18px rgba(255,185,32,.22))}
+    .regionCard:nth-child(3) .mapShape{background:linear-gradient(140deg,rgba(88,108,124,.92),rgba(18,24,30,.80));filter:drop-shadow(0 14px 18px rgba(85,170,255,.14))}
+    .regionCard:nth-child(4) .mapShape{background:linear-gradient(140deg,rgba(136,102,72,.92),rgba(36,24,18,.82));filter:drop-shadow(0 14px 18px rgba(180,140,100,.16))}
+    /* body row: map + numbers side by side */
+    .regionBody{display:flex;align-items:center;gap:12px}
+    .regionNums{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+    .regionNums .lbl{color:var(--muted);font-size:11px;font-weight:700;margin-bottom:1px}
+    /* SYP row */
+    .regionSypRow{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap}
+    .regionSypVal{font-size:clamp(13px,1.5vw,22px);font-weight:900;color:#fff;direction:ltr;line-height:1.1;word-break:break-all}
+    .regionSypCur{font-size:10px;font-weight:700;color:var(--muted);flex-shrink:0}
+    /* USD row */
+    .regionUsdRow{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;
+      background:rgba(255,159,26,.08);border:1px solid rgba(255,159,26,.18);
+      border-radius:8px;padding:4px 8px}
+    .regionUsdVal{font-size:clamp(12px,1.4vw,20px);font-weight:900;color:var(--amber);direction:ltr;line-height:1.1;word-break:break-all}
+    .regionUsdCur{font-size:10px;font-weight:700;color:var(--gold);flex-shrink:0}
+    /* pct bar */
+    .regionPctRow{display:flex;align-items:center;gap:8px;margin-top:2px}
+    .regionPctBar{flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+    .regionPctFill{height:100%;border-radius:2px;transition:width .6s ease}
+    .regionPctTxt{font-size:12px;font-weight:900;flex-shrink:0}
 
-    .glass{
-      background:linear-gradient(160deg, rgba(255,255,255,.13), rgba(255,255,255,.065));
-      border:1px solid var(--line);
-      box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.18);
-      backdrop-filter: blur(24px) saturate(1.15);
-      -webkit-backdrop-filter: blur(24px) saturate(1.15);
-      border-radius:var(--radius);
+    /* ── BOTTOM SECTION ────────────────────────────────────── */
+    .bottomGrid{display:grid;grid-template-columns:1.36fr .85fr .62fr;gap:14px}
+    .panel{padding:22px}
+    .panelHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .panelHead h3{margin:0;font-size:21px;color:#fff6ea;font-weight:900}
+    .panelMenu{color:var(--muted);font-size:20px;letter-spacing:2px;cursor:pointer;user-select:none}
+    /* tabs */
+    .tabs{display:flex;border:1px solid rgba(255,255,255,.12);border-radius:12px;overflow:hidden}
+    .tabs button{min-height:32px;padding:0 14px;border-radius:0;border:none;
+      border-right:1px solid rgba(255,255,255,.10);background:transparent;
+      color:#bdb5ad;font-size:12px;font-weight:700;cursor:pointer;box-shadow:none;transition:all .16s}
+    .tabs button:last-child{border-right:none}
+    .tabs button.active{background:rgba(255,159,26,.20);color:var(--gold)}
+    .chartWrap{height:288px;position:relative}
+    /* region table */
+    .table{width:100%;border-collapse:collapse}
+    .table th,.table td{padding:13px 10px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px;text-align:right}
+    .table th{color:var(--muted);font-weight:800;background:rgba(255,255,255,.02)}
+    .table td{color:#f0e9e0}
+    .totalRow td{font-weight:900;color:var(--amber);font-size:17px}
+    /* goal */
+    .goal{display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:22px 18px;gap:14px;text-align:center}
+    .goal h3{margin:0;font-size:18px;color:#fff6ea}
+    .ring{
+      width:218px;height:218px;border-radius:50%;display:grid;place-items:center;
+      background:conic-gradient(
+        var(--amber) calc(var(--p) * 1%),
+        rgba(255,255,255,.07) 0
+      );
+      box-shadow:0 0 0 1px rgba(255,159,26,.10), 0 0 52px rgba(255,159,26,.20);
       position:relative;
-      overflow:hidden;
     }
-    .glass:before{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background:linear-gradient(135deg, rgba(255,255,255,.20), transparent 24%, transparent 72%, rgba(255,255,255,.06));
-      opacity:.65;
-    }
-    .glass > *{position:relative; z-index:1}
+    .ring::before{content:"";position:absolute;inset:17px;border-radius:50%;
+      background:#090a0c;border:1px solid rgba(255,255,255,.09)}
+    .ringTxt{position:relative;z-index:1;text-align:center}
+    .ringTxt b{display:block;font-size:56px;font-weight:900;color:#fff;line-height:1}
+    .ringTxt span{color:var(--muted);font-size:12.5px}
+    .goalMeta{font-size:13px;line-height:2;color:var(--soft);text-align:center}
+    .goalMeta b{color:var(--text)}
+    .goalMeta #goalDone{color:var(--amber)}
 
-    .hero{
-      display:grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr);
-      gap:18px;
-      margin-top:4px;
-    }
-    .controlPanel{padding:18px}
-    .miniTitle{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:12px;
-      margin-bottom:14px;
-    }
-    .miniTitle h2,.sectionTitle h2{margin:0; font-size:18px; letter-spacing:-.2px}
-    .miniTitle p,.sectionTitle p{margin:6px 0 0; color:var(--muted); font-size:13px; line-height:1.55}
-    .statusPill{
-      display:inline-flex;
-      align-items:center;
-      gap:7px;
-      border:1px solid rgba(255,255,255,.18);
-      padding:8px 11px;
-      border-radius:999px;
-      color:var(--muted);
-      font-size:12px;
-      white-space:nowrap;
-      background:rgba(255,255,255,.07);
-    }
-    .dot{width:8px;height:8px;border-radius:50%;background:var(--bad);box-shadow:0 0 18px var(--bad)}
-    .dot.ok{background:var(--good);box-shadow:0 0 18px var(--good)}
-    .dot.warn{background:var(--warn);box-shadow:0 0 18px var(--warn)}
+    /* ── RECORDS ───────────────────────────────────────────── */
+    .recordsPanel{padding:22px}
+    .toolbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}
+    .recordsScroll{max-height:380px;overflow:auto;border:1px solid rgba(255,255,255,.08);
+      border-radius:16px;background:rgba(0,0,0,.10)}
+    .recordsScroll table{min-width:860px}
+    .empty{padding:22px;text-align:center;color:var(--muted)}
 
-    .fieldGrid{display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:12px}
-    .field{display:flex; flex-direction:column; gap:7px}
-    label{color:var(--muted); font-size:12px; font-weight:800}
-    input, select, textarea{
-      width:100%;
-      color:var(--text);
-      background:rgba(0,0,0,.20);
-      border:1px solid rgba(255,255,255,.16);
-      border-radius:16px;
-      padding:12px 13px;
-      outline:none;
-      font-family:var(--font);
-      font-weight:750;
-      transition:.15s ease;
-    }
-    input:focus,select:focus,textarea:focus{border-color:rgba(143,215,255,.65); box-shadow:0 0 0 4px rgba(143,215,255,.10)}
-    textarea{min-height:108px; direction:ltr; text-align:left; line-height:1.55; resize:vertical; font-family:ui-monospace, SFMono-Regular, Consolas, monospace; font-weight:600}
-    select option{background:#121521;color:#fff}
-    .wide{grid-column:span 2}
+    /* ── LOGIN OVERLAY ─────────────────────────────────────── */
+    .loginOverlay{position:fixed;inset:0;background:rgba(0,0,0,.82);
+      display:grid;place-items:center;z-index:50;padding:18px;backdrop-filter:blur(20px)}
+    .loginBox{width:min(460px,100%);padding:28px}
+    .loginBox h1{margin:0 0 6px;font-size:30px}
+    .formGrid{display:grid;gap:12px;margin-top:18px}
+    .msg{margin-top:12px;border:1px solid rgba(255,99,118,.35);border-radius:13px;
+      padding:12px;color:#ffd6dc;background:rgba(255,99,118,.10);display:none;line-height:1.6}
+    .msg.show{display:block}
+    .safeNote{font-size:12px;color:var(--muted);line-height:1.7;margin-top:10px}
 
-    .kpiGrid{
-      display:grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap:14px;
-      margin-top:18px;
-    }
-    .kpi{
-      padding:18px;
-      border-radius:24px;
-      background:linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.055));
-      border:1px solid rgba(255,255,255,.15);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
-      min-height:124px;
-    }
-    .kpi .label{color:var(--muted); font-size:12px; font-weight:850; display:flex; justify-content:space-between; gap:8px}
-    .kpi .value{font-size:clamp(22px, 3vw, 34px); font-weight:950; margin-top:12px; letter-spacing:-1px; direction:ltr; text-align:right}
-    .kpi .sub{color:var(--muted2); margin-top:9px; font-size:12px; line-height:1.4}
-    .spark{
-      width:42px;height:42px;border-radius:16px;display:grid;place-items:center;
-      background:linear-gradient(145deg, rgba(143,215,255,.22), rgba(189,156,255,.14));
-      border:1px solid rgba(255,255,255,.16);
-    }
+    /* ── MOBILE NAV ────────────────────────────────────────── */
+    .mobileTopNav{display:none;gap:8px;overflow:auto;padding-bottom:4px}
+    .mobileTopNav button{white-space:nowrap;min-height:40px;
+      background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);
+      border-radius:12px;font-size:13px;padding:0 14px;cursor:pointer;
+      color:var(--text);box-shadow:none}
 
-    .regionGrid{
-      display:grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap:14px;
-      margin-top:18px;
+    /* ── RESPONSIVE ────────────────────────────────────────── */
+    @media(max-width:1280px){
+      .shell{grid-template-columns:1fr}
+      .side{display:none}
+      .mobileTopNav{display:flex}
+      .main{padding:14px}
+      .topbar{grid-template-columns:1fr}
+      .kpiGrid,.regionGrid{grid-template-columns:repeat(2,1fr)}
+      .bottomGrid{grid-template-columns:1fr 1fr}
+      .goal{grid-column:1/-1}
     }
-    .regionCard{
-      padding:18px;
-      border-radius:24px;
-      background:linear-gradient(150deg, rgba(255,255,255,.13), rgba(255,255,255,.055));
-      border:1px solid rgba(255,255,255,.15);
-      overflow:hidden;
-      position:relative;
-      min-height:170px;
+    @media(max-width:700px){
+      .kpiGrid,.regionGrid,.bottomGrid,.grid2,.toolbar{grid-template-columns:1fr}
+      .title{font-size:32px}
+      .kpi{padding:14px 14px}
+      .kpiSypVal{font-size:clamp(14px,5vw,22px)}
+      .kpiUsdVal{font-size:clamp(12px,4vw,18px)}
+      .kpiIcon{width:32px;height:32px;font-size:15px}
+      .mapShape{width:120px;height:84px}
+      .chartWrap{height:240px}
+      .ring{width:180px;height:180px}
+      .ringTxt b{font-size:42px}
+      .recordsScroll{max-height:420px}
     }
-    .regionCard:before{
-      content:"";
-      position:absolute;
-      width:170px;height:170px;border-radius:50%;
-      left:-80px;top:-90px;
-      background:var(--accent);
-      filter:blur(26px);opacity:.38;
-    }
-    .regionName{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:950;font-size:18px}
-    .regionShare{color:var(--muted);font-size:12px;border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:6px 9px;background:rgba(0,0,0,.15)}
-    .regionAmount{margin-top:20px;font-size:26px;font-weight:950;letter-spacing:-.5px;direction:ltr;text-align:right}
-    .regionUSD{margin-top:8px;color:var(--muted);font-weight:850;direction:ltr;text-align:right}
-    .barShell{height:8px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;margin-top:17px}
-    .barFill{height:100%;width:0;background:linear-gradient(90deg, rgba(143,215,255,.85), rgba(189,156,255,.78));border-radius:999px;transition:width .5s ease}
-
-    .dashGrid{
-      display:grid;
-      grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
-      gap:18px;
-      margin-top:18px;
-    }
-    .panel{padding:18px}
-    .chartBox{height:335px;position:relative;margin-top:10px}
-
-    .insightList{display:grid;gap:10px;margin-top:12px}
-    .insight{
-      display:flex;gap:10px;align-items:flex-start;
-      padding:13px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.13);
-      background:rgba(255,255,255,.062);
-      color:var(--muted);
-      line-height:1.55;
-      font-size:13px;
-    }
-    .badge{
-      min-width:30px;height:30px;border-radius:12px;display:grid;place-items:center;
-      background:rgba(143,215,255,.16);border:1px solid rgba(143,215,255,.25); color:#dff5ff;
-    }
-
-    .aiGrid{
-      display:grid;
-      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
-      gap:18px;
-      margin-top:18px;
-    }
-    .chat{
-      height:410px;
-      overflow:auto;
-      padding:12px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      border-radius:22px;
-      background:rgba(0,0,0,.16);
-      border:1px solid rgba(255,255,255,.12);
-    }
-    .msg{
-      max-width:88%;
-      padding:12px 13px;
-      border-radius:18px;
-      line-height:1.65;
-      font-size:14px;
-      color:rgba(255,255,255,.9);
-      white-space:pre-wrap;
-    }
-    .msg.user{align-self:flex-start;background:rgba(143,215,255,.14);border:1px solid rgba(143,215,255,.22)}
-    .msg.ai{align-self:flex-end;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14)}
-    .aiInput{display:grid;grid-template-columns:1fr auto auto;gap:10px;margin-top:10px}
-    .quickAsk{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-    .chip{
-      border-radius:999px;
-      padding:9px 11px;
-      font-size:12px;
-      color:var(--muted);
-      background:rgba(255,255,255,.07);
-      border:1px solid rgba(255,255,255,.14);
-      cursor:pointer;
-      transition:.2s ease;
-      font-weight:800;
-    }
-    .chip:hover{color:var(--text);border-color:rgba(255,255,255,.28)}
-
-    .settings{
-      margin-top:18px;
-      padding:18px;
-      display:none;
-    }
-    .settings.open{display:block}
-    .settings.adminSecret{
-      position:fixed;
-      z-index:80;
-      left:max(16px, env(safe-area-inset-left));
-      right:max(16px, env(safe-area-inset-right));
-      top:max(16px, env(safe-area-inset-top));
-      max-height:calc(100vh - 32px - env(safe-area-inset-top));
-      overflow:auto;
-      backdrop-filter:blur(26px) saturate(1.35);
-      -webkit-backdrop-filter:blur(26px) saturate(1.35);
-      box-shadow:0 35px 120px rgba(0,0,0,.62);
-    }
-    .hiddenAdminField{display:none!important}
-    #settingsBtn,#connectBtn{display:none!important}
-    .settingsGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
-    .note{
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.65;
-      padding:12px;
-      border-radius:16px;
-      border:1px dashed rgba(255,255,255,.18);
-      background:rgba(0,0,0,.12);
-    }
-    .reportSurface{padding:0;margin:0}
-
-    .tableWrap{overflow:auto;margin-top:12px;border-radius:20px;border:1px solid rgba(255,255,255,.12)}
-    table{width:100%;border-collapse:collapse;min-width:640px;background:rgba(0,0,0,.08)}
-    th,td{padding:13px 12px;border-bottom:1px solid rgba(255,255,255,.10);text-align:right;font-size:13px}
-    th{color:var(--muted);font-weight:900;background:rgba(255,255,255,.06)}
-    td.num{direction:ltr;text-align:right;font-weight:900;color:#fff}
-    tr:last-child td{border-bottom:none}
-
-    .toast{
-      position:fixed;
-      bottom:22px;
-      right:22px;
-      z-index:100;
-      max-width:min(460px, calc(100vw - 44px));
-      padding:14px 15px;
-      border-radius:18px;
-      background:rgba(14,18,31,.82);
-      border:1px solid rgba(255,255,255,.18);
-      backdrop-filter:blur(18px);
-      color:var(--text);
-      box-shadow:0 16px 46px rgba(0,0,0,.35);
-      display:none;
-      line-height:1.6;
-      font-size:13px;
-    }
-    .toast.show{display:block;animation:pop .25s ease both}
-    @keyframes pop{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
-
-    .loadingOverlay{
-      position:fixed;inset:0;z-index:120;display:none;place-items:center;
-      background:rgba(0,0,0,.38);backdrop-filter:blur(16px);
-    }
-    .loadingOverlay.show{display:grid}
-    .loaderCard{padding:22px;border-radius:24px;text-align:center;min-width:280px;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.16);box-shadow:var(--shadow)}
-    .spinner{width:44px;height:44px;border-radius:50%;border:4px solid rgba(255,255,255,.18);border-top-color:rgba(143,215,255,.95);margin:0 auto 12px;animation:spin .85s linear infinite}@keyframes spin{to{rotate:360deg}}
-
-    .printOnly{display:none}
-
-    @media (max-width:1180px){
-      .hero,.dashGrid,.aiGrid{grid-template-columns:1fr}
-      .fieldGrid,.kpiGrid,.regionGrid{grid-template-columns:repeat(2, minmax(0,1fr))}
-      .wide{grid-column:span 2}
-    }
-    @media (max-width:720px){
-      .app{padding:14px;padding-bottom:92px}
-      .topbar{position:relative;align-items:flex-start;flex-direction:column}
-      .actions{width:100%;justify-content:stretch}.actions .btn{flex:1;text-align:center}
-      .fieldGrid,.kpiGrid,.regionGrid,.settingsGrid{grid-template-columns:1fr}.wide{grid-column:auto}
-      .kpi .value{font-size:28px}
-      .chartBox{height:290px}
-      .aiInput{grid-template-columns:1fr}.msg{max-width:96%}
-      .titleBlock p{white-space:normal}
-      .regionCard{min-height:155px}
-      .logo{width:50px;height:50px}
-    }
-
     @media print{
-      body{background:#101323;color:#fff}
-      .topbar,.settings,.aiGrid,.noPrint{display:none!important}
-      .app{padding:0;width:100%}
-      .glass{box-shadow:none;break-inside:avoid}
-      .printOnly{display:block}
+      .side,.topActions,.filterPanel,.loginOverlay,.mobileTopNav,.toolbar button{display:none!important}
+      .shell{display:block}
+      .card{break-inside:avoid}
     }
   </style>
 </head>
 <body>
-  <div class="loadingOverlay" id="loadingOverlay"><div class="loaderCard"><div class="spinner"></div><b id="loadingText">جاري تجهيز التقرير...</b></div></div>
-  <div class="toast" id="toast"></div>
 
-  <main class="app">
-    <header class="topbar noPrint">
-      <div class="brand">
-        <div class="logo" id="adminLogo" title="Admin Settings">RC</div>
-        <div class="titleBlock">
-          <h1>لوحة تحكم المناطق</h1>
-          <p>مزامنة تلقائية من Firebase — تعرض Region 1 / Region 2 / Region 3 / Region 4 فقط</p>
-        </div>
+  <!-- ══ LOGIN OVERLAY ══════════════════════════════════════ -->
+  <div class="loginOverlay" id="loginOverlay">
+    <div class="loginBox card">
+      <div style="width:48px;height:48px;margin:0 0 16px auto;border-radius:13px;
+        background:conic-gradient(from 45deg,#ff6200,#ffc87a,#ff9f1a,#ff6200);
+        box-shadow:0 0 28px rgba(255,159,26,.44);display:flex;align-items:center;justify-content:center;">
+        <div style="width:22px;height:22px;background:#030405;transform:rotate(45deg);border-radius:4px"></div>
       </div>
-      <div class="actions">
-        <button class="btn primary" id="connectBtn">إعادة مزامنة</button>
-        <button class="btn good" id="pdfBtn">تصدير PDF فخم</button>
-        <button class="btn" id="refreshBtn">تحديث</button>
-        <button class="btn warn" id="settingsBtn">إدارة AI</button>
+      <h1>لوحة الإيرادات</h1>
+      <div style="color:var(--muted);font-size:13px;margin-top:4px">
+        لوحة إيرادات مستقلة، تقرأ بيانات تطبيق المندوبين والمكاتب فقط.
       </div>
-    </header>
-
-    <section class="settings glass noPrint adminSecret" id="settingsPanel">
-      <div class="miniTitle">
-        <div>
-          <h2>إعدادات الإدارة المخفية</h2>
-          <p>الربط مع Firebase ثابت داخل الكود. هنا فقط تضع مفتاح OpenAI للذكاء الحقيقي، وسعر الصرف، وخيارات الصوت.</p>
-        </div>
-        <span class="statusPill"><span class="dot warn"></span> Admin فقط</span>
+      <div class="formGrid">
+        <div><label>البريد الإلكتروني</label><input id="email" type="email" class="ltr" placeholder="name@example.com"></div>
+        <div><label>كلمة المرور</label><input id="password" type="password" class="ltr" placeholder="••••••••"></div>
+        <button class="btnPrimary" id="loginBtn">دخول</button>
       </div>
+      <div class="msg" id="loginMsg"></div>
+      <div class="safeNote">🔒 لا يحذف ولا يكتب أي بيانات. القراءة فقط من نفس Firebase.</div>
+    </div>
+  </div>
 
-      <!-- حقول مخفية ضرورية للكود: لا تظهر للواجهة -->
-      <textarea id="firebaseConfigInput" class="hiddenAdminField">{
-  "apiKey": "AIzaSyDoVPtyKtuY5LBRw6plvwDVJv4TDIk0Klk",
-  "authDomain": "mandob-app-82843.firebaseapp.com",
-  "projectId": "mandob-app-82843",
-  "storageBucket": "mandob-app-82843.firebasestorage.app",
-  "messagingSenderId": "749939721927",
-  "appId": "1:749939721927:web:4c1c63aacca39ec41fe0e2",
-  "measurementId": "G-40ZG8YVETG"
-}</textarea>
-      <textarea id="regionMapInput" class="hiddenAdminField"></textarea>
-      <input id="collectionPathInput" class="hiddenAdminField" value="__auto__" />
-      <input id="aiProxyInput" class="hiddenAdminField" value="" />
-      <input id="anonAuthInput" class="hiddenAdminField" value="off" />
-      <input id="autoAdminLoginInput" class="hiddenAdminField" value="on" />
-      <input id="fromDateInput" class="hiddenAdminField" type="date" />
-      <input id="toDateInput" class="hiddenAdminField" type="date" />
+  <!-- ══ SHELL ══════════════════════════════════════════════ -->
+  <div class="shell">
 
-      <div class="fieldGrid" style="margin-top:14px">
-        <div class="field wide">
-          <label>OpenAI API Key — للذكاء الحقيقي</label>
-          <input id="openaiKeyInput" type="password" autocomplete="off" placeholder="الصق المفتاح هنا، ثم حفظ" />
-        </div>
-        <div class="field">
-          <label>AI Model</label>
-          <input id="aiModelInput" placeholder="gpt-4.1-mini" />
-        </div>
-        <div class="field">
-          <label>بريد الإدارة للقراءة من Firebase</label>
-          <input id="adminEmailInput" type="email" autocomplete="username" placeholder="admin@rcell.app" />
-        </div>
-        <div class="field">
-          <label>كلمة مرور الإدارة</label>
-          <input id="adminPasswordInput" type="password" autocomplete="current-password" placeholder="123456 أو كلمة المرور الحالية" />
-        </div>
-        <div class="field">
-          <label>سعر الصرف SYP لكل 1 USD</label>
-          <input id="exchangeRateInput" inputmode="numeric" placeholder="مثال: 15000" />
-        </div>
-        <div class="field">
-          <label>الفترة</label>
-          <select id="periodSelect">
-            <option value="all">كل البيانات</option>
-            <option value="today">اليوم</option>
-            <option value="yesterday">أمس</option>
-            <option value="week">آخر 7 أيام</option>
-            <option value="month">هذا الشهر</option>
-            <option value="year">هذه السنة</option>
-            <option value="custom">تاريخ مخصص</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>الصوت العربي</label>
-          <select id="voiceInput">
-            <option value="on">مفعل</option>
-            <option value="off">متوقف</option>
-          </select>
-        </div>
+    <!-- ── SIDEBAR ─────────────────────────────────────────── -->
+    <aside class="side">
+      <div class="logo"></div>
+
+      <nav class="nav">
+        <button class="active" data-jump="home">
+          <span class="ico">⊞</span>الرئيسية
+        </button>
+        <button data-jump="records">
+          <span class="ico">☰</span>التقارير
+        </button>
+        <button data-jump="chart">
+          <span class="ico">⇄</span>المقارنات
+        </button>
+        <button data-jump="table">
+          <span class="ico">◎</span>الأهداف
+        </button>
+        <button id="notifyBtn">
+          <span class="ico">🔔</span>التنبيهات
+        </button>
+        <button id="filterBtn" style="display:none"><!-- hidden clone --></button>
+        <button onclick="document.getElementById('filterPanel').classList.toggle('show')">
+          <span class="ico">⚙</span>الإعدادات
+        </button>
+        <button id="refreshSide">
+          <span class="ico">↻</span>تحديث
+        </button>
+        <button id="logoutSide">
+          <span class="ico">⎋</span>خروج
+        </button>
+      </nav>
+
+      <div class="sideFooter">
+        <div><span class="dot"></span>آخر تحديث</div>
+        <b id="lastUpdate">—</b>
+        <div class="copy">منذ 5 دقائق · Read-only v2</div>
+      </div>
+    </aside>
+
+    <!-- ── MAIN ────────────────────────────────────────────── -->
+    <main class="main" id="home">
+
+      <!-- Mobile Nav -->
+      <div class="mobileTopNav">
+        <button data-jump="home">الرئيسية</button>
+        <button data-jump="records">السجلات</button>
+        <button data-jump="chart">الاتجاه</button>
+        <button id="refreshMobile">↻ تحديث</button>
+        <button id="logoutMobile">⎋ خروج</button>
       </div>
 
-      <div class="note" style="margin-top:12px">
-        تنبيه سريع: المفتاح هنا محفوظ على هذا الجهاز فقط داخل المتصفح. لا تنشر الملف للناس وفيه مفتاح محفوظ، لأن أي مفتاح API داخل صفحة أمامية ممكن ينكشف لو شخص وصل للملف أو التخزين المحلي.
-      </div>
-      <div class="actions" style="margin-top:12px;justify-content:flex-start">
-        <button class="btn good" id="saveSettingsBtn">حفظ وتفعيل الذكاء الحقيقي</button>
-        <button class="btn" id="testLocalBtn">اختبار التحليل المحلي</button>
-        <button class="btn danger" id="clearSettingsBtn">مسح المفتاح والإعدادات</button>
-        <button class="btn" id="closeSettingsBtn">إغلاق</button>
-      </div>
-    </section>
+      <!-- ── TOP BAR ──────────────────────────────────────── -->
+      <header class="topbar">
+        <!-- Date -->
+        <div class="dateBox">
+          <span style="font-size:18px">📅</span>
+          <span style="color:var(--muted)">اليوم:</span>
+          <input id="mainDate" type="date" style="width:auto;min-height:0;border:none;background:transparent;padding:0;color:var(--text);font-weight:700;font-size:13.5px">
+          <span style="color:var(--muted);font-size:12px;margin-right:4px">▾</span>
+        </div>
+        <!-- Title -->
+        <div class="titleWrap">
+          <div class="titleLine"></div>
+          <h1 class="title">لوحة الإيرادات</h1>
+          <div class="titleLine"></div>
+        </div>
+        <!-- Actions -->
+        <div class="topActions">
+          <button class="btnIcon" id="notifyTopBtn">🔔</button>
+          <button class="btnFilter" id="filterBtnMain">
+            <span style="font-size:14px">☰</span> تصفية
+          </button>
+        </div>
 
-    <div id="reportSurface" class="reportSurface">
-      <section class="hero">
-        <div class="glass controlPanel">
-          <div class="miniTitle">
-            <div>
-              <h2>Command Center</h2>
-              <p id="periodLabel">الفترة: كل البيانات</p>
-            </div>
-            <span class="statusPill" id="connectionPill"><span class="dot" id="connectionDot"></span><span id="connectionText">غير متصل</span></span>
-          </div>
-
-          <div class="fieldGrid noPrint">
-            <div class="field wide">
-              <label>سعر الصرف اليدوي</label>
-              <input id="quickRateInput" inputmode="numeric" placeholder="اكتب سعر الصرف" />
-            </div>
-            <div class="field">
-              <label>الفترة السريعة</label>
-              <select id="quickPeriodSelect">
-                <option value="all">كل البيانات</option>
-                <option value="today">اليوم</option>
-                <option value="yesterday">أمس</option>
-                <option value="week">آخر 7 أيام</option>
-                <option value="month">هذا الشهر</option>
-                <option value="year">هذه السنة</option>
-                <option value="custom">مخصص</option>
+        <!-- Filter Panel (absolute) -->
+        <section class="filterPanel card" id="filterPanel">
+          <div class="grid2">
+            <div><label>من تاريخ</label><input id="fromDate" type="date"></div>
+            <div><label>إلى تاريخ</label><input id="toDate" type="date"></div>
+            <div><label>المنطقة</label>
+              <select id="regionFilter">
+                <option value="">الكل</option>
+                <option value="R1">Region 1</option>
+                <option value="R2">Region 2</option>
+                <option value="R3">Region 3</option>
+                <option value="R4">Region 4</option>
               </select>
             </div>
-            <div class="field">
-              <label>آخر تحديث</label>
-              <input id="lastUpdateInput" readonly />
+            <div><label>بحث مندوب</label><input id="repSearch" placeholder="اسم المندوب" type="text"></div>
+            <div><label>الهدف الشهري USD</label><input id="monthlyTarget" type="number" class="ltr" value="40000000"></div>
+            <div><label>سعر افتراضي SYP/USD</label><input id="defaultRate" type="number" class="ltr" value="15000"></div>
+            <button class="btnPrimary full" id="applyFilters">تطبيق الفلتر</button>
+          </div>
+        </section>
+      </header>
+
+      <!-- ── STATUS ───────────────────────────────────────── -->
+      <div class="statusBar">
+        <div><span class="dot"></span><span id="readStatus">جاهز للاتصال</span></div>
+        <div id="userInfo" style="color:var(--muted);font-size:13px">—</div>
+      </div>
+
+      <!-- ── KPI CARDS ─────────────────────────────────────── -->
+      <section class="kpiGrid">
+
+        <!-- بطاقة 1: إجمالي التاريخ المحدد -->
+        <article class="card kpi">
+          <div class="kpiTop">
+            <div class="kpiIcon">💼</div>
+            <div class="kpiLabel" id="todayLabel">إجمالي المحدد</div>
+          </div>
+          <div class="kpiAmounts">
+            <div class="kpiSypRow">
+              <span class="kpiSypVal" id="todaySypVal">0</span>
+              <span class="kpiSypCur">SYP</span>
+            </div>
+            <div class="kpiUsdRow">
+              <span class="kpiUsdVal" id="todayUsd">0</span>
+              <span class="kpiUsdCur">USD</span>
             </div>
           </div>
+        </article>
 
-          <div class="kpiGrid">
-            <article class="kpi">
-              <div class="label"><span>إجمالي SYP</span><span class="spark">ل.س</span></div>
-              <div class="value" id="totalSyp">0</div>
-              <div class="sub" id="totalSypSub">من 0 سجل مطابق</div>
-            </article>
-            <article class="kpi">
-              <div class="label"><span>إجمالي USD</span><span class="spark">$</span></div>
-              <div class="value" id="totalUsd">0</div>
-              <div class="sub" id="totalUsdSub">حسب سعر الصرف اليدوي</div>
-            </article>
-            <article class="kpi">
-              <div class="label"><span>أقوى منطقة</span><span class="spark">▲</span></div>
-              <div class="value" id="bestRegion">—</div>
-              <div class="sub" id="bestRegionSub">حسب إجمالي الفترة</div>
-            </article>
-            <article class="kpi">
-              <div class="label"><span>متوسط المنطقة</span><span class="spark">≈</span></div>
-              <div class="value" id="avgRegion">0</div>
-              <div class="sub">إجمالي المناطق ÷ 4</div>
-            </article>
+        <!-- بطاقة 2: آخر 24 ساعة مضافة -->
+        <article class="card kpi">
+          <div class="kpiTop">
+            <div class="kpiIcon">🕐</div>
+            <div class="kpiLabel">آخر 24 ساعة مضافة</div>
           </div>
-        </div>
-
-        <div class="glass panel">
-          <div class="miniTitle">
-            <div>
-              <h2>نبض المناطق</h2>
-              <p>قراءة مباشرة من Firebase مع تجميع نظيف حسب Region فقط.</p>
+          <div class="kpiAmounts">
+            <div class="kpiSypRow">
+              <span class="kpiSypVal" id="new24SypVal">0</span>
+              <span class="kpiSypCur">SYP</span>
+            </div>
+            <div class="kpiUsdRow">
+              <span class="kpiUsdVal" id="new24Usd">0</span>
+              <span class="kpiUsdCur">USD</span>
             </div>
           </div>
-          <div class="chartBox"><canvas id="shareChart"></canvas></div>
-        </div>
+        </article>
+
+        <!-- بطاقة 3: إجمالي الشهر -->
+        <article class="card kpi">
+          <div class="kpiTop">
+            <div class="kpiIcon">📅</div>
+            <div class="kpiLabel" id="monthLabel">إجمالي هذا الشهر</div>
+          </div>
+          <div class="kpiAmounts">
+            <div class="kpiSypRow">
+              <span class="kpiSypVal" id="monthSypVal">0</span>
+              <span class="kpiSypCur">SYP</span>
+            </div>
+            <div class="kpiUsdRow">
+              <span class="kpiUsdVal" id="monthUsd">0</span>
+              <span class="kpiUsdCur">USD</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- بطاقة 4: متوسط سعر الصرف -->
+        <article class="card kpi">
+          <div class="kpiTop">
+            <div class="kpiIcon">💲</div>
+            <div class="kpiLabel">متوسط سعر الصرف</div>
+          </div>
+          <div class="kpiAmounts">
+            <div class="kpiSypRow">
+              <span class="kpiSypVal" id="avgRate">0</span>
+              <span class="kpiSypCur">SYP/USD</span>
+            </div>
+          </div>
+          <div class="kpiSub">
+            <canvas class="spark" id="spark"></canvas>
+          </div>
+        </article>
+
       </section>
 
+      <!-- ── REGION CARDS (JS-generated inside) ────────────── -->
       <section class="regionGrid" id="regionCards"></section>
 
-      <section class="dashGrid">
-        <div class="glass panel">
-          <div class="sectionTitle">
-            <h2>مقارنة المناطق</h2>
-            <p>المبالغ بالليرة السورية حسب الفترة المختارة.</p>
+      <!-- ── BOTTOM GRID ───────────────────────────────────── -->
+      <section class="bottomGrid">
+
+        <!-- Trend Chart -->
+        <article class="card panel" id="chart">
+          <div class="panelHead">
+            <h3>اتجاه الإيرادات</h3>
+            <div style="display:flex;align-items:center;gap:12px">
+              <div class="tabs">
+                <button data-chart="daily"   class="active">يومي</button>
+                <button data-chart="weekly">أسبوعي</button>
+                <button data-chart="monthly">شهري</button>
+              </div>
+              <span class="panelMenu">···</span>
+            </div>
           </div>
-          <div class="chartBox"><canvas id="barChart"></canvas></div>
-        </div>
-        <div class="glass panel">
-          <div class="sectionTitle">
-            <h2>ملخص المدير</h2>
-            <p>تنبيهات ذكية بدون كشف أي أسماء بالواجهة الرئيسية.</p>
-          </div>
-          <div class="insightList" id="insightList"></div>
-          <div class="tableWrap">
-            <table>
-              <thead><tr><th>المنطقة</th><th>SYP</th><th>USD</th><th>النسبة</th><th>عدد السجلات</th></tr></thead>
-              <tbody id="regionTable"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <section class="aiGrid noPrint">
-      <div class="glass panel">
-        <div class="sectionTitle">
-          <h2>الذكاء الإداري الصوتي</h2>
-          <p>اسأله عن المناطق فقط: مقارنة، أقوى منطقة، ضعف الأداء، تقرير سريع، أو توصية للمدير.</p>
-        </div>
-        <div class="quickAsk">
-          <span class="chip" data-q="اعطني تقرير إداري مختصر عن المناطق">تقرير إداري</span>
-          <span class="chip" data-q="ليش أضعف منطقة نازلة؟ أعطني السبب بالأرقام">تشخيص مشكلة</span>
-          <span class="chip" data-q="رتّب المناطق من الأقوى للأضعف">ترتيب المناطق</span>
-          <span class="chip" data-q="قارن Region 1 مع Region 2">قارن 1 و 2</span>
-          <span class="chip" data-q="اعمل رسالة واتساب للمدير عن المناطق">واتساب</span>
-          <span class="chip" data-q="كم ناقص كل منطقة لتوصل لمتوسط المناطق؟">هدف</span>
-        </div>
-        <div class="note" style="margin-top:12px">
-          المساعد يقرأ أرقام المناطق الحالية، يقارن، يرتّب، يشخّص الضعف، ويجهز ملخص مدير بصوت عربي — بدون كشف أسماء.
-        </div>
-      </div>
-      <div class="glass panel">
-        <div class="chat" id="chatBox">
-          <div class="msg ai">أهلاً عماد. إذا وضعت مفتاح OpenAI من إعدادات الإدارة المخفية أجاوب بذكاء حقيقي، وإذا ما في مفتاح أشتغل بتحليل محلي. التحليل يبقى حسب المناطق فقط بدون أسماء.</div>
-        </div>
-        <div class="aiInput">
-          <input id="aiQuestionInput" placeholder="اكتب سؤالك عن المناطق..." />
-          <button class="btn primary" id="askBtn">اسأل</button>
-          <button class="btn" id="micBtn">🎙️</button>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <script type="module">
-    import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getAuth, signInAnonymously, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-    const REGIONS = ["Region 1", "Region 2", "Region 3", "Region 4"];
-    const AUTO_COLLECTIONS = [
-      // المسار الحقيقي في تطبيق أرسل للمبيع + مسارات احتياطية
-      "sales_reports", "representatives", "deliveries", "office_withdrawals", "manual_amounts",
-      // أسماء محتملة لتطبيق أرسل / المندوبين — اللوحة تفحصها تلقائياً بدون ما تظهر للمستخدم
-      "arsal_data", "arsal_entries", "arsalEntries", "arsal", "أرسل", "ارسال", "ersal", "send", "sent",
-      "entries", "entry", "records", "record", "revenues", "revenue", "sales", "sale", "transactions", "transaction", "submissions", "submission",
-      "mandob_entries", "mandobEntries", "mandob_data", "mandobData", "mandob", "mandobs", "delegates", "delegate_entries", "delegateEntries",
-      "daily_entries", "dailyEntries", "daily_reports", "dailyReports", "payments", "amounts", "cash", "reports", "report", "data",
-      "imad", "imad_data", "region_data", "regionData", "region_entries", "regionEntries"
-    ];
-    const REGION_ACCENTS = [
-      "radial-gradient(circle, rgba(143,215,255,.82), transparent 62%)",
-      "radial-gradient(circle, rgba(189,156,255,.78), transparent 62%)",
-      "radial-gradient(circle, rgba(112,240,196,.62), transparent 62%)",
-      "radial-gradient(circle, rgba(255,210,118,.62), transparent 62%)"
-    ];
-
-    const DEFAULT_REGION_MAP = {
-      "جفان":"Region 1", "Jevan":"Region 1", "Jafan":"Region 1", "علي":"Region 1", "كاوا":"Region 1", "دلخواز":"Region 1", "بشار":"Region 1", "صالة قامشلو 1":"Region 1", "صالة قامشلو 2":"Region 1", "صالة عامودا":"Region 1", "صالة درباسية":"Region 1", "صالة معبدة":"Region 1", "صالة ديريك":"Region 1",
-      "شريف":"Region 2", "يوسف":"Region 2", "كمال":"Region 2", "صالة حسكة 1":"Region 2", "صالة حسكة 2":"Region 2", "صالة تل تمر":"Region 2", "صالة الشدادي":"Region 2",
-      "جاسم حسو":"Region 3", "فرهاد خليل":"Region 3", "احمد اومري":"Region 3", "أحمد اومري":"Region 3", "صالة الرقة 1":"Region 3", "صالة الرقة 2":"Region 3", "احمد هنيدي":"Region 3", "أحمد هنيدي":"Region 3", "صالة الطبقة":"Region 3", "صالة دير الزور":"Region 3",
-      "شاهر ابو احمد":"Region 4", "شاهر أبو أحمد":"Region 4", "عبده جاسم":"Region 4", "صالة منبج":"Region 4", "عادل عبدالعزيز":"Region 4", "عادل عبد العزيز":"Region 4", "صالة كوباني":"Region 4"
-    };
-
-    const $ = (id) => document.getElementById(id);
-    const els = {
-      settingsPanel: $("settingsPanel"), settingsBtn: $("settingsBtn"), connectBtn: $("connectBtn"), refreshBtn: $("refreshBtn"), pdfBtn: $("pdfBtn"), adminLogo: $("adminLogo"), closeSettingsBtn: $("closeSettingsBtn"),
-      firebaseConfigInput: $("firebaseConfigInput"), collectionPathInput: $("collectionPathInput"), exchangeRateInput: $("exchangeRateInput"), quickRateInput: $("quickRateInput"),
-      periodSelect: $("periodSelect"), quickPeriodSelect: $("quickPeriodSelect"), fromDateInput: $("fromDateInput"), toDateInput: $("toDateInput"), anonAuthInput: $("anonAuthInput"),
-      regionMapInput: $("regionMapInput"), openaiKeyInput: $("openaiKeyInput"), aiModelInput: $("aiModelInput"), aiProxyInput: $("aiProxyInput"), voiceInput: $("voiceInput"), adminEmailInput: $("adminEmailInput"), adminPasswordInput: $("adminPasswordInput"), autoAdminLoginInput: $("autoAdminLoginInput"),
-      saveSettingsBtn: $("saveSettingsBtn"), clearSettingsBtn: $("clearSettingsBtn"), testLocalBtn: $("testLocalBtn"),
-      connectionPill: $("connectionPill"), connectionDot: $("connectionDot"), connectionText: $("connectionText"), lastUpdateInput: $("lastUpdateInput"), periodLabel: $("periodLabel"),
-      totalSyp: $("totalSyp"), totalUsd: $("totalUsd"), totalSypSub: $("totalSypSub"), totalUsdSub: $("totalUsdSub"), bestRegion: $("bestRegion"), bestRegionSub: $("bestRegionSub"), avgRegion: $("avgRegion"),
-      regionCards: $("regionCards"), regionTable: $("regionTable"), insightList: $("insightList"), reportSurface: $("reportSurface"),
-      chatBox: $("chatBox"), aiQuestionInput: $("aiQuestionInput"), askBtn: $("askBtn"), micBtn: $("micBtn"), toast: $("toast"), loadingOverlay: $("loadingOverlay"), loadingText: $("loadingText")
-    };
-
-    const storageKey = "region-command-center-auto-sync-v4-sales-reports";
-    let firebaseApp = null;
-    let db = null;
-    let unsubscribe = null;
-    let charts = {bar:null, share:null};
-    let rawDocs = [];
-    let representativeRegionById = new Map();
-    let representativeRegionByName = new Map();
-    let current = emptyAggregation();
-
-    const state = {
-      settings:{
-        firebaseConfig:`{
-  "apiKey": "AIzaSyDoVPtyKtuY5LBRw6plvwDVJv4TDIk0Klk",
-  "authDomain": "mandob-app-82843.firebaseapp.com",
-  "projectId": "mandob-app-82843",
-  "storageBucket": "mandob-app-82843.firebasestorage.app",
-  "messagingSenderId": "749939721927",
-  "appId": "1:749939721927:web:4c1c63aacca39ec41fe0e2",
-  "measurementId": "G-40ZG8YVETG"
-}`,
-        collectionPath:"sales_reports",
-        exchangeRate:"",
-        period:"all",
-        fromDate:"",
-        toDate:"",
-        anonAuth:"off",
-        autoAdminLogin:"on",
-        adminEmail:"admin@rcell.app",
-        adminPassword:"123456",
-        regionMap: JSON.stringify(DEFAULT_REGION_MAP, null, 2),
-        openaiKey:"",
-        aiModel:"gpt-4.1-mini",
-        aiProxy:"",
-        voice:"on"
-      }
-    };
-
-    function emptyAggregation(){
-      const byRegion = Object.fromEntries(REGIONS.map(r => [r, {region:r, syp:0, usd:0, count:0, share:0}]));
-      return {byRegion, totalSyp:0, totalUsd:0, totalCount:0, exchangeRate:0, unmatched:0, skippedDeleted:0, filteredDocs:[], periodLabel:"كل البيانات"};
-    }
-
-    function saveSettings(){
-      state.settings.firebaseConfig = els.firebaseConfigInput.value.trim();
-      state.settings.collectionPath = els.collectionPathInput.value.trim();
-      state.settings.exchangeRate = normalizeNumber(els.exchangeRateInput.value || els.quickRateInput.value || "");
-      state.settings.period = els.periodSelect.value;
-      state.settings.fromDate = els.fromDateInput.value;
-      state.settings.toDate = els.toDateInput.value;
-      state.settings.anonAuth = els.anonAuthInput.value;
-      state.settings.autoAdminLogin = els.autoAdminLoginInput?.value || "on";
-      state.settings.adminEmail = els.adminEmailInput?.value.trim() || "admin@rcell.app";
-      state.settings.adminPassword = els.adminPasswordInput?.value || "123456";
-      state.settings.regionMap = els.regionMapInput.value.trim() || "{}";
-      state.settings.openaiKey = els.openaiKeyInput.value.trim();
-      state.settings.aiModel = els.aiModelInput.value.trim() || "gpt-4.1-mini";
-      state.settings.aiProxy = els.aiProxyInput.value.trim();
-      state.settings.voice = els.voiceInput.value;
-      localStorage.setItem(storageKey, JSON.stringify(state.settings));
-      syncInputs();
-      render();
-      toast(state.settings.openaiKey ? "تم حفظ الإعدادات وتفعيل الذكاء الحقيقي." : "تم حفظ الإعدادات. الذكاء المحلي مفعل بدون مفتاح.");
-    }
-
-    function loadSettings(){
-      try{
-        const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
-        if(saved) Object.assign(state.settings, saved);
-      }catch(e){}
-      syncInputs();
-    }
-
-    function syncInputs(){
-      els.firebaseConfigInput.value = state.settings.firebaseConfig || "";
-      els.collectionPathInput.value = state.settings.collectionPath || "";
-      els.exchangeRateInput.value = state.settings.exchangeRate || "";
-      els.quickRateInput.value = state.settings.exchangeRate || "";
-      els.periodSelect.value = state.settings.period || "all";
-      els.quickPeriodSelect.value = state.settings.period || "all";
-      els.fromDateInput.value = state.settings.fromDate || "";
-      els.toDateInput.value = state.settings.toDate || "";
-      els.anonAuthInput.value = state.settings.anonAuth || "off";
-      if(els.autoAdminLoginInput) els.autoAdminLoginInput.value = state.settings.autoAdminLogin || "on";
-      if(els.adminEmailInput) els.adminEmailInput.value = state.settings.adminEmail || "admin@rcell.app";
-      if(els.adminPasswordInput) els.adminPasswordInput.value = state.settings.adminPassword || "123456";
-      els.regionMapInput.value = state.settings.regionMap || JSON.stringify(DEFAULT_REGION_MAP, null, 2);
-      els.openaiKeyInput.value = state.settings.openaiKey || "";
-      els.aiModelInput.value = state.settings.aiModel || "gpt-4.1-mini";
-      els.aiProxyInput.value = state.settings.aiProxy || "";
-      els.voiceInput.value = state.settings.voice || "on";
-    }
-
-    function normalizeNumber(value){
-      if(value == null) return "";
-      const arabic = "٠١٢٣٤٥٦٧٨٩";
-      const persian = "۰۱۲۳۴۵۶۷۸۹";
-      let s = String(value).trim();
-      s = s.replace(/[٠-٩]/g, d => arabic.indexOf(d)).replace(/[۰-۹]/g, d => persian.indexOf(d));
-      s = s.replace(/[^0-9.\-]/g, "");
-      const parts = s.split(".");
-      if(parts.length > 2) s = parts.shift() + "." + parts.join("");
-      return s;
-    }
-
-    function toNumber(value){
-      const n = Number(normalizeNumber(value));
-      return Number.isFinite(n) ? n : 0;
-    }
-
-    function fmt(n, decimals=0){
-      const value = Number.isFinite(Number(n)) ? Number(n) : 0;
-      return new Intl.NumberFormat("en-US", {maximumFractionDigits:decimals, minimumFractionDigits:decimals}).format(value);
-    }
-
-    function fmtMoney(n, suffix=""){
-      return `${fmt(n, 0)}${suffix ? " " + suffix : ""}`;
-    }
-
-    function toast(text, ms=3400){
-      els.toast.textContent = text;
-      els.toast.classList.add("show");
-      clearTimeout(toast._t);
-      toast._t = setTimeout(()=>els.toast.classList.remove("show"), ms);
-    }
-
-    function setLoading(show, text="جاري المعالجة..."){
-      els.loadingText.textContent = text;
-      els.loadingOverlay.classList.toggle("show", !!show);
-    }
-
-    function setConnection(status, text){
-      els.connectionText.textContent = text;
-      els.connectionDot.classList.remove("ok","warn");
-      if(status === "ok") els.connectionDot.classList.add("ok");
-      else if(status === "warn") els.connectionDot.classList.add("warn");
-    }
-
-    function parseFirebaseConfig(){
-      const txt = state.settings.firebaseConfig.trim();
-      if(!txt) throw new Error("Firebase Config فارغ. افتح الإعدادات وضع config المشروع.");
-      try{return JSON.parse(txt)} catch(e){
-        try{
-          const body = txt.replace(/const\s+firebaseConfig\s*=\s*/, "").replace(/;\s*$/, "");
-          return Function(`"use strict"; return (${body});`)();
-        } catch(err){
-          throw new Error("Firebase Config غير صحيح. استخدم JSON أو كود firebaseConfig الأصلي.");
-        }
-      }
-    }
-
-    function isAutoPath(path){
-      const p = String(path || "").trim().toLowerCase();
-      return !p || p === "auto" || p === "__auto__" || p === "تلقائي";
-    }
-
-    function quickDocScore(docs){
-      let score = 0;
-      for(const d of docs.slice(0, 80)){
-        if(isDeletedDoc(d)) continue;
-        if(extractRegion(d)) score += 4;
-        if(extractAmount(d) > 0) score += 3;
-        if(extractDate(d)) score += 1;
-      }
-      return score + Math.min(docs.length, 30);
-    }
-
-    async function discoverRootCollections(config){
-      // محاولة اكتشاف أسماء Collections من Firestore REST. إذا رفضت الصلاحيات نرجع لقائمة التخمينات بهدوء.
-      try{
-        const url = `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(config.projectId)}/databases/(default)/documents:listCollectionIds?key=${encodeURIComponent(config.apiKey)}`;
-        const res = await fetch(url, {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({pageSize:100})
-        });
-        if(!res.ok) return [];
-        const data = await res.json();
-        return Array.isArray(data.collectionIds) ? data.collectionIds : [];
-      }catch(e){
-        return [];
-      }
-    }
-
-    async function waitForAuthReady(auth){
-      await new Promise(resolve => {
-        let done = false;
-        const finish = () => { if(done) return; done = true; try{unsub?.()}catch(_){} resolve(); };
-        let unsub = onAuthStateChanged(auth, finish, finish);
-        setTimeout(finish, 900);
-      });
-    }
-
-    async function ensureFirebaseAuth(){
-      const auth = getAuth(firebaseApp);
-      try{ await setPersistence(auth, browserLocalPersistence); }catch(_){}
-      await waitForAuthReady(auth);
-      if(auth.currentUser){
-        setConnection("warn", `تسجيل دخول موجود — جاري قراءة المبيع...`);
-        return auth.currentUser;
-      }
-      let adminError = null;
-      const email = state.settings.adminEmail || "admin@rcell.app";
-      const pass = state.settings.adminPassword || "123456";
-      if((state.settings.autoAdminLogin || "on") !== "off" && email && pass){
-        try{
-          const cred = await signInWithEmailAndPassword(auth, email, pass);
-          setConnection("warn", "تم دخول الإدارة — جاري قراءة sales_reports...");
-          return cred.user;
-        }catch(e){
-          adminError = e;
-          console.warn("Admin auth failed:", e?.code || e?.message || e);
-        }
-      }
-      if(state.settings.anonAuth === "on" || state.settings.anonAuth === "auto"){
-        try{
-          const cred = await signInAnonymously(auth);
-          setConnection("warn", "دخول مجهول — جاري القراءة...");
-          return cred.user;
-        }catch(e){
-          console.warn("Anonymous auth unavailable:", e?.message || e);
-        }
-      }
-      if(adminError){
-        throw new Error("فشل دخول الإدارة للقراءة من Firebase. افتح RC خمس مرات وضع بريد/كلمة مرور الإدارة الصحيحة.");
-      }
-      return null;
-    }
-
-    async function loadRepresentativeRegionMaps(){
-      representativeRegionById = new Map();
-      representativeRegionByName = new Map();
-      try{
-        const snap = await getDocs(collection(db, "representatives"));
-        snap.docs.forEach(d => {
-          const data = {id:d.id, ...d.data()};
-          const reg = normalizeRegion(data.region);
-          if(!reg) return;
-          if(data.id) representativeRegionById.set(String(data.id), reg);
-          if(d.id) representativeRegionById.set(String(d.id), reg);
-          if(data.name) representativeRegionByName.set(String(data.name).trim().toLowerCase(), reg);
-          if(data.email) representativeRegionByName.set(String(data.email).trim().toLowerCase(), reg);
-        });
-      }catch(e){
-        console.warn("Could not load representatives map:", e?.message || e);
-      }
-    }
-
-    async function findBestCollectionPath(requestedPath){
-      const path = String(requestedPath || "").trim();
-      if(!isAutoPath(path)) return path;
-      setConnection("warn", "مزامنة تلقائية: أبحث عن البيانات...");
-      const discovered = await discoverRootCollections(parseFirebaseConfig());
-      const candidates = [...new Set([...discovered, ...AUTO_COLLECTIONS])];
-      let best = {path:null, docs:[], score:-1, denied:0};
-      for(const candidate of candidates){
-        try{
-          const snap = await getDocs(collection(db, candidate));
-          const docs = snap.docs.map(d => ({id:d.id, _collectionPath:candidate, ...d.data()}));
-          const score = quickDocScore(docs);
-          if(score > best.score) best = {path:candidate, docs, score, denied:best.denied};
-          if(score >= 8) break;
-        }catch(e){
-          best.denied++;
-          console.warn("Auto collection scan skipped:", candidate, e?.message || e);
-        }
-      }
-      if(best.path && best.docs.length){
-        state.settings.collectionPath = best.path;
-        els.collectionPathInput.value = best.path;
-        localStorage.setItem(storageKey, JSON.stringify(state.settings));
-        toast(`تم العثور على Collection تلقائياً: ${best.path}`);
-        return best.path;
-      }
-      if(best.path){
-        state.settings.collectionPath = best.path;
-        els.collectionPathInput.value = best.path;
-        localStorage.setItem(storageKey, JSON.stringify(state.settings));
-        toast(`تم اختيار ${best.path} لكن لا توجد سجلات ظاهرة حالياً.`);
-        return best.path;
-      }
-      throw new Error("لم أستطع تحديد Collection تلقائياً. الواجهة مربوطة صح، لكن يلزم معرفة اسم الـ Collection الحقيقي أو تعديل Firestore Rules للقراءة.");
-    }
-
-    async function connectFirebase(forceOnce=false){
-      saveSettings();
-      if(unsubscribe){unsubscribe(); unsubscribe=null;}
-      if(firebaseApp){try{await deleteApp(firebaseApp)}catch(e){} firebaseApp=null; db=null;}
-      const config = parseFirebaseConfig();
-      setConnection("warn", "جاري الاتصال...");
-      firebaseApp = initializeApp(config, "region-center-" + Date.now());
-      db = getFirestore(firebaseApp);
-      await ensureFirebaseAuth();
-      await loadRepresentativeRegionMaps();
-      const path = await findBestCollectionPath(state.settings.collectionPath);
-      const ref = collection(db, path);
-      if(forceOnce){
-        const snap = await getDocs(ref);
-        rawDocs = snap.docs.map(d => ({id:d.id, _collectionPath:path, ...d.data()}));
-        setConnection("ok", `متصل — ${fmt(rawDocs.filter(d => !isDeletedDoc(d)).length)} سجل نشط — ${path}`);
-        els.lastUpdateInput.value = new Date().toLocaleString("en-US");
-        render();
-        return;
-      }
-      unsubscribe = onSnapshot(ref, (snapshot)=>{
-        rawDocs = snapshot.docs.map(d => ({id:d.id, _collectionPath:path, ...d.data()}));
-        setConnection("ok", `متصل — ${fmt(rawDocs.filter(d => !isDeletedDoc(d)).length)} سجل نشط — ${path}`);
-        els.lastUpdateInput.value = new Date().toLocaleString("en-US");
-        render();
-      }, (error)=>{
-        console.error(error);
-        setConnection("warn", "خطأ اتصال");
-        toast("تعذر قراءة Firebase: " + (error?.message || error));
-      });
-      toast("تم تشغيل القراءة المباشرة من Firebase.");
-    }
-
-    function getRegionMap(){
-      try{
-        const map = JSON.parse(state.settings.regionMap || "{}");
-        return {...DEFAULT_REGION_MAP, ...map};
-      }catch(e){
-        toast("ربط المناطق JSON غير صحيح؛ سيتم الاعتماد على field region فقط.");
-        return DEFAULT_REGION_MAP;
-      }
-    }
-
-    function pick(obj, keys){
-      for(const k of keys){
-        if(obj && Object.prototype.hasOwnProperty.call(obj, k) && obj[k] !== undefined && obj[k] !== null && obj[k] !== "") return obj[k];
-      }
-      return undefined;
-    }
-
-    function deepPick(obj, keys){
-      const direct = pick(obj, keys);
-      if(direct !== undefined) return direct;
-      for(const v of Object.values(obj || {})){
-        if(v && typeof v === "object" && !Array.isArray(v)){
-          const nested = pick(v, keys);
-          if(nested !== undefined) return nested;
-        }
-      }
-      return undefined;
-    }
-
-    function normalizeRegion(value){
-      if(value === undefined || value === null) return null;
-      const s = String(value).trim().toLowerCase().replace(/[_\-]/g," ").replace(/\s+/g," ");
-      if(!s) return null;
-      const n = s.match(/(?:region|reg|r|منطقة|المنطقة)\s*([1-4])/i) || s.match(/^([1-4])$/);
-      if(n) return `Region ${n[1]}`;
-      if(["region 1","reg 1","r1","reg1"].includes(s)) return "Region 1";
-      if(["region 2","reg 2","r2","reg2"].includes(s)) return "Region 2";
-      if(["region 3","reg 3","r3","reg3"].includes(s)) return "Region 3";
-      if(["region 4","reg 4","r4","reg4"].includes(s)) return "Region 4";
-      return null;
-    }
-
-    function extractDate(doc){
-      const v = deepPick(doc, ["date","day","createdAt","created_at","timestamp","time","ts","submittedAt","created","entryDate"]);
-      if(!v) return null;
-      if(typeof v?.toDate === "function") return v.toDate();
-      if(typeof v === "number") return new Date(v < 1e12 ? v * 1000 : v);
-      if(typeof v === "string"){
-        const cleaned = v.trim();
-        const d = new Date(cleaned);
-        if(!isNaN(d)) return d;
-        const m = cleaned.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-        if(m) return new Date(Number(m[3]), Number(m[2])-1, Number(m[1]));
-      }
-      if(v && typeof v === "object" && "seconds" in v) return new Date(v.seconds * 1000);
-      return null;
-    }
-
-    function extractAmount(doc){
-      // تطبيق أرسل يحفظ المبيع الأساسي في amountSyp. لا نجمع التسليمات، المكاتب، أو رسوم التحويل.
-      const primarySalesAmount = deepPick(doc, [
-        "amountSyp", "amount_syp", "amountSYP", "salesSyp", "sales_syp", "saleSyp", "sale_syp",
-        "salesEmployeeRevenue", "employeeRevenueSyp", "revenueSyp", "netRevenueSyp",
-        "مبيع", "المبيع", "مبلغ المبيع", "إيراد المندوب", "ايراد المندوب"
-      ]);
-      const primary = toNumber(primarySalesAmount);
-      if(primary > 0) return primary;
-
-      // احتياط للنسخ القديمة فقط، وليس لحقول التسليم أو المكاتب.
-      const fallbackAmount = deepPick(doc, [
-        "amount", "syp", "SYP", "totalSyp", "total_syp", "revenue", "income", "مبلغ", "المبلغ", "الإيراد", "ايراد"
-      ]);
-      return toNumber(fallbackAmount);
-    }
-
-    function isTruthyFlag(value){
-      if(value === true) return true;
-      if(value === false || value === undefined || value === null || value === "") return false;
-      const s = String(value).trim().toLowerCase();
-      return ["true", "1", "yes", "y", "on", "deleted", "trashed", "removed", "محذوف", "محذوفة", "نعم"].includes(s);
-    }
-
-    function hasValue(value){
-      return value !== undefined && value !== null && String(value).trim() !== "";
-    }
-
-    function isDeletedDoc(doc){
-      // مهم: تطبيق أرسل يحذف غالباً حذفاً ناعماً، لذلك الوثيقة تبقى في sales_reports مع علامة حذف.
-      const boolFlags = [
-        "deleted", "isDeleted", "is_deleted", "softDeleted", "soft_deleted",
-        "removed", "isRemoved", "is_removed", "trashed", "inTrash", "in_trash", "trash",
-        "archived", "isArchived", "is_archived", "cancelled", "canceled", "void", "voided"
-      ];
-      for(const f of boolFlags){
-        if(Object.prototype.hasOwnProperty.call(doc, f) && isTruthyFlag(doc[f])) return true;
-      }
-
-      const inactiveFlags = ["active", "isActive", "is_active", "enabled", "visible"];
-      for(const f of inactiveFlags){
-        if(Object.prototype.hasOwnProperty.call(doc, f) && doc[f] === false) return true;
-      }
-
-      const deleteTimeFields = [
-        "deletedAt", "deleted_at", "removedAt", "removed_at", "trashedAt", "trashed_at",
-        "archivedAt", "archived_at", "cancelledAt", "canceledAt", "voidedAt", "deletedBy", "deleted_by"
-      ];
-      for(const f of deleteTimeFields){
-        if(hasValue(doc[f])) return true;
-      }
-
-      const status = String(deepPick(doc, ["status", "state", "recordStatus", "record_status", "docStatus", "doc_status", "حالة", "الحالة"]) ?? "").trim().toLowerCase();
-      if(status){
-        const deletedStatuses = [
-          "deleted", "delete", "trash", "trashed", "removed", "archived", "inactive",
-          "cancelled", "canceled", "void", "voided", "rejected",
-          "محذوف", "محذوفة", "سلة المحذوفات", "ملغي", "ملغى", "مرفوض", "مؤرشف"
-        ];
-        if(deletedStatuses.includes(status)) return true;
-      }
-      return false;
-    }
-
-    function extractRegion(doc){
-      const regionValue = deepPick(doc, ["region","regionName","region_name","regionId","region_id","reg","area","group","zone","منطقة","المنطقة","الريجون"]);
-      const fromRegion = normalizeRegion(regionValue);
-      if(fromRegion) return fromRegion;
-      const repId = deepPick(doc, ["representativeId","repId","delegateId","mandobId","userId","createdBy"]);
-      if(repId != null && representativeRegionById.has(String(repId))) return representativeRegionById.get(String(repId));
-      const regionMap = getRegionMap();
-      const name = deepPick(doc, ["representativeName","delegateName","delegate_name","mandoub","mandoubName","rep","repName","userName","username","name","sellerName","employee","agent","email","مندوب","المندوب","الاسم","اسم المندوب"]);
-      if(name != null){
-        const raw = String(name).trim();
-        const low = raw.toLowerCase();
-        if(representativeRegionByName.has(low)) return representativeRegionByName.get(low);
-        if(regionMap[raw]) return regionMap[raw];
-        const lowerKey = Object.keys(regionMap).find(k => k.trim().toLowerCase() === low);
-        if(lowerKey) return regionMap[lowerKey];
-      }
-      return null;
-    }
-
-    function periodRange(period){
-      const now = new Date();
-      const startOfDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-      let start=null, end=null, label="كل البيانات";
-      if(period === "today") {start=startOfDay(now); end=new Date(start); end.setDate(end.getDate()+1); label="اليوم";}
-      if(period === "yesterday") {end=startOfDay(now); start=new Date(end); start.setDate(start.getDate()-1); label="أمس";}
-      if(period === "week") {end=new Date(); start=startOfDay(now); start.setDate(start.getDate()-6); label="آخر 7 أيام";}
-      if(period === "month") {start=new Date(now.getFullYear(), now.getMonth(), 1); end=new Date(now.getFullYear(), now.getMonth()+1, 1); label="هذا الشهر";}
-      if(period === "year") {start=new Date(now.getFullYear(), 0, 1); end=new Date(now.getFullYear()+1, 0, 1); label="هذه السنة";}
-      if(period === "custom") {
-        start = state.settings.fromDate ? new Date(state.settings.fromDate + "T00:00:00") : null;
-        end = state.settings.toDate ? new Date(state.settings.toDate + "T23:59:59") : null;
-        label = `مخصص ${state.settings.fromDate || "البداية"} → ${state.settings.toDate || "النهاية"}`;
-      }
-      return {start,end,label};
-    }
-
-    function inPeriod(docDate, range){
-      if(!range.start && !range.end) return true;
-      if(!docDate) return false;
-      if(range.start && docDate < range.start) return false;
-      if(range.end && docDate > range.end) return false;
-      return true;
-    }
-
-    function aggregate(){
-      const out = emptyAggregation();
-      const exchangeRate = toNumber(state.settings.exchangeRate);
-      out.exchangeRate = exchangeRate;
-      const range = periodRange(state.settings.period);
-      out.periodLabel = range.label;
-
-      for(const doc of rawDocs){
-        if(isDeletedDoc(doc)) { out.skippedDeleted++; continue; }
-        const date = extractDate(doc);
-        if(!inPeriod(date, range)) continue;
-        const region = extractRegion(doc);
-        const amount = extractAmount(doc);
-        if(!region || !REGIONS.includes(region)) { out.unmatched++; continue; }
-        if(!amount) continue;
-        out.byRegion[region].syp += amount;
-        out.byRegion[region].usd += exchangeRate > 0 ? amount / exchangeRate : 0;
-        out.byRegion[region].count += 1;
-        out.totalSyp += amount;
-        out.totalCount += 1;
-        out.filteredDocs.push({region, amount, date});
-      }
-      out.totalUsd = exchangeRate > 0 ? out.totalSyp / exchangeRate : 0;
-      REGIONS.forEach(r => out.byRegion[r].share = out.totalSyp > 0 ? (out.byRegion[r].syp / out.totalSyp) * 100 : 0);
-      return out;
-    }
-
-    function render(){
-      current = aggregate();
-      els.periodLabel.textContent = `الفترة: ${current.periodLabel}`;
-      els.totalSyp.textContent = fmtMoney(current.totalSyp);
-      els.totalUsd.textContent = current.exchangeRate > 0 ? fmt(current.totalUsd, 2) : "0";
-      els.totalSypSub.textContent = current.skippedDeleted ? `من ${fmt(current.totalCount)} سجل نشط — تم استثناء ${fmt(current.skippedDeleted)} محذوف` : `من ${fmt(current.totalCount)} سجل نشط`;
-      els.totalUsdSub.textContent = current.exchangeRate > 0 ? `على سعر ${fmt(current.exchangeRate)} SYP` : "اكتب سعر الصرف اليدوي";
-      const rows = REGIONS.map(r => current.byRegion[r]);
-      const best = [...rows].sort((a,b)=>b.syp-a.syp)[0];
-      const worst = [...rows].sort((a,b)=>a.syp-b.syp)[0];
-      els.bestRegion.textContent = best && best.syp > 0 ? best.region : "—";
-      els.bestRegionSub.textContent = best && best.syp > 0 ? `${fmt(best.share,1)}% من الإجمالي` : "لا توجد بيانات بعد";
-      els.avgRegion.textContent = fmt(current.totalSyp / 4);
-      renderRegions(rows);
-      renderTable(rows);
-      renderInsights(rows, best, worst);
-      renderCharts(rows);
-    }
-
-    function renderRegions(rows){
-      els.regionCards.innerHTML = rows.map((r, i)=>`
-        <article class="regionCard" style="--accent:${REGION_ACCENTS[i]}">
-          <div class="regionName"><span>${r.region}</span><span class="regionShare">${fmt(r.share,1)}%</span></div>
-          <div class="regionAmount">${fmtMoney(r.syp)}</div>
-          <div class="regionUSD">${current.exchangeRate > 0 ? fmt(r.usd,2) : "0.00"} USD</div>
-          <div class="barShell"><div class="barFill" style="width:${Math.min(100, r.share)}%"></div></div>
-          <div class="sub" style="color:var(--muted);margin-top:12px;font-size:12px">${fmt(r.count)} سجل ضمن الفترة</div>
+          <div class="chartWrap"><canvas id="trendChart"></canvas></div>
         </article>
-      `).join("");
+
+        <!-- Region Table -->
+        <article class="card panel" id="table">
+          <div class="panelHead"><h3>إجمالي الإيرادات حسب المنطقة</h3></div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>المنطقة</th>
+                <th>إجمالي الإيرادات (USD)</th>
+                <th>نسبة من الإجمالي</th>
+              </tr>
+            </thead>
+            <tbody id="regionTable"></tbody>
+          </table>
+        </article>
+
+        <!-- Goal Ring -->
+        <article class="card goal">
+          <h3>تقدم الهدف الشهري</h3>
+          <div class="ring" id="goalRing" style="--p:0">
+            <div class="ringTxt">
+              <b id="goalPct">0%</b>
+              <span>من الهدف الشهري</span>
+            </div>
+          </div>
+          <div class="goalMeta">
+            <div>الهدف: &nbsp;<b class="amount" id="goalTarget">40,000,000 USD</b></div>
+            <div>المحقق: <b class="amount" id="goalDone">0 USD</b></div>
+          </div>
+        </article>
+
+      </section>
+
+      <!-- ── RECORDS ────────────────────────────────────────── -->
+      <section class="card recordsPanel" id="records">
+        <div class="panelHead">
+          <h3>سجلات إيرادات المندوبين</h3>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="muted" id="recordsCount">0 سجل</span>
+            <button class="btnSecondary" id="toggleRecords" style="min-height:36px;padding:0 14px;font-size:13px">إخفاء ↑</button>
+          </div>
+        </div>
+        <div id="recordsBody_wrap">
+        <div class="toolbar">
+          <div><label>من تاريخ</label><input id="recordsFrom" type="date"></div>
+          <div><label>إلى تاريخ</label><input id="recordsTo" type="date"></div>
+          <div><label>المنطقة</label>
+            <select id="recordsRegion">
+              <option value="">الكل</option>
+              <option value="R1">Region 1</option>
+              <option value="R2">Region 2</option>
+              <option value="R3">Region 3</option>
+              <option value="R4">Region 4</option>
+            </select>
+          </div>
+          <div><label>بحث</label><input id="recordsSearch" type="text" placeholder="مندوب / ملاحظات"></div>
+          <div><label>&nbsp;</label><button class="btnSecondary" id="syncFilters">تطبيق</button></div>
+        </div>
+        <div class="toolbar">
+          <div><label>من تاريخ</label><input id="recordsFrom" type="date"></div>
+          <div><label>إلى تاريخ</label><input id="recordsTo" type="date"></div>
+          <div><label>المنطقة</label>
+            <select id="recordsRegion">
+              <option value="">الكل</option>
+              <option value="R1">Region 1</option>
+              <option value="R2">Region 2</option>
+              <option value="R3">Region 3</option>
+              <option value="R4">Region 4</option>
+            </select>
+          </div>
+          <div><label>بحث</label><input id="recordsSearch" type="text" placeholder="مندوب / ملاحظات"></div>
+          <div><label>&nbsp;</label><button class="btnSecondary" id="syncFilters">تطبيق</button></div>
+        </div>
+        <div class="recordsScroll">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>التاريخ</th><th>وقت الإضافة</th><th>المنطقة</th>
+                <th>المندوب</th><th>SYP</th><th>USD</th><th>سعر الصرف</th><th>ملاحظات</th>
+              </tr>
+            </thead>
+            <tbody id="recordsBody"></tbody>
+          </table>
+        </div>
+        </div><!-- /recordsBody_wrap -->
+      </section>
+
+    </main><!-- /main -->
+  </div><!-- /shell -->
+
+<!-- ══ FIREBASE + LOGIC (unchanged) ══════════════════════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, query, getDocs, getDoc, doc, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig={apiKey:"AIzaSyDoVPtyKtuY5LBRw6plvwDVJv4TDIk0Klk",authDomain:"mandob-app-82843.firebaseapp.com",projectId:"mandob-app-82843",storageBucket:"mandob-app-82843.firebasestorage.app",messagingSenderId:"749939721927",appId:"1:749939721927:web:4c1c63aacca39ec41fe0e2",measurementId:"G-40ZG8YVETG"};
+const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getFirestore(app);
+const $=id=>document.getElementById(id);
+const ar="٠١٢٣٤٥٦٧٨٩", fa="۰۱۲۳۴۵۶۷۸۹";
+const REGIONS=["R1","R2","R3","R4"];
+const regionNames={R1:"Region 1",R2:"Region 2",R3:"Region 3",R4:"Region 4"};
+const colors={R1:"#ff6b00",R2:"#ffad20",R3:"#55aaff",R4:"#c69a74"};
+let trendChart=null,sparkChart=null,chartMode="daily";
+const state={user:null,profile:null,reps:[],offices:[],sales:[],deliveries:[],manual:[],withdrawals:[],settings:{},ratesByDate:new Map(),filtered:[]};
+function n(v){if(v===null||v===undefined)return 0;let s=String(v).trim().replace(/[٠-٩]/g,d=>String(ar.indexOf(d))).replace(/[۰-۹]/g,d=>String(fa.indexOf(d))).replace(/,/g,"").replace(/\s/g,"").replace(/[^\d.-]/g,"");return Number(s||0)}
+function fmt(v,max=0){return n(v).toLocaleString("en-US",{maximumFractionDigits:max})}
+function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]))}
+function today(){return new Date().toISOString().slice(0,10)}
+function monthStart(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-01`}
+function createdMs(x){const c=x?.createdAt||x?.created_at||x?.timestamp||x?.updatedAt||x?.addedAt;if(!c)return 0;if(typeof c.toDate==="function")return c.toDate().getTime();if(c.seconds)return c.seconds*1000;if(c._seconds)return c._seconds*1000;const t=Date.parse(c);return Number.isFinite(t)?t:0}
+function dateFromTimestamp(ms){if(!ms)return "";const d=new Date(ms);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function dateVal(x){return x?.date||x?.saleDate||x?.day||x?.recordDate||dateFromTimestamp(createdMs(x))||""}
+function cleanKey(v){return String(v||"").trim().replace(/\s+/g," ").toLowerCase()}
+function sameKey(a,b){return cleanKey(a)&&cleanKey(a)===cleanKey(b)}
+function normalizeRegion(v){const s=String(v||"").trim();if(!s)return "";const low=s.toLowerCase().replace(/[٠-٩]/g,d=>String(ar.indexOf(d))).replace(/[۰-۹]/g,d=>String(fa.indexOf(d))).replace(/[_\-ـ]+/g," ");const m=low.match(/(?:^|\s)(?:r|region|reg|origin|ريجن|منطقة|منطقه)?\s*([1-4])(?:\s|$)/);return m?`R${m[1]}`:s}
+function repForRow(row){return state.reps.find(r=>String(r.id)===String(row.representativeId||row.repId||row.mandobId||"")||sameKey(r.name,row.representativeName||row.repName||row.mandobName))}
+function regionOf(row){return normalizeRegion(row.region||row.origin||row.area||repForRow(row)?.region)||"R1"}
+function repName(row){return row.representativeName||row.repName||row.mandobName||repForRow(row)?.name||"—"}
+function defaultRate(){return n($("defaultRate")?.value)||n(state.settings.defaultExchangeRate||state.settings.exchangeRate)||15000}
+function active(rows){return (rows||[]).filter(x=>!x.deleted&&!x.permanentDeleted&&!x.hiddenDeleted&&!x.archived)}
+function rowAmountSyp(row){const s=n(row.amountSyp||row.syp||row.amount_syp||row.sourceSyp||row.totalSyp||row.amount);if(s>0)return s;const u=n(row.amountUsd||row.usd||row.amount_usd);const r=rateForDate(dateVal(row),row);return u>0&&r>0?u*r:0}
+function rawUsd(row){return n(row.amountUsd||row.usd||row.amount_usd||row.convertedUsd)}
+function explicitRate(row){let r=n(row.exchangeRate||row.usdRate||row.rate||row.dollarRate||row.sypUsdRate||row.avgRate);if(r>0)return r;const s=n(row.amountSyp||row.sourceSyp), u=n(row.amountUsd||row.convertedUsd);return s>0&&u>0?s/u:0}
+function collectRates(){const map=new Map();const add=(d,r)=>{r=n(r);if(!d||r<=0||r<100)return;if(!map.has(d))map.set(d,[]);map.get(d).push(r)};[...state.sales,...state.deliveries,...state.manual,...state.withdrawals].forEach(x=>{const d=dateVal(x);const r=explicitRate(x);if(r)add(d,r)});state.ratesByDate=new Map([...map.entries()].map(([d,a])=>[d,a.reduce((x,y)=>x+y,0)/a.length]));}
+function rateForDate(d,row=null){return explicitRate(row)||state.ratesByDate.get(d)||defaultRate()}
+function usdValue(row){const direct=rawUsd(row);if(direct>0)return direct;const s=rowAmountSyp(row), r=rateForDate(dateVal(row),row);return s>0&&r>0?s/r:0}
+function fingerprint(row){return [dateVal(row),repName(row),Math.round(rowAmountSyp(row)),Math.round(usdValue(row)*100),cleanKey(row.notes||row.description||"")].join("|")}
+function dedupe(rows){const seen=new Map(),out=[];for(const r of rows){const fp=fingerprint(r),cm=createdMs(r);const p=seen.get(fp);if(p&&cm&&p.cm&&Math.abs(cm-p.cm)<25000)continue;seen.set(fp,{cm});out.push(r)}return out}
+async function loadCollection(name,max=3000){try{const snap=await getDocs(query(collection(db,name),limit(max)));return snap.docs.map(d=>({id:d.id,...d.data()}))}catch(e){console.warn(name,e);return []}}
+async function loadSettings(){try{const s=await getDoc(doc(db,"app_settings","main"));state.settings=s.exists()?s.data():{}}catch(e){state.settings={}}}
+async function loadAll(){setStatus("جاري القراءة من Firebase...");state.reps=await loadCollection("representatives",1500);state.offices=await loadCollection("offices",800);state.sales=await loadCollection("sales_reports",4000);state.deliveries=await loadCollection("deliveries",4000);state.manual=await loadCollection("manual_amounts",2000);state.withdrawals=await loadCollection("office_withdrawals",2000);await loadSettings();collectRates();renderAll();setStatus(`آخر قراءة ناجحة: ${new Date().toLocaleTimeString("ar")}`);$("lastUpdate").textContent=new Date().toLocaleTimeString("ar");}
+function setStatus(t){$("readStatus").textContent=t}
+function filteredRows(){const from=$("fromDate").value||"",to=$("toDate").value||"",org=$("regionFilter").value||"",term=cleanKey($("repSearch").value||"");return dedupe(active(state.sales)).filter(r=>{const d=dateVal(r), rg=regionOf(r);const hay=cleanKey([repName(r),r.notes,r.description,rg,regionNames[rg]].join(" "));return (!from||d>=from)&&(!to||d<=to)&&(!org||rg===org)&&(!term||hay.includes(term));}).sort((a,b)=>String(dateVal(b)).localeCompare(String(dateVal(a)))||(createdMs(b)-createdMs(a)))}
+function sumRows(rows){return rows.reduce((a,r)=>{a.syp+=rowAmountSyp(r);a.usd+=usdValue(r);return a},{syp:0,usd:0})}
+function rowsForDate(d){return dedupe(active(state.sales)).filter(r=>dateVal(r)===d)}
+function rowsForMonth(dateStr){const base=dateStr||today();const m=base.slice(0,7);const end=base.slice(0,10);return dedupe(active(state.sales)).filter(r=>dateVal(r)>=m+"-01"&&dateVal(r)<=end)}
+function new24Rows(){const cut=Date.now()-24*3600*1000;return dedupe(active(state.sales)).filter(r=>createdMs(r)>=cut)}
+function renderKpis(){
+  const sel=$("mainDate").value||today();
+  const t=sumRows(rowsForDate(sel)),
+        nw=sumRows(new24Rows()),
+        mo=sumRows(rowsForMonth(sel));
+  const rows=state.filtered;
+  const rates=rows.map(r=>rateForDate(dateVal(r),r)).filter(x=>x>0);
+  const avg=rates.length?rates.reduce((a,b)=>a+b,0)/rates.length:defaultRate();
+
+  /* كارد 1 */
+  const selDate=new Date(sel+"T00:00:00");
+  const dayName=isNaN(selDate)?"":" — "+selDate.toLocaleDateString("ar-SA",{weekday:"long",day:"numeric",month:"long"});
+  $("todayLabel").textContent="إجمالي"+dayName;
+  $("todaySypVal").textContent=fmt(t.syp);
+  $("todayUsd").textContent=fmt(t.usd,2);
+
+  /* كارد 2 */
+  $("new24SypVal").textContent=fmt(nw.syp);
+  $("new24Usd").textContent=fmt(nw.usd,2);
+
+  /* كارد 3 */
+  const monthNames=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+  const mIdx=isNaN(selDate)?new Date().getMonth():selDate.getMonth();
+  $("monthLabel").textContent=`إجمالي ${monthNames[mIdx]}`;
+  $("monthSypVal").textContent=fmt(mo.syp);
+  $("monthUsd").textContent=fmt(mo.usd,2);
+
+  /* كارد 4 */
+  $("avgRate").textContent=fmt(avg,2);
+  renderSpark(rates.slice(-20));
+}
+function renderOrigins(){
+  const rows=state.filtered, total=sumRows(rows);
+  $("regionCards").innerHTML=REGIONS.map((rg)=>{
+    const s=sumRows(rows.filter(r=>regionOf(r)===rg));
+    const pct=total.usd>0?s.usd/total.usd*100:0;
+    return `
+    <article class="card regionCard">
+      <div class="regionHead">
+        <span class="regionDot" style="color:${colors[rg]};background:${colors[rg]}"></span>
+        ${regionNames[rg]}
+      </div>
+      <div class="regionBody">
+        <div class="mapShape"></div>
+        <div class="regionNums">
+          <div class="lbl">إجمالي الإيرادات</div>
+          <div class="regionSypRow">
+            <span class="regionSypVal">${fmt(s.syp)}</span>
+            <span class="regionSypCur">SYP</span>
+          </div>
+          <div class="regionUsdRow">
+            <span class="regionUsdVal">${fmt(s.usd,2)}</span>
+            <span class="regionUsdCur">USD</span>
+          </div>
+          <div class="regionPctRow">
+            <div class="regionPctBar"><div class="regionPctFill" style="width:${fmt(pct,1)}%;background:${colors[rg]}"></div></div>
+            <span class="regionPctTxt" style="color:${colors[rg]}">${fmt(pct,1)}%</span>
+          </div>
+        </div>
+      </div>
+    </article>`;
+  }).join("");
+}
+function renderOriginTable(){const rows=state.filtered,total=sumRows(rows);let html=REGIONS.map(rg=>{const s=sumRows(rows.filter(r=>regionOf(r)===rg));const pct=total.usd>0?s.usd/total.usd*100:0;return `<tr><td><span class="regionDot" style="display:inline-block;color:${colors[rg]};background:${colors[rg]}"></span> ${regionNames[rg]}</td><td class="amount">${fmt(s.usd,2)}</td><td class="amount">${fmt(pct,1)}%</td></tr>`}).join("");html+=`<tr class="totalRow"><td>الإجمالي</td><td class="amount">${fmt(total.usd,2)}</td><td class="amount">100%</td></tr>`;$("regionTable").innerHTML=html;}
+function groupKey(d,mode){if(mode==="monthly")return d.slice(0,7);if(mode==="weekly"){const dt=new Date(d);if(isNaN(dt))return d;const onejan=new Date(dt.getFullYear(),0,1);const week=Math.ceil((((dt-onejan)/86400000)+onejan.getDay()+1)/7);return `${dt.getFullYear()}-W${String(week).padStart(2,"0")}`}return d}
+function renderChart(){const rows=state.filtered;const labels=[...new Set(rows.map(r=>groupKey(dateVal(r),chartMode)).filter(Boolean))].sort().slice(-12);const datasets=REGIONS.map(rg=>({label:regionNames[rg],data:labels.map(l=>sumRows(rows.filter(r=>regionOf(r)===rg&&groupKey(dateVal(r),chartMode)===l)).usd),borderColor:colors[rg],backgroundColor:colors[rg]+"33",tension:.38,pointRadius:4,pointHoverRadius:7,borderWidth:2.5,fill:false}));const ctx=$("trendChart");if(trendChart)trendChart.destroy();trendChart=new Chart(ctx,{type:"line",data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#d4c9bf",usePointStyle:true,pointStyleWidth:10}}},scales:{x:{ticks:{color:"#857d74"},grid:{color:"rgba(255,255,255,.06)"}},y:{ticks:{color:"#857d74",callback:v=>v>=1000000?(v/1000000).toFixed(1)+"M":v>=1000?(v/1000).toFixed(0)+"K":v},grid:{color:"rgba(255,255,255,.07)"}}}}});}
+function renderSpark(vals){const data=(vals.length?vals:[defaultRate()]).slice(-12);const ctx=$("spark");if(sparkChart)sparkChart.destroy();sparkChart=new Chart(ctx,{type:"line",data:{labels:data.map((_,i)=>i+1),datasets:[{data,borderColor:"#ff9f1a",borderWidth:2,pointRadius:0,tension:.45}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}})}
+function renderGoal(){const month=sumRows(rowsForMonth());const target=n($("monthlyTarget").value)||40000000;const pct=Math.max(0,Math.min(100,target?month.usd/target*100:0));$("goalRing").style.setProperty("--p",pct);$("goalPct").textContent=`${fmt(pct,0)}%`;$("goalTarget").textContent=`${fmt(target)} USD`;$("goalDone").textContent=`${fmt(month.usd,2)} USD`;}
+function renderRecords(){const from=$("recordsFrom").value||$("fromDate").value||"",to=$("recordsTo").value||$("toDate").value||"",org=$("recordsRegion").value||$("regionFilter").value||"",term=cleanKey($("recordsSearch").value||$("repSearch").value||"");const rows=dedupe(active(state.sales)).filter(r=>{const d=dateVal(r),rg=regionOf(r),hay=cleanKey([repName(r),r.notes,r.description,rg,regionNames[rg]].join(" "));return(!from||d>=from)&&(!to||d<=to)&&(!org||rg===org)&&(!term||hay.includes(term));}).sort((a,b)=>String(dateVal(b)).localeCompare(String(dateVal(a)))||(createdMs(b)-createdMs(a)));const total=sumRows(rows);$("recordsCount").textContent=`${fmt(rows.length)} سجل — المجموع ${fmt(total.syp)} SYP / ${fmt(total.usd,2)} USD`;$("recordsBody").innerHTML=rows.map(r=>{const d=dateVal(r),rate=rateForDate(d,r),cm=createdMs(r);return `<tr><td>${esc(d)}</td><td>${cm?new Date(cm).toLocaleString("ar"):"—"}</td><td>${regionNames[regionOf(r)]||esc(regionOf(r))}</td><td>${esc(repName(r))}</td><td class="amount">${fmt(rowAmountSyp(r))}</td><td class="amount">${fmt(usdValue(r),2)}</td><td class="amount">${fmt(rate,2)}</td><td>${esc(r.notes||r.description||"—")}</td></tr>`}).join("")||`<tr><td colspan="8" class="empty">لا توجد سجلات ضمن هذا الفلتر</td></tr>`;}
+function syncRecordFilterInputs(){["recordsFrom","fromDate"].forEach(id=>$(id).value=$("fromDate").value||$("recordsFrom").value);["recordsTo","toDate"].forEach(id=>$(id).value=$("toDate").value||$("recordsTo").value);["recordsRegion","regionFilter"].forEach(id=>$(id).value=$("regionFilter").value||$("recordsRegion").value)}
+function renderAll(){state.filtered=filteredRows();renderKpis();renderOrigins();renderOriginTable();renderChart();renderGoal();renderRecords();}
+function jump(id){document.getElementById(id)?.scrollIntoView({behavior:"smooth",block:"start"})}
+
+function bind(){
+  const d=today();
+  $("mainDate").value=d;
+  $("fromDate").value=monthStart();
+  $("toDate").value=d;
+  $("recordsFrom").value=monthStart();
+  $("recordsTo").value=d;
+  $("monthlyTarget").value=localStorage.getItem("orb_goal")||"40000000";
+  $("defaultRate").value=localStorage.getItem("orb_rate")||"15000";
+
+  /* jump buttons (sidebar + mobile) */
+  document.querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>jump(b.dataset.jump));
+
+  /* filter panel toggle — main btn + hidden sidebar clone */
+  $("filterBtnMain").onclick=()=>$("filterPanel").classList.toggle("show");
+  /* the hidden #filterBtn still needed by applyFilters close */
+  $("filterBtn").onclick=()=>$("filterPanel").classList.toggle("show");
+
+  $("applyFilters").onclick=()=>{
+    localStorage.setItem("orb_goal",$("monthlyTarget").value);
+    localStorage.setItem("orb_rate",$("defaultRate").value);
+    syncRecordFilterInputs();renderAll();
+    $("filterPanel").classList.remove("show");
+  };
+
+  $("syncFilters").onclick=()=>{
+    $("fromDate").value=$("recordsFrom").value;
+    $("toDate").value=$("recordsTo").value;
+    $("regionFilter").value=$("recordsRegion").value;
+    $("repSearch").value=$("recordsSearch").value;
+    renderAll();
+  };
+
+  ["mainDate","fromDate","toDate","regionFilter","repSearch",
+   "recordsFrom","recordsTo","recordsRegion","recordsSearch"].forEach(id=>{
+    $(id).addEventListener("input",()=>{syncRecordFilterInputs();renderAll()});
+  });
+
+  document.querySelectorAll("[data-chart]").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll("[data-chart]").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    chartMode=b.dataset.chart;
+    renderChart();
+  });
+
+  $("refreshSide").onclick=$("refreshMobile").onclick=()=>loadAll();
+  $("logoutSide").onclick=$("logoutMobile").onclick=()=>signOut(auth);
+
+  /* زر إخفاء السجلات */
+  $("toggleRecords").onclick=()=>{
+    const wrap=$("recordsBody_wrap");
+    const btn=$("toggleRecords");
+    if(wrap.style.display==="none"){wrap.style.display="";btn.textContent="إخفاء ↑";}
+    else{wrap.style.display="none";btn.textContent="إظهار ↓";}
+  };
+
+  /* تحديث آخر 24 ساعة كل 24 ساعة تلقائياً */
+  setInterval(()=>{renderKpis();}, 24*3600*1000);
+
+  $("loginBtn").onclick=async()=>{
+    try{
+      $("loginMsg").classList.remove("show");
+      await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
+    }catch(e){
+      $("loginMsg").textContent=e.message||String(e);
+      $("loginMsg").classList.add("show");
     }
+  };
+}
 
-    function renderTable(rows){
-      els.regionTable.innerHTML = rows.map(r=>`
-        <tr>
-          <td><b>${r.region}</b></td>
-          <td class="num">${fmt(r.syp)}</td>
-          <td class="num">${current.exchangeRate > 0 ? fmt(r.usd,2) : "0.00"}</td>
-          <td class="num">${fmt(r.share,1)}%</td>
-          <td class="num">${fmt(r.count)}</td>
-        </tr>
-      `).join("");
-    }
-
-    function renderInsights(rows, best, worst){
-      const avg = current.totalSyp / 4;
-      const active = rows.filter(r=>r.syp>0).length;
-      const gap = best && worst ? best.syp - worst.syp : 0;
-      const insights = [];
-      if(current.totalSyp === 0){
-        insights.push(["تنبيه", "لا توجد مبالغ مطابقة للفترة الحالية. تأكد من Collection Path أو الفترة أو حقول region/amount."]);
-      } else {
-        insights.push(["إجمالي", `الإجمالي الحالي ${fmt(current.totalSyp)} SYP، ويعادل ${current.exchangeRate > 0 ? fmt(current.totalUsd,2) : "0.00"} USD حسب السعر اليدوي.`]);
-        insights.push(["أفضل", `${best.region} هي الأقوى حالياً بنسبة ${fmt(best.share,1)}% من إجمالي المناطق.`]);
-        if(worst.syp === 0) insights.push(["ضعف", `${worst.region} لا تحتوي مبالغ ضمن الفترة المختارة. راقب مصدر البيانات أو الفترة.`]);
-        else insights.push(["فجوة", `الفارق بين الأقوى والأضعف هو ${fmt(gap)} SYP. هذا مهم للمتابعة الإدارية.`]);
-        if(active < 4) insights.push(["تغطية", `عدد المناطق النشطة ${active}/4. هناك منطقة أو أكثر بدون حركة ضمن الفترة.`]);
-        if(avg > 0) insights.push(["متوسط", `متوسط كل منطقة ${fmt(avg)} SYP. أي منطقة تحت هذا الرقم تحتاج مراجعة أداء.`]);
-      }
-      if(current.unmatched > 0) insights.push(["ربط", `${fmt(current.unmatched)} سجل لم يتم ربطه بمنطقة. أضف region داخل البيانات أو حدّث الربط الداخلي.`]);
-      els.insightList.innerHTML = insights.map(([b,t])=>`<div class="insight"><span class="badge">${b}</span><span>${t}</span></div>`).join("");
-    }
-
-    function renderCharts(rows){
-      const labels = rows.map(r=>r.region);
-      const data = rows.map(r=>r.syp);
-      const commonOptions = {
-        responsive:true,
-        maintainAspectRatio:false,
-        animation:{duration:500},
-        plugins:{
-          legend:{labels:{color:"rgba(255,255,255,.78)", font:{family:"Tahoma", weight:"bold"}}},
-          tooltip:{callbacks:{label:(ctx)=>`${ctx.label || ""}: ${fmt(ctx.raw)} SYP`}}
-        },
-        scales:{
-          x:{ticks:{color:"rgba(255,255,255,.72)", font:{weight:"bold"}}, grid:{color:"rgba(255,255,255,.06)"}},
-          y:{ticks:{color:"rgba(255,255,255,.62)", callback:(v)=>fmt(v)}, grid:{color:"rgba(255,255,255,.07)"}}
-        }
-      };
-      if(charts.bar) charts.bar.destroy();
-      charts.bar = new Chart($("barChart"), {
-        type:"bar",
-        data:{labels, datasets:[{label:"SYP", data, borderRadius:18, borderSkipped:false, backgroundColor:["rgba(143,215,255,.75)","rgba(189,156,255,.72)","rgba(112,240,196,.68)","rgba(255,210,118,.68)"]}]},
-        options:commonOptions
-      });
-      if(charts.share) charts.share.destroy();
-      charts.share = new Chart($("shareChart"), {
-        type:"doughnut",
-        data:{labels, datasets:[{data, borderWidth:1, borderColor:"rgba(255,255,255,.18)", backgroundColor:["rgba(143,215,255,.78)","rgba(189,156,255,.74)","rgba(112,240,196,.70)","rgba(255,210,118,.70)"]}]},
-        options:{responsive:true, maintainAspectRatio:false, cutout:"68%", plugins:{legend:{position:"bottom", labels:{color:"rgba(255,255,255,.75)", font:{weight:"bold"}}}, tooltip:{callbacks:{label:(ctx)=>`${ctx.label}: ${fmt(ctx.raw)} SYP`}}}}
-      });
-    }
-
-    function buildDataSnapshot(){
-      const rows = REGIONS.map(r=>current.byRegion[r]);
-      const best = [...rows].sort((a,b)=>b.syp-a.syp)[0];
-      const worst = [...rows].sort((a,b)=>a.syp-b.syp)[0];
-      const exchange = Number(current.exchangeRate) || 0;
-      const weekdays = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
-      const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-      const makeBucket = (label, sortKey="") => ({label, sortKey, syp:0, usd:0, records:0, regions:Object.fromEntries(REGIONS.map(r=>[r,{syp:0, usd:0, records:0}]))});
-      const byDate = {};
-      const byWeekday = {};
-      const byMonth = {};
-      const latest = [];
-
-      for(const row of current.filteredDocs || []){
-        const d = row.date instanceof Date && !isNaN(row.date) ? row.date : null;
-        const region = row.region;
-        const amount = Number(row.amount) || 0;
-        if(!region || !REGIONS.includes(region) || amount <= 0) continue;
-        const usd = exchange > 0 ? amount / exchange : 0;
-        const dateKey = d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}` : "بدون تاريخ";
-        const dateLabel = d ? `${weekdays[d.getDay()]} ${dateKey}` : "بدون تاريخ";
-        const weekdayLabel = d ? weekdays[d.getDay()] : "بدون تاريخ";
-        const monthKey = d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}` : "بدون شهر";
-        const monthLabel = d ? `${monthNames[d.getMonth()]} ${d.getFullYear()}` : "بدون شهر";
-        if(!byDate[dateKey]) byDate[dateKey] = makeBucket(dateLabel, dateKey);
-        if(!byWeekday[weekdayLabel]) byWeekday[weekdayLabel] = makeBucket(weekdayLabel, String(d ? d.getDay() : 99));
-        if(!byMonth[monthKey]) byMonth[monthKey] = makeBucket(monthLabel, monthKey);
-        for(const bucket of [byDate[dateKey], byWeekday[weekdayLabel], byMonth[monthKey]]){
-          bucket.syp += amount;
-          bucket.usd += usd;
-          bucket.records += 1;
-          bucket.regions[region].syp += amount;
-          bucket.regions[region].usd += usd;
-          bucket.regions[region].records += 1;
-        }
-        latest.push({date:dateKey, day:weekdayLabel, region, syp:Math.round(amount), usd:Number(usd.toFixed(2))});
-      }
-
-      const finalizeBucket = (b) => ({
-        label:b.label,
-        sortKey:b.sortKey,
-        syp:Math.round(b.syp),
-        usd:Number(b.usd.toFixed(2)),
-        records:b.records,
-        regions:Object.fromEntries(REGIONS.map(r=>[r,{syp:Math.round(b.regions[r].syp), usd:Number(b.regions[r].usd.toFixed(2)), records:b.regions[r].records}]))
-      });
-      const daily = Object.values(byDate).sort((a,b)=>String(a.sortKey).localeCompare(String(b.sortKey))).map(finalizeBucket);
-      const weekdayOrder = {"الأحد":0,"الاثنين":1,"الثلاثاء":2,"الأربعاء":3,"الخميس":4,"الجمعة":5,"السبت":6,"بدون تاريخ":99};
-      const weekdaySummary = Object.values(byWeekday).sort((a,b)=>(weekdayOrder[a.label]??99)-(weekdayOrder[b.label]??99)).map(finalizeBucket);
-      const monthly = Object.values(byMonth).sort((a,b)=>String(a.sortKey).localeCompare(String(b.sortKey))).map(finalizeBucket);
-      const topDays = [...daily].sort((a,b)=>b.syp-a.syp).slice(0,7);
-      const weakDays = [...daily].filter(d=>d.syp>0).sort((a,b)=>a.syp-b.syp).slice(0,7);
-
-      return {
-        period: current.periodLabel,
-        exchangeRate: exchange,
-        totalSyp: Math.round(current.totalSyp),
-        totalUsd: Number(current.totalUsd.toFixed(2)),
-        totalRecords: current.totalCount,
-        unmatchedRecords: current.unmatched,
-        skippedDeleted: current.skippedDeleted,
-        bestRegion: best?.region || null,
-        worstRegion: worst?.region || null,
-        regions: rows.map(r=>({region:r.region, syp:Math.round(r.syp), usd:Number(r.usd.toFixed(2)), share:Number(r.share.toFixed(2)), records:r.count})),
-        daily,
-        weekdaySummary,
-        monthly,
-        topDays,
-        weakDays,
-        latestRecords: latest.sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,25)
-      };
-    }
-
-    function localAIAnswer(question){
-      const original = (question || "").trim();
-      const q = normalizeArabicText(original);
-      const snap = buildDataSnapshot();
-      const rows = snap.regions.map(r => ({...r}));
-      const sortedDesc = [...rows].sort((a,b)=>b.syp-a.syp);
-      const sortedAsc = [...rows].sort((a,b)=>a.syp-b.syp);
-      const best = sortedDesc[0] || rows[0];
-      const worst = sortedAsc[0] || rows[0];
-      const avg = snap.totalSyp / 4;
-      const active = rows.filter(r=>r.syp>0).length;
-      const inactive = rows.filter(r=>r.syp<=0);
-      const aboveAvg = rows.filter(r=>r.syp>=avg && avg>0).map(r=>r.region);
-      const belowAvg = rows.filter(r=>r.syp<avg && avg>0).map(r=>r.region);
-      const gap = Math.max(0, (best?.syp||0) - (worst?.syp||0));
-      const exchangeReady = Number(snap.exchangeRate) > 0;
-
-      const mentioned = extractMentionedRegions(q);
-      const hasAny = (words)=>words.some(w=>q.includes(w));
-      const wantsCompare = hasAny(["قارن", "مقارنه", "مقارنة", "فرق", "الفارق", "بين", "افضل من", "اقوى من", "اضعف من"]);
-      const wantsBest = hasAny(["اقوى", "أقوى", "افضل", "أفضل", "الاول", "الأول", "متصدر", "اعلى", "أعلى", "best"]);
-      const wantsWorst = hasAny(["اضعف", "أضعف", "اقل", "أقل", "الاخير", "الأخير", "نازل", "ضعيف", "worst"]);
-      const wantsTotal = hasAny(["اجمالي", "إجمالي", "المجموع", "مجموع", "كل المناطق", "total", "كامل"]);
-      const wantsUsd = hasAny(["دولار", "usd", "صرف", "الصرف", "سعر"]);
-      const wantsReport = hasAny(["تقرير", "ملخص", "خلاصه", "خلاصة", "مدير", "اداري", "إداري", "brief"]);
-      const wantsWhy = hasAny(["ليش", "لماذا", "سبب", "السبب", "شو المشكلة", "ما المشكلة", "وين المشكلة", "مشكله", "مشكلة"]);
-      const wantsAdvice = hasAny(["شو اعمل", "ماذا افعل", "حل", "توصيه", "توصية", "اقتراح", "اجراء", "إجراء", "خطة"]);
-      const wantsRank = hasAny(["رتب", "ترتيب", "ranking", "من الاول للاخير", "من الأعلى", "من الاعلى"]);
-      const wantsShare = hasAny(["نسبه", "نسبة", "حصه", "حصة", "share", "%"]);
-      const wantsRecords = hasAny(["عدد", "سجلات", "حركات", "records", "entries"]);
-      const wantsWhatsApp = hasAny(["واتساب", "whatsapp", "رساله", "رسالة"]);
-      const wantsRisk = hasAny(["خطر", "مخاطر", "تنبيه", "انذار", "إنذار", "شاذ", "غير طبيعي", "مراقبه", "مراقبة"]);
-      const wantsTarget = hasAny(["هدف", "تارغت", "target", "ناقص", "كم يحتاج", "كم لازم"]);
-      const wantsForecast = hasAny(["توقع", "تنبؤ", "بكره", "غدا", "غداً", "forecast"]);
-      const wantsPdf = hasAny(["pdf", "بي دي اف", "تصدير", "طباعة", "طباعه"]);
-      const wantsVoice = hasAny(["صوت", "احكي", "اقرا", "اقرأ", "اسمع"]);
-
-      function normalizeArabicText(text){
-        return String(text || "")
-          .toLowerCase()
-          .replace(/[ًٌٍَُِّْـ]/g, "")
-          .replace(/[أإآ]/g, "ا")
-          .replace(/ى/g, "ي")
-          .replace(/ة/g, "ه")
-          .replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d))
-          .replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
-      }
-
-      function extractMentionedRegions(text){
-        const set = new Set();
-        const patterns = [
-          /region\s*([1-4])/g,
-          /reg\s*([1-4])/g,
-          /r\s*([1-4])/g,
-          /منطقه\s*([1-4])/g,
-          /المنطقه\s*([1-4])/g,
-          /منطقة\s*([1-4])/g,
-          /([1-4])\s*(?:و|مع|ضد|مقابل)/g,
-          /(?:و|مع|ضد|مقابل)\s*([1-4])/g
-        ];
-        for(const pat of patterns){
-          let m;
-          while((m = pat.exec(text))) set.add(`Region ${m[1]}`);
-        }
-        const wordMap = {
-          "الاولى":"Region 1", "الاولي":"Region 1", "الاول":"Region 1", "واحد":"Region 1",
-          "الثانيه":"Region 2", "الثاني":"Region 2", "اثنين":"Region 2", "اتنين":"Region 2",
-          "الثالثه":"Region 3", "الثالث":"Region 3", "ثلاثه":"Region 3", "تلاته":"Region 3",
-          "الرابعه":"Region 4", "الرابع":"Region 4", "اربعه":"Region 4"
-        };
-        for(const [w,r] of Object.entries(wordMap)) if(text.includes(w)) set.add(r);
-        return [...set].filter(r=>REGIONS.includes(r));
-      }
-
-      function getRegion(name){ return rows.find(r=>r.region === name) || rows[0]; }
-      function percentOfAvg(r){ return avg > 0 ? (r.syp / avg) * 100 : 0; }
-      function lineRegion(r){ return `${r.region}: ${fmt(r.syp)} SYP / ${fmt(r.usd,2)} USD / ${fmt(r.share,1)}% / ${fmt(r.records)} سجل`; }
-      function statusForRegion(r){
-        if(snap.totalSyp <= 0) return "لا يوجد إجمالي حتى نحكم على الأداء.";
-        if(r.syp <= 0) return "بدون حركة ضمن الفترة المختارة.";
-        if(r.region === best.region) return "الأقوى حالياً بين المناطق.";
-        if(r.region === worst.region) return "الأضعف حالياً ويحتاج متابعة.";
-        if(r.syp >= avg) return "فوق متوسط المناطق.";
-        return "تحت متوسط المناطق ويحتاج رفع حركة أو التأكد من وصول البيانات.";
-      }
-      function recommendationForRegion(r){
-        if(snap.totalSyp <= 0) return "ابدأ بتأكيد الربط واسم Collection والفترة، لأن اللوحة لا ترى مبالغ حالياً.";
-        if(r.syp <= 0) return `راجع أولاً هل ${r.region} أرسلت بيانات لهذه الفترة، وهل حقل المنطقة/المبلغ مقروء صح.`;
-        if(r.syp < avg) return `ركّز على ${r.region}: تحتاج تقريباً ${fmt(avg-r.syp)} SYP لتصل لمتوسط المناطق.`;
-        if(r.region === best.region) return `حافظ على زخم ${r.region} ولا تجعلها تغطي ضعف باقي المناطق وحدها.`;
-        return `${r.region} وضعها مقبول رقمياً، راقب الثبات بدل تغيير الخطة بسرعة.`;
-      }
-
-      function header(){
-        return `الفترة: ${snap.period}\nالإجمالي: ${fmt(snap.totalSyp)} SYP${exchangeReady ? ` / ${fmt(snap.totalUsd,2)} USD` : " / USD غير محسوب لأن سعر الصرف فارغ"}`;
-      }
-
-      if(snap.totalSyp === 0){
-        let msg = `ما عندي أرقام محسوبة حالياً لهذه الفترة.\n\nالأسباب المحتملة:\n1) اسم Collection غير صحيح.\n2) الفترة المختارة لا تحتوي بيانات.\n3) الحقول داخل Firebase لا تحمل region أو amount بشكل واضح.\n4) يوجد سجلات غير مربوطة: ${fmt(snap.unmatchedRecords)}.\n\nاسألني بعد الاتصال أو غيّر الفترة إلى «كل البيانات» للتأكد.`;
-        if(wantsPdf) msg = `تصدير PDF شغال، لكن التقرير سيكون فاضي تقريباً لأن إجمالي المناطق حالياً صفر. الأفضل أولاً تأكيد قراءة Firebase ثم تصدير PDF.`;
-        if(wantsVoice) msg += `\n\nالصوت العربي مفعل إذا المتصفح يدعم Speech Synthesis العربي.`;
-        return msg;
-      }
-
-      if(wantsPdf){
-        return `PDF جاهز من زر «تصدير PDF فخم».\n\n${header()}\n\nقبل التصدير تأكد من سعر الصرف اليدوي لأن الدولار يعتمد عليه. التقرير سيعرض المناطق الأربع فقط بدون أسماء مندوبين.`;
-      }
-
-      if(wantsVoice){
-        return `الصوت العربي مفعل حالياً من إعدادات اللوحة.\n\n${header()}\n\nإذا ما سمعت صوت، المشكلة عادة من المتصفح أو عدم وجود صوت عربي مثبت، وليس من بيانات Firebase.`;
-      }
-
-      if(wantsCompare || mentioned.length >= 2){
-        const a = getRegion(mentioned[0] || "Region 1");
-        const b = getRegion(mentioned[1] || "Region 2");
-        const diff = Math.abs(a.syp - b.syp);
-        const winner = a.syp >= b.syp ? a : b;
-        const loser = a.syp >= b.syp ? b : a;
-        return `مقارنة مباشرة:\n\n${lineRegion(a)}\n${lineRegion(b)}\n\nالأقوى بينهما: ${winner.region}.\nالفارق: ${fmt(diff)} SYP (${exchangeReady ? fmt(diff / snap.exchangeRate,2) + " USD" : "USD غير محسوب"}).\n\nقراءة إدارية: ${loser.region} أقل من ${winner.region} بنسبة ${winner.syp>0 ? fmt((diff / winner.syp)*100,1) : "0.0"}%. ${recommendationForRegion(loser)}`;
-      }
-
-      if(mentioned.length === 1){
-        const r = getRegion(mentioned[0]);
-        const needToBest = Math.max(0, best.syp - r.syp);
-        const needToAvg = Math.max(0, avg - r.syp);
-        return `${r.region} حالياً:\n\n${lineRegion(r)}\nالحالة: ${statusForRegion(r)}\nمقارنة بالمتوسط: ${fmt(percentOfAvg(r),1)}% من متوسط المناطق.\nتحتاج للوصول للمتوسط: ${fmt(needToAvg)} SYP.\nتحتاج لمساواة الأقوى (${best.region}): ${fmt(needToBest)} SYP.\n\nتوصيتي: ${recommendationForRegion(r)}`;
-      }
-
-      if(wantsRank){
-        return `ترتيب المناطق من الأقوى للأضعف:\n\n${sortedDesc.map((r,i)=>`${i+1}) ${lineRegion(r)}`).join("\n")}\n\nالخلاصة: الفارق بين الأول والأخير ${fmt(gap)} SYP. ${gap > avg ? "الفارق كبير ويحتاج متابعة." : "الفارق مقبول نسبياً مقارنة بالمتوسط."}`;
-      }
-
-      if(wantsBest){
-        return `أقوى منطقة هي ${best.region}.\n\n${lineRegion(best)}\n\nليش هي الأقوى؟ لأنها أعلى قيمة SYP وحصتها ${fmt(best.share,1)}% من إجمالي المناطق.\nالفارق بينها وبين ثاني منطقة: ${fmt(Math.max(0, best.syp - (sortedDesc[1]?.syp || 0)))} SYP.\n\nإدارياً: لا تعتمد عليها وحدها؛ قارن المناطق الأقل حتى لا يصير الأداء مركز بمنطقة واحدة.`;
-      }
-
-      if(wantsWorst){
-        return `أضعف منطقة هي ${worst.region}.\n\n${lineRegion(worst)}\n\nليش اعتبرتها الأضعف؟ لأنها الأقل SYP ضمن الفترة المختارة.\nالفرق بينها وبين متوسط المناطق: ${fmt(Math.max(0, avg-worst.syp))} SYP.\n\nالإجراء: ${recommendationForRegion(worst)}`;
-      }
-
-      if(wantsWhy || wantsRisk){
-        const warnings = [];
-        if(!exchangeReady) warnings.push("سعر الصرف غير مضبوط، لذلك USD غير دقيق.");
-        if(snap.unmatchedRecords > 0) warnings.push(`${fmt(snap.unmatchedRecords)} سجل غير مربوط بمنطقة، وهذا قد يخفي جزءاً من الإيراد.`);
-        if(inactive.length) warnings.push(`${inactive.map(r=>r.region).join("، ")} بدون حركة ضمن الفترة.`);
-        if(best.share >= 55) warnings.push(`${best.region} تحمل ${fmt(best.share,1)}% من الإجمالي؛ التركيز عالي على منطقة واحدة.`);
-        if(worst.syp < avg * .55) warnings.push(`${worst.region} تحت المتوسط بفارق واضح.`);
-        if(!warnings.length) warnings.push("لا توجد مشكلة رقمية حادة ظاهرة من بيانات المناطق الحالية.");
-        return `تشخيص المشكلة بالأرقام:\n\n${warnings.map((w,i)=>`${i+1}) ${w}`).join("\n")}\n\n${header()}\n\nأول خطوة عملية: ${recommendationForRegion(worst)}`;
-      }
-
-      if(wantsAdvice){
-        return `خطة سريعة للمدير:\n\n1) ركّز على ${worst.region}: ${recommendationForRegion(worst)}\n2) حافظ على ${best.region} لأنها تقود الأداء حالياً.\n3) راقب المناطق تحت المتوسط: ${belowAvg.length ? belowAvg.join("، ") : "لا يوجد"}.\n4) إذا يوجد سجلات غير مربوطة (${fmt(snap.unmatchedRecords)}) أصلح ربط المنطقة حتى لا يطلع التقرير ناقص.\n\n${header()}`;
-      }
-
-      if(wantsTarget){
-        const target = extractTargetNumber(q);
-        if(target > 0){
-          const lines = rows.map(r=>`${r.region}: ناقصها ${fmt(Math.max(0, target-r.syp))} SYP للوصول إلى ${fmt(target)} SYP`).join("\n");
-          return `مقارنة المناطق مع الهدف ${fmt(target)} SYP:\n\n${lines}\n\nالأقرب للهدف: ${sortedDesc[0].region}.`;
-        }
-        return `إذا اعتبرنا متوسط المناطق هدفاً مؤقتاً (${fmt(avg)} SYP):\n\n${rows.map(r=>`${r.region}: ${r.syp>=avg ? "واصل للهدف" : "ناقصها " + fmt(avg-r.syp) + " SYP"}`).join("\n")}\n\nالأفضل وضع هدف يدوي لكل منطقة لاحقاً بدل الاعتماد على المتوسط فقط.`;
-      }
-
-      if(wantsShare){
-        return `نِسَب المناطق من الإجمالي:\n\n${rows.map(r=>`${r.region}: ${fmt(r.share,1)}% — ${fmt(r.syp)} SYP`).join("\n")}\n\nأكبر حصة: ${best.region}. أقل حصة: ${worst.region}.`;
-      }
-
-      if(wantsRecords){
-        return `عدد السجلات المحسوبة:\n\n${rows.map(r=>`${r.region}: ${fmt(r.records)} سجل`).join("\n")}\n\nالإجمالي المحسوب: ${fmt(snap.totalRecords)} سجل.\nغير مربوط بمنطقة: ${fmt(snap.unmatchedRecords)} سجل.`;
-      }
-
-      if(wantsUsd || wantsTotal){
-        return `${header()}\n\nتفصيل المناطق:\n${rows.map(lineRegion).join("\n")}\n\nملاحظة: USD محسوب من سعر الصرف اليدوي الموجود في اللوحة، وليس من Firebase.`;
-      }
-
-      if(wantsWhatsApp){
-        return `ملخص واتساب للمدير:\n\nتقرير المناطق — ${snap.period}\nالإجمالي: ${fmt(snap.totalSyp)} SYP${exchangeReady ? ` / ${fmt(snap.totalUsd,2)} USD` : ""}\nسعر الصرف: ${exchangeReady ? fmt(snap.exchangeRate) : "غير محدد"}\nالأقوى: ${best.region} (${fmt(best.syp)} SYP)\nالأضعف: ${worst.region} (${fmt(worst.syp)} SYP)\n\n${rows.map(r=>`${r.region}: ${fmt(r.syp)} SYP`).join("\n")}`;
-      }
-
-      if(wantsForecast){
-        return `توقع حقيقي يحتاج بيانات أيام سابقة كثيرة، وأنا حالياً أحلل الفترة الظاهرة فقط.\n\nقراءة تقريبية غير مؤكدة: إذا بقي نفس النمط، ${best.region} مرشحة تبقى الأقوى، و${worst.region} تحتاج تدخل أسرع.\n\nلجعل التوقع قوي لاحقاً لازم نخزن تاريخ يومي ونحسب متوسط 7 أيام و30 يوم لكل Region.`;
-      }
-
-      if(wantsReport){
-        return `تقرير إداري للمناطق — ${snap.period}\n\n${header()}\nأقوى منطقة: ${best.region} بنسبة ${fmt(best.share,1)}%.\nأضعف منطقة: ${worst.region} بنسبة ${fmt(worst.share,1)}%.\nالمناطق النشطة: ${active}/4.\nالفارق بين الأقوى والأضعف: ${fmt(gap)} SYP.\n\nتفصيل:\n${sortedDesc.map(lineRegion).join("\n")}\n\nقرار مقترح: ${recommendationForRegion(worst)}`;
-      }
-
-      return `فهمت سؤالك كتحليل عام للمناطق.\n\n${header()}\n\nالأقوى: ${best.region} (${fmt(best.syp)} SYP).\nالأضعف: ${worst.region} (${fmt(worst.syp)} SYP).\nتحت المتوسط: ${belowAvg.length ? belowAvg.join("، ") : "لا يوجد"}.\nفوق أو على المتوسط: ${aboveAvg.length ? aboveAvg.join("، ") : "لا يوجد"}.\n\nجوابي العملي: ${recommendationForRegion(worst)}\n\nاكتب أي سؤال بحرّية مثل: ليش Region 3 ضعيفة؟ كم ناقص Region 2؟ رتّب المناطق؟ اعمل رسالة واتساب؟`;
-
-      function extractTargetNumber(text){
-        const m = text.replace(/,/g, "").match(/(\d+(?:\.\d+)?)/);
-        return m ? Number(m[1]) : 0;
-      }
-    }
-
-    function appendMsg(role, text){
-      const div = document.createElement("div");
-      div.className = `msg ${role}`;
-      div.textContent = text;
-      els.chatBox.appendChild(div);
-      els.chatBox.scrollTop = els.chatBox.scrollHeight;
-    }
-
-    function speakArabic(text){
-      if(state.settings.voice !== "on") return;
-      if(!("speechSynthesis" in window)) return;
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text.replace(/[\*#_`]/g,""));
-      utter.lang = "ar-SA";
-      utter.rate = .95;
-      utter.pitch = 1.02;
-      const voices = window.speechSynthesis.getVoices();
-      const arVoice = voices.find(v => /^ar/i.test(v.lang)) || voices.find(v => /Arabic|العربية/i.test(v.name));
-      if(arVoice) utter.voice = arVoice;
-      window.speechSynthesis.speak(utter);
-    }
-
-    async function askAI(question){
-      const q = question.trim();
-      if(!q) return;
-      appendMsg("user", q);
-      els.aiQuestionInput.value = "";
-      appendMsg("ai", (state.settings.openaiKey || state.settings.aiProxy) ? "أحلل عبر الذكاء الحقيقي الآن..." : "أحلل الأرقام محلياً الآن...");
-      const lastMsg = els.chatBox.lastElementChild;
-      let answer = "";
-      try{
-        if(state.settings.openaiKey || state.settings.aiProxy){
-          answer = await askOpenAI(q);
-        } else {
-          answer = localAIAnswer(q);
-        }
-      } catch(e){
-        console.warn(e);
-        answer = localAIAnswer(q) + "\n\nملاحظة تقنية: تعذر الاتصال بالذكاء السحابي، لذلك استخدمت التحليل المحلي من بيانات اللوحة.";
-      }
-      lastMsg.textContent = answer;
-      speakArabic(answer);
-    }
-
-    async function askOpenAI(question){
-      const snapshot = buildDataSnapshot();
-      const instructions = `أنت مساعد عربي ذكي داخل لوحة تحكم مالية.
-أجب على أي سؤال عادي للمستخدم بشكل طبيعي ومباشر.
-إذا كان السؤال عن الإيرادات أو الأيام أو المناطق أو التقرير: اعتمد فقط على JSON المرفق، واستخدم الأرقام كما هي.
-مسموح لك استخدام بيانات: Region 1 و Region 2 و Region 3 و Region 4، ملخص الأيام، ملخص أسماء الأيام، الأشهر، الإجمالي، الدولار، سعر الصرف، عدد السجلات، والمحذوفات المستثناة.
-ممنوع تماماً ذكر أسماء مندوبين أو مكاتب أو تخمينها. لا تقل إن لديك أسماء؛ البيانات المسموحة هي المناطق والأيام فقط.
-إذا سأل عن يوم مثل الأحد/الاثنين/الثلاثاء فارجع قيمة ذلك اليوم من weekdaySummary أو daily حسب السؤال.
-إذا البيانات ناقصة قل ذلك بوضوح. أجب بالعربية، مختصر، عملي، ودافئ بدون حشو.`;
-      const inputText = `سؤال المستخدم: ${question}
-
-بيانات اللوحة JSON المخفية عن الواجهة، مسموحة للذكاء فقط:
-${JSON.stringify(snapshot, null, 2)}`;
-
-      if(state.settings.aiProxy){
-        const res = await fetch(state.settings.aiProxy, {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({instructions, input:inputText, model:state.settings.aiModel || "gpt-4.1-mini", snapshot, question})
-        });
-        if(!res.ok) throw new Error(await res.text());
-        const data = await res.json();
-        return data.answer || data.output_text || data.text || JSON.stringify(data);
-      }
-
-      const res = await fetch("https://api.openai.com/v1/responses", {
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json",
-          "Authorization":"Bearer " + state.settings.openaiKey
-        },
-        body:JSON.stringify({
-          model: state.settings.aiModel || "gpt-4.1-mini",
-          instructions,
-          input: [{role:"user", content:[{type:"input_text", text: inputText}]}],
-          max_output_tokens: 650
-        })
-      });
-      if(!res.ok) throw new Error(await res.text());
-      const data = await res.json();
-      if(data.output_text) return data.output_text;
-      const chunks = [];
-      for(const item of data.output || []){
-        for(const c of item.content || []){
-          if(c.text) chunks.push(c.text);
-        }
-      }
-      return chunks.join("\n") || "وصل رد فارغ من خدمة الذكاء.";
-    }
-
-    function setupMic(){
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if(!SpeechRecognition){
-        toast("المتصفح لا يدعم الإملاء الصوتي هنا. جرّب Chrome أو Edge.");
-        return;
-      }
-      const rec = new SpeechRecognition();
-      rec.lang = "ar-SA";
-      rec.interimResults = false;
-      rec.maxAlternatives = 1;
-      rec.onstart = ()=>toast("عم اسمعك... احكي سؤالك عن المناطق.", 1800);
-      rec.onerror = ()=>toast("تعذر تشغيل الميكروفون. تأكد من السماح للمتصفح.");
-      rec.onresult = e => {
-        const text = e.results?.[0]?.[0]?.transcript || "";
-        els.aiQuestionInput.value = text;
-        askAI(text);
-      };
-      rec.start();
-    }
-
-    async function exportPDF(){
-      try{
-        setLoading(true, "جاري تجهيز PDF فخم...");
-        await new Promise(r=>setTimeout(r,250));
-        if(document.fonts?.ready) await document.fonts.ready;
-        const target = els.reportSurface;
-        const canvas = await html2canvas(target, {
-          scale: Math.min(2.4, window.devicePixelRatio || 2),
-          useCORS:true,
-          allowTaint:true,
-          backgroundColor:"#080a15",
-          logging:false,
-          windowWidth: document.documentElement.scrollWidth
-        });
-        const imgData = canvas.toDataURL("image/png", 1.0);
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF("p", "mm", "a4");
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const imgWidth = pageWidth;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 0;
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "FAST");
-        heightLeft -= pageHeight;
-        while(heightLeft > 0){
-          position = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "FAST");
-          heightLeft -= pageHeight;
-        }
-        const date = new Date().toISOString().slice(0,10);
-        pdf.save(`Region_Command_Center_${date}.pdf`);
-        toast("تم تصدير PDF بنجاح.");
-      } catch(e){
-        console.error(e);
-        toast("فشل تصدير PDF: " + (e?.message || e));
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    function wireEvents(){
-      if(els.settingsBtn) els.settingsBtn.addEventListener("click", ()=>els.settingsPanel.classList.toggle("open"));
-      if(els.closeSettingsBtn) els.closeSettingsBtn.addEventListener("click", ()=>els.settingsPanel.classList.remove("open"));
-      let adminTapCount = 0;
-      let adminTapTimer = null;
-      if(els.adminLogo){
-        els.adminLogo.addEventListener("click", ()=>{
-          adminTapCount += 1;
-          clearTimeout(adminTapTimer);
-          adminTapTimer = setTimeout(()=>{ adminTapCount = 0; }, 1600);
-          if(adminTapCount >= 5){
-            adminTapCount = 0;
-            els.settingsPanel.classList.toggle("open");
-            toast(els.settingsPanel.classList.contains("open") ? "تم فتح إعدادات الإدارة المخفية." : "تم إغلاق إعدادات الإدارة.");
-          }
-        });
-      }
-      els.saveSettingsBtn.addEventListener("click", saveSettings);
-      els.clearSettingsBtn.addEventListener("click", ()=>{
-        localStorage.removeItem(storageKey);
-        location.reload();
-      });
-      if(els.connectBtn) els.connectBtn.addEventListener("click", async()=>{
-        try{ await connectFirebase(false); }
-        catch(e){ setConnection("warn", "تعذر الاتصال"); toast(e.message || String(e), 6500); }
-      });
-      els.refreshBtn.addEventListener("click", async()=>{
-        try{ await connectFirebase(true); toast("تم التحديث مرة واحدة."); }
-        catch(e){ toast(e.message || String(e)); }
-      });
-      els.pdfBtn.addEventListener("click", exportPDF);
-      els.testLocalBtn.addEventListener("click", ()=>{
-        const answer = localAIAnswer("اعطني تقرير إداري مختصر");
-        appendMsg("ai", answer);
-        speakArabic(answer);
-        toast("تم اختبار التحليل المحلي.");
-      });
-      els.quickRateInput.addEventListener("change", ()=>{
-        state.settings.exchangeRate = normalizeNumber(els.quickRateInput.value);
-        els.exchangeRateInput.value = state.settings.exchangeRate;
-        localStorage.setItem(storageKey, JSON.stringify(state.settings));
-        render();
-      });
-      els.exchangeRateInput.addEventListener("change", ()=>{
-        state.settings.exchangeRate = normalizeNumber(els.exchangeRateInput.value);
-        els.quickRateInput.value = state.settings.exchangeRate;
-        localStorage.setItem(storageKey, JSON.stringify(state.settings));
-        render();
-      });
-      els.periodSelect.addEventListener("change", ()=>{
-        state.settings.period = els.periodSelect.value;
-        els.quickPeriodSelect.value = state.settings.period;
-        localStorage.setItem(storageKey, JSON.stringify(state.settings));
-        render();
-      });
-      els.quickPeriodSelect.addEventListener("change", ()=>{
-        state.settings.period = els.quickPeriodSelect.value;
-        els.periodSelect.value = state.settings.period;
-        localStorage.setItem(storageKey, JSON.stringify(state.settings));
-        render();
-      });
-      [els.fromDateInput, els.toDateInput].forEach(el=>el.addEventListener("change", ()=>{
-        state.settings.fromDate = els.fromDateInput.value;
-        state.settings.toDate = els.toDateInput.value;
-        state.settings.period = "custom";
-        els.periodSelect.value = "custom";
-        els.quickPeriodSelect.value = "custom";
-        localStorage.setItem(storageKey, JSON.stringify(state.settings));
-        render();
-      }));
-      els.askBtn.addEventListener("click", ()=>askAI(els.aiQuestionInput.value));
-      els.aiQuestionInput.addEventListener("keydown", e=>{if(e.key === "Enter") askAI(els.aiQuestionInput.value)});
-      els.micBtn.addEventListener("click", setupMic);
-      document.querySelectorAll(".chip[data-q]").forEach(chip=>chip.addEventListener("click", ()=>askAI(chip.dataset.q)));
-    }
-
-    function init(){
-      loadSettings();
-      // تثبيت الربط داخل الكود: لا نفتح إعدادات ولا نطلب Config من المستخدم
-      state.settings.firebaseConfig = `{
-  "apiKey": "AIzaSyDoVPtyKtuY5LBRw6plvwDVJv4TDIk0Klk",
-  "authDomain": "mandob-app-82843.firebaseapp.com",
-  "projectId": "mandob-app-82843",
-  "storageBucket": "mandob-app-82843.firebasestorage.app",
-  "messagingSenderId": "749939721927",
-  "appId": "1:749939721927:web:4c1c63aacca39ec41fe0e2",
-  "measurementId": "G-40ZG8YVETG"
-}`;
-      state.settings.collectionPath = "sales_reports";
-      state.settings.regionMap = JSON.stringify(DEFAULT_REGION_MAP, null, 2);
-      state.settings.anonAuth = "off";
-      state.settings.autoAdminLogin = state.settings.autoAdminLogin || "on";
-      state.settings.adminEmail = state.settings.adminEmail || "admin@rcell.app";
-      state.settings.adminPassword = state.settings.adminPassword || "123456";
-      syncInputs();
-      wireEvents();
-      render();
-      setConnection("warn", "مزامنة تلقائية قيد التشغيل...");
-      window.speechSynthesis?.getVoices?.();
-      setTimeout(async()=>{
-        try{ await connectFirebase(false); }
-        catch(e){
-          console.error(e);
-          setConnection("warn", "تعذر قراءة sales_reports — راجع دخول الإدارة");
-          toast(e.message || String(e), 7500);
-        }
-      }, 300);
-    }
-
-    init();
-  </script>
+bind();
+await setPersistence(auth,browserLocalPersistence);
+onAuthStateChanged(auth,async user=>{
+  state.user=user;
+  if(!user){$("loginOverlay").style.display="grid";return}
+  $("loginOverlay").style.display="none";
+  $("userInfo").textContent=user.email||"متصل";
+  await loadAll();
+});
+</script>
 </body>
 </html>
