@@ -3,27 +3,27 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>لوحة الإيرادات</title>
+  <title>لوحة الإيرادات — صندوق زجاجي فاخر</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     /* ── VARIABLES ─────────────────────────────────────────── */
     :root {
-      --bg:       #030405;
-      --sidebar:  #060809;
-      --amber:    #ff9f1a;
-      --amber2:   #ff6200;
-      --gold:     #ffc87a;
-      --blue:     #55aaff;
-      --green:    #2ecc71;
-      --red:      #ff5252;
-      --muted:    #857d74;
-      --soft:     #d4c9bf;
-      --text:     #fff6ea;
-      --card-bg:  rgba(18,20,25,0.85);
-      --cb:       rgba(255,255,255,0.10);
-      --cb-h:     rgba(255,159,26,0.40);
-      --shadow:   0 24px 80px rgba(0,0,0,.64);
-      --r:        22px;
+      --bg:       #050817;
+      --sidebar:  #07101e;
+      --amber:    #67e8ff;
+      --amber2:   #8b5cf6;
+      --gold:     #dbeafe;
+      --blue:     #60a5fa;
+      --green:    #34d399;
+      --red:      #fb7185;
+      --muted:    #91a4bd;
+      --soft:     #d6e6ff;
+      --text:     #f7fbff;
+      --card-bg:  rgba(11,22,39,0.72);
+      --cb:       rgba(255,255,255,0.15);
+      --cb-h:     rgba(103,232,255,0.42);
+      --shadow:   0 26px 90px rgba(0,0,0,.58);
+      --r:        26px;
     }
 
     /* ── RESET ─────────────────────────────────────────────── */
@@ -340,6 +340,926 @@
       .shell{display:block}
       .card{break-inside:avoid}
     }
+  
+    /* ══════════════════════════════════════════════════════════
+       IMAD PREMIUM ROYAL GLASS 3D SKIN
+       تغيير كامل للون + بطاقات Region أفخم + قفل زجاجي 3D
+       ══════════════════════════════════════════════════════════ */
+    body{
+      background:
+        radial-gradient(circle at 18% 5%, rgba(103,232,255,.20), transparent 30%),
+        radial-gradient(circle at 82% 12%, rgba(139,92,246,.18), transparent 32%),
+        linear-gradient(145deg,#030712 0%,#07111f 45%,#020617 100%) !important;
+      color:var(--text);
+    }
+    body::before{
+      background:
+        radial-gradient(ellipse at 50% -8%, rgba(103,232,255,.24) 0%, transparent 32%),
+        radial-gradient(ellipse at 88% 8%, rgba(167,139,250,.22) 0%, transparent 26%),
+        radial-gradient(ellipse at 7% 94%, rgba(52,211,153,.12) 0%, transparent 28%),
+        linear-gradient(162deg,#061326 0%,#020617 62%,#030712 100%) !important;
+      opacity:1;
+    }
+    body::after{
+      background-image:
+        linear-gradient(rgba(103,232,255,.038) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(167,139,250,.030) 1px,transparent 1px) !important;
+      background-size:64px 64px !important;
+      opacity:.72;
+    }
+
+    .main{
+      background:
+        radial-gradient(ellipse at 48% -6%, rgba(103,232,255,.20), transparent 30%),
+        radial-gradient(ellipse at 92% 24%, rgba(167,139,250,.10), transparent 25%),
+        linear-gradient(140deg,rgba(5,13,27,.92),rgba(2,6,23,.88)) !important;
+    }
+    .side{
+      background:
+        linear-gradient(180deg,rgba(6,18,33,.94),rgba(2,8,19,.97)) !important;
+      border-left:1px solid rgba(180,220,255,.12) !important;
+      box-shadow:inset -1px 0 0 rgba(255,255,255,.04), 18px 0 70px rgba(0,0,0,.24);
+    }
+
+    .card{
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.030) 46%,rgba(103,232,255,.030)) !important;
+      border:1px solid rgba(210,235,255,.16) !important;
+      box-shadow:
+        0 28px 90px rgba(0,0,0,.55),
+        0 0 0 1px rgba(103,232,255,.055),
+        inset 0 1px 0 rgba(255,255,255,.20),
+        inset 0 -1px 0 rgba(255,255,255,.055) !important;
+      backdrop-filter:blur(26px) saturate(1.45) !important;
+      -webkit-backdrop-filter:blur(26px) saturate(1.45) !important;
+      isolation:isolate;
+    }
+    .card::before{
+      background:
+        radial-gradient(circle at 12% 10%,rgba(103,232,255,.18),transparent 32%),
+        radial-gradient(circle at 88% 0%,rgba(167,139,250,.14),transparent 28%),
+        linear-gradient(118deg,rgba(255,255,255,.16),transparent 22%,transparent 73%,rgba(103,232,255,.08)) !important;
+      z-index:-1;
+    }
+    .card::after{
+      content:"";
+      position:absolute;
+      inset:1px;
+      border-radius:inherit;
+      pointer-events:none;
+      background:linear-gradient(135deg,rgba(255,255,255,.16),transparent 24%,transparent 74%,rgba(103,232,255,.08));
+      opacity:.56;
+      z-index:-1;
+    }
+    .card:hover{
+      border-color:rgba(103,232,255,.38) !important;
+      box-shadow:
+        0 34px 100px rgba(0,0,0,.62),
+        0 0 34px rgba(103,232,255,.12),
+        inset 0 1px 0 rgba(255,255,255,.22) !important;
+      transform:translateY(-1px);
+    }
+
+    .title{
+      color:#f8fbff !important;
+      letter-spacing:-.8px;
+      text-shadow:
+        0 0 32px rgba(103,232,255,.28),
+        0 0 64px rgba(167,139,250,.18),
+        0 3px 14px rgba(0,0,0,.70) !important;
+    }
+    .titleLine{
+      background:linear-gradient(90deg,transparent,#67e8ff,#a78bfa,transparent) !important;
+    }
+    .titleLine::after{
+      background:#67e8ff !important;
+      box-shadow:0 0 18px #67e8ff,0 0 34px rgba(167,139,250,.55) !important;
+    }
+
+    .logo{
+      width:62px !important;
+      height:62px !important;
+      border-radius:22px !important;
+      margin-bottom:30px !important;
+      position:relative !important;
+      transform-style:preserve-3d;
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.24),rgba(103,232,255,.10) 42%,rgba(167,139,250,.14)) !important;
+      border:1px solid rgba(224,242,254,.30);
+      box-shadow:
+        0 22px 48px rgba(0,0,0,.42),
+        0 0 34px rgba(103,232,255,.26),
+        inset 0 1px 0 rgba(255,255,255,.42),
+        inset 0 -16px 26px rgba(2,6,23,.30) !important;
+    }
+    .logo::before{
+      content:"" !important;
+      position:absolute !important;
+      width:28px !important;
+      height:25px !important;
+      left:50% !important;
+      top:10px !important;
+      transform:translateX(-50%) perspective(280px) rotateX(15deg) !important;
+      border:5px solid rgba(230,250,255,.88) !important;
+      border-bottom:0 !important;
+      border-radius:18px 18px 6px 6px !important;
+      background:transparent !important;
+      box-shadow:0 0 15px rgba(103,232,255,.42), inset 0 0 8px rgba(103,232,255,.18) !important;
+    }
+    .logo::after{
+      content:"" !important;
+      position:absolute !important;
+      width:38px !important;
+      height:30px !important;
+      left:50% !important;
+      top:28px !important;
+      transform:translateX(-50%) perspective(280px) rotateX(7deg) rotateY(-10deg) !important;
+      border-radius:12px !important;
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.56),rgba(103,232,255,.18) 42%,rgba(15,23,42,.34)) !important;
+      border:1px solid rgba(240,249,255,.50) !important;
+      box-shadow:
+        0 12px 24px rgba(0,0,0,.32),
+        0 0 20px rgba(103,232,255,.30),
+        inset 0 1px 0 rgba(255,255,255,.72),
+        inset 0 -10px 18px rgba(2,6,23,.28) !important;
+    }
+
+    .nav button{
+      color:#9fb4cc !important;
+      border:1px solid transparent !important;
+    }
+    .nav button:hover{
+      color:#eaf6ff !important;
+      background:rgba(103,232,255,.07) !important;
+      border-color:rgba(103,232,255,.10) !important;
+    }
+    .nav button.active{
+      color:#fff !important;
+      background:linear-gradient(135deg,rgba(103,232,255,.18),rgba(167,139,250,.15)) !important;
+      border-color:rgba(103,232,255,.34) !important;
+      box-shadow:0 0 28px rgba(103,232,255,.14),inset 0 0 18px rgba(255,255,255,.06) !important;
+    }
+
+    .dateBox,.btnIcon,.btnFilter,.btnSecondary,input,select,.statusBar,.sideFooter{
+      background:rgba(255,255,255,.055) !important;
+      border-color:rgba(210,235,255,.14) !important;
+      color:var(--text) !important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+    }
+    input:focus,select:focus{
+      border-color:rgba(103,232,255,.70) !important;
+      box-shadow:0 0 0 3px rgba(103,232,255,.13) !important;
+    }
+    .btnPrimary{
+      background:linear-gradient(135deg,#67e8ff,#8b5cf6) !important;
+      color:#04111f !important;
+      box-shadow:0 14px 34px rgba(103,232,255,.20),0 10px 30px rgba(139,92,246,.18) !important;
+    }
+    .btnPrimary:hover{
+      box-shadow:0 18px 44px rgba(103,232,255,.27),0 14px 38px rgba(139,92,246,.22) !important;
+    }
+    .dot{
+      background:#67e8ff !important;
+      box-shadow:0 0 12px #67e8ff,0 0 24px rgba(139,92,246,.45) !important;
+    }
+
+    .kpiGrid{gap:16px !important}
+    .kpi{
+      min-height:154px !important;
+      padding:22px 20px !important;
+      overflow:hidden;
+    }
+    .kpiIcon{
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.20),rgba(103,232,255,.12),rgba(167,139,250,.10)) !important;
+      border-color:rgba(103,232,255,.34) !important;
+      box-shadow:
+        0 12px 30px rgba(0,0,0,.24),
+        0 0 24px rgba(103,232,255,.18),
+        inset 0 1px 0 rgba(255,255,255,.40) !important;
+    }
+    .kpiLabel{color:#d8e7f8 !important}
+    .kpiSypVal,.regionSypVal{
+      color:#ffffff !important;
+      text-shadow:0 0 22px rgba(103,232,255,.10);
+    }
+    .kpiUsdRow,.regionUsdRow{
+      background:linear-gradient(135deg,rgba(103,232,255,.105),rgba(167,139,250,.075)) !important;
+      border-color:rgba(103,232,255,.20) !important;
+    }
+    .kpiUsdVal,.regionUsdVal,.totalRow td,#goalDone{
+      color:#67e8ff !important;
+    }
+    .kpiUsdCur,.regionUsdCur{
+      color:#dbeafe !important;
+    }
+
+    .regionGrid{
+      grid-template-columns:repeat(4,minmax(250px,1fr)) !important;
+      gap:16px !important;
+    }
+    .regionCard{
+      min-height:236px;
+      padding:22px 20px !important;
+      overflow:hidden;
+    }
+    .regionCard::after{
+      background:
+        linear-gradient(135deg,rgba(255,255,255,.18),transparent 24%,transparent 72%,rgba(103,232,255,.12)),
+        radial-gradient(circle at 16% 18%,rgba(103,232,255,.14),transparent 34%) !important;
+    }
+    .regionHead{
+      font-size:18px !important;
+      color:#f8fbff;
+      justify-content:space-between;
+    }
+    .regionHead::after{
+      content:"زجاجي 3D";
+      font-size:10.5px;
+      color:#bfeeff;
+      padding:5px 9px;
+      border-radius:999px;
+      border:1px solid rgba(103,232,255,.22);
+      background:rgba(103,232,255,.08);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.16);
+    }
+    .regionBody{
+      align-items:center !important;
+      gap:16px !important;
+      min-height:150px;
+    }
+    .regionVisual{
+      width:136px;
+      height:122px;
+      flex:0 0 136px;
+      position:relative;
+      display:grid;
+      place-items:center;
+      perspective:700px;
+      transform-style:preserve-3d;
+      border-radius:30px;
+      background:
+        radial-gradient(circle at 38% 22%,rgba(255,255,255,.20),transparent 24%),
+        linear-gradient(145deg,rgba(255,255,255,.10),rgba(103,232,255,.045),rgba(2,6,23,.18));
+      border:1px solid rgba(220,245,255,.12);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 20px 42px rgba(0,0,0,.20);
+      overflow:visible;
+    }
+    .regionVisual::before{
+      content:"";
+      position:absolute;
+      inset:18px 8px 4px;
+      border-radius:50%;
+      background:radial-gradient(ellipse,rgba(103,232,255,.20),transparent 68%);
+      filter:blur(8px);
+      transform:translateY(36px) rotateX(70deg);
+      opacity:.86;
+    }
+    .regionVisual .mapShape{
+      position:absolute !important;
+      width:112px !important;
+      height:76px !important;
+      left:12px;
+      bottom:5px;
+      opacity:.64;
+      transform:perspective(620px) rotateX(57deg) rotateZ(-10deg) translateZ(-20px) !important;
+      background:linear-gradient(140deg,rgba(103,232,255,.40),rgba(167,139,250,.22)) !important;
+      filter:drop-shadow(0 18px 18px rgba(103,232,255,.16)) !important;
+      z-index:1;
+    }
+    .glassLock3D{
+      position:relative;
+      width:80px;
+      height:92px;
+      transform:perspective(680px) rotateX(8deg) rotateY(-16deg) translateZ(18px);
+      transform-style:preserve-3d;
+      z-index:3;
+      filter:drop-shadow(0 22px 22px rgba(0,0,0,.34));
+      animation:lockFloat 5.8s ease-in-out infinite;
+    }
+    .glassLock3D .lockShackle{
+      position:absolute;
+      left:50%;
+      top:0;
+      width:46px;
+      height:42px;
+      transform:translateX(-50%) translateZ(24px);
+      border:7px solid rgba(235,250,255,.82);
+      border-bottom:0;
+      border-radius:26px 26px 8px 8px;
+      background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(103,232,255,.04));
+      box-shadow:
+        0 0 18px rgba(103,232,255,.32),
+        inset 0 2px 4px rgba(255,255,255,.36),
+        inset 0 -8px 16px rgba(2,6,23,.18);
+    }
+    .glassLock3D .lockBody{
+      position:absolute;
+      left:50%;
+      top:34px;
+      width:70px;
+      height:54px;
+      transform:translateX(-50%) translateZ(34px);
+      border-radius:18px 18px 22px 22px;
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.62) 0%,rgba(103,232,255,.26) 33%,rgba(167,139,250,.16) 70%,rgba(15,23,42,.36) 100%);
+      border:1px solid rgba(240,249,255,.52);
+      box-shadow:
+        0 18px 36px rgba(0,0,0,.32),
+        0 0 28px rgba(103,232,255,.24),
+        inset 0 2px 0 rgba(255,255,255,.68),
+        inset 12px 0 22px rgba(255,255,255,.14),
+        inset -10px -18px 22px rgba(2,6,23,.26);
+    }
+    .glassLock3D .lockBody::before{
+      content:"";
+      position:absolute;
+      inset:7px 10px auto auto;
+      width:28px;
+      height:10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.38);
+      filter:blur(.3px);
+      transform:rotate(-18deg);
+    }
+    .glassLock3D .lockKey{
+      position:absolute;
+      left:50%;
+      top:54px;
+      width:10px;
+      height:24px;
+      transform:translateX(-50%) translateZ(46px);
+      border-radius:999px;
+      background:linear-gradient(180deg,#04111f,#0f172a);
+      box-shadow:0 0 0 4px rgba(255,255,255,.16),0 0 14px rgba(103,232,255,.18);
+    }
+    .glassLock3D .lockKey::before{
+      content:"";
+      position:absolute;
+      left:50%;
+      top:-11px;
+      width:14px;
+      height:14px;
+      border-radius:50%;
+      transform:translateX(-50%);
+      background:#04111f;
+      box-shadow:0 0 0 4px rgba(255,255,255,.16);
+    }
+    @keyframes lockFloat{
+      0%,100%{transform:perspective(680px) rotateX(8deg) rotateY(-16deg) translateY(0) translateZ(18px)}
+      50%{transform:perspective(680px) rotateX(11deg) rotateY(-10deg) translateY(-5px) translateZ(26px)}
+    }
+
+    .regionNums{
+      gap:8px !important;
+      min-width:0;
+    }
+    .regionNums .lbl{
+      color:#9db7cf !important;
+      font-size:12px !important;
+    }
+    .regionSypVal{
+      font-size:clamp(16px,1.7vw,27px) !important;
+      line-height:1.05 !important;
+      overflow-wrap:anywhere;
+    }
+    .regionUsdVal{
+      font-size:clamp(14px,1.45vw,22px) !important;
+      overflow-wrap:anywhere;
+    }
+    .regionPctBar{
+      background:rgba(255,255,255,.11) !important;
+      height:5px !important;
+    }
+    .regionPctFill{
+      box-shadow:0 0 14px currentColor;
+    }
+
+    .regionCard:nth-child(1) .glassLock3D .lockBody{background:linear-gradient(145deg,rgba(255,255,255,.64),rgba(103,232,255,.30),rgba(14,165,233,.20),rgba(15,23,42,.36))}
+    .regionCard:nth-child(2) .glassLock3D .lockBody{background:linear-gradient(145deg,rgba(255,255,255,.64),rgba(167,139,250,.30),rgba(139,92,246,.18),rgba(15,23,42,.36))}
+    .regionCard:nth-child(3) .glassLock3D .lockBody{background:linear-gradient(145deg,rgba(255,255,255,.64),rgba(52,211,153,.28),rgba(16,185,129,.17),rgba(15,23,42,.36))}
+    .regionCard:nth-child(4) .glassLock3D .lockBody{background:linear-gradient(145deg,rgba(255,255,255,.64),rgba(240,201,135,.30),rgba(245,158,11,.16),rgba(15,23,42,.36))}
+
+    .regionCard:nth-child(1) .mapShape{background:linear-gradient(140deg,rgba(103,232,255,.50),rgba(14,165,233,.20)) !important}
+    .regionCard:nth-child(2) .mapShape{background:linear-gradient(140deg,rgba(167,139,250,.50),rgba(139,92,246,.20)) !important}
+    .regionCard:nth-child(3) .mapShape{background:linear-gradient(140deg,rgba(52,211,153,.50),rgba(16,185,129,.20)) !important}
+    .regionCard:nth-child(4) .mapShape{background:linear-gradient(140deg,rgba(240,201,135,.48),rgba(245,158,11,.18)) !important}
+
+    .table th{
+      color:#a9bed5 !important;
+      background:rgba(103,232,255,.035) !important;
+    }
+    .table td{color:#edf7ff !important}
+    .tabs button.active{
+      background:linear-gradient(135deg,rgba(103,232,255,.16),rgba(167,139,250,.12)) !important;
+      color:#dff8ff !important;
+    }
+    .ring{
+      background:conic-gradient(#67e8ff calc(var(--p) * 1%), rgba(255,255,255,.08) 0) !important;
+      box-shadow:0 0 0 1px rgba(103,232,255,.12),0 0 58px rgba(103,232,255,.20) !important;
+    }
+    .ring::before{
+      background:#061326 !important;
+      border-color:rgba(210,235,255,.13) !important;
+    }
+
+    .loginOverlay{
+      background:
+        radial-gradient(circle at 50% 0%,rgba(103,232,255,.18),transparent 34%),
+        radial-gradient(circle at 86% 16%,rgba(167,139,250,.18),transparent 30%),
+        rgba(0,0,0,.84) !important;
+    }
+    .loginBox > div:first-child{
+      width:76px !important;
+      height:76px !important;
+      border-radius:26px !important;
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.22),rgba(103,232,255,.12),rgba(167,139,250,.14)) !important;
+      border:1px solid rgba(224,242,254,.28) !important;
+      box-shadow:
+        0 22px 48px rgba(0,0,0,.42),
+        0 0 38px rgba(103,232,255,.24),
+        inset 0 1px 0 rgba(255,255,255,.42),
+        inset 0 -16px 26px rgba(2,6,23,.28) !important;
+      position:relative !important;
+    }
+    .loginBox > div:first-child::before{
+      content:"";
+      position:absolute;
+      width:32px;
+      height:28px;
+      left:50%;
+      top:13px;
+      transform:translateX(-50%);
+      border:6px solid rgba(238,250,255,.88);
+      border-bottom:0;
+      border-radius:20px 20px 6px 6px;
+      box-shadow:0 0 17px rgba(103,232,255,.38);
+    }
+    .loginBox > div:first-child > div{
+      width:44px !important;
+      height:34px !important;
+      border-radius:13px !important;
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.56),rgba(103,232,255,.20),rgba(15,23,42,.32)) !important;
+      transform:translateY(13px) !important;
+      border:1px solid rgba(240,249,255,.44) !important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.58),0 12px 22px rgba(0,0,0,.26) !important;
+    }
+
+    @media(max-width:1280px){
+      .regionGrid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+    }
+    @media(max-width:700px){
+      .regionGrid{grid-template-columns:1fr !important}
+      .regionCard{min-height:0}
+      .regionBody{gap:12px !important}
+      .regionVisual{width:116px;height:108px;flex-basis:116px}
+      .glassLock3D{transform:scale(.86) perspective(680px) rotateX(8deg) rotateY(-16deg) translateZ(18px)}
+      .regionVisual .mapShape{width:98px !important;height:66px !important}
+      .kpi{min-height:138px !important}
+    }
+
+  
+    /* ═════════ IMAD LIQUID BOX UPDATE ═════════ */
+    :root{
+      --bg:#040617;
+      --sidebar:#050a1d;
+      --amber:#7dd3fc;
+      --amber2:#a78bfa;
+      --gold:#e0f2fe;
+      --blue:#60a5fa;
+      --green:#38f8b5;
+      --red:#fb7185;
+      --muted:#93a9c9;
+      --soft:#dbeafe;
+      --text:#f8fbff;
+      --card-bg:rgba(8,16,38,.62);
+      --cb:rgba(210,238,255,.16);
+      --cb-h:rgba(125,211,252,.46);
+      --shadow:0 28px 90px rgba(0,0,0,.55);
+      --r:30px;
+    }
+    body::before{
+      background:
+        radial-gradient(circle at 18% 6%,rgba(96,165,250,.34),transparent 28%),
+        radial-gradient(circle at 78% 0%,rgba(167,139,250,.30),transparent 26%),
+        radial-gradient(circle at 84% 78%,rgba(45,212,191,.16),transparent 30%),
+        radial-gradient(circle at 14% 88%,rgba(56,189,248,.12),transparent 28%),
+        linear-gradient(145deg,#030514 0%,#07101f 48%,#030412 100%);
+    }
+    body::after{background-size:44px 44px;opacity:.76}
+    .main{
+      background:
+        radial-gradient(ellipse at 50% -10%,rgba(96,165,250,.18),transparent 28%),
+        linear-gradient(140deg,rgba(8,13,32,.88),rgba(3,5,17,.92))!important;
+    }
+    .side{
+      background:linear-gradient(180deg,rgba(5,10,29,.96),rgba(3,6,18,.98))!important;
+      border-left:1px solid rgba(164,220,255,.14);
+      box-shadow:inset -1px 0 0 rgba(255,255,255,.05);
+    }
+    .logo{
+      background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(125,211,252,.08))!important;
+      border:1px solid rgba(219,245,255,.22);
+      border-radius:19px!important;
+      box-shadow:0 22px 54px rgba(0,0,0,.34),0 0 38px rgba(125,211,252,.18)!important;
+      overflow:hidden;
+    }
+    .logo::before{
+      content:"";position:absolute;width:34px;height:28px;border-radius:9px;
+      background:linear-gradient(145deg,rgba(255,255,255,.58),rgba(125,211,252,.10) 62%,rgba(20,35,70,.22));
+      border:1px solid rgba(235,250,255,.42);
+      transform:perspective(300px) rotateX(58deg) rotateZ(-12deg) translateY(-5px);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 14px 20px rgba(0,0,0,.22),0 0 28px rgba(125,211,252,.24);
+      animation:boxFloat 5.5s ease-in-out infinite;
+    }
+    .logo::after{
+      content:"";position:absolute;width:30px;height:24px;border-radius:8px;
+      background:linear-gradient(160deg,rgba(186,230,253,.48),rgba(59,130,246,.14) 54%,rgba(15,23,42,.38));
+      border:1px solid rgba(219,245,255,.26);
+      transform:perspective(300px) rotateX(22deg) rotateY(-24deg) translateY(8px);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -12px 18px rgba(15,23,42,.20);
+    }
+    .nav button{color:#8ea5c6}
+    .nav button.active{
+      color:#fff;
+      background:linear-gradient(135deg,rgba(96,165,250,.22),rgba(167,139,250,.16),rgba(45,212,191,.08));
+      border-color:rgba(125,211,252,.35);
+      box-shadow:0 0 30px rgba(96,165,250,.18),inset 0 0 18px rgba(255,255,255,.05);
+    }
+    .card{
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.105),rgba(125,211,252,.035) 44%,rgba(255,255,255,.018))!important;
+      border-color:rgba(210,238,255,.16)!important;
+      box-shadow:0 24px 80px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(125,211,252,.08)!important;
+      backdrop-filter:blur(24px) saturate(1.25)!important;
+    }
+    .card::before{
+      background:
+        radial-gradient(circle at 18% 12%,rgba(255,255,255,.18),transparent 25%),
+        radial-gradient(circle at 82% 90%,rgba(125,211,252,.10),transparent 35%),
+        linear-gradient(120deg,rgba(255,255,255,.15),transparent 20%,transparent 76%,rgba(167,139,250,.09))!important;
+    }
+    .card:hover{
+      transform:translateY(-2px);
+      border-color:rgba(125,211,252,.42)!important;
+      box-shadow:0 30px 96px rgba(0,0,0,.48),0 0 36px rgba(96,165,250,.12),inset 0 1px 0 rgba(255,255,255,.22)!important;
+    }
+    .topbar{grid-template-columns:minmax(250px,320px) 1fr minmax(310px,390px)!important}
+    .title{color:#effaff!important;text-shadow:0 0 32px rgba(125,211,252,.24),0 2px 12px rgba(0,0,0,.7)!important}
+    .titleLine{background:linear-gradient(90deg,transparent,#7dd3fc,#a78bfa,transparent)!important}
+    .titleLine::after,.dot{background:#7dd3fc!important;box-shadow:0 0 14px #7dd3fc!important}
+    .dateBox,.btnIcon,.btnFilter,input,select,.statusBar{
+      background:rgba(255,255,255,.055)!important;
+      border-color:rgba(210,238,255,.14)!important;
+    }
+    .copyBtn{
+      background:linear-gradient(135deg,rgba(125,211,252,.20),rgba(167,139,250,.15))!important;
+      border-color:rgba(125,211,252,.30)!important;
+      box-shadow:0 12px 34px rgba(56,189,248,.10)!important;
+    }
+    .btnPrimary{
+      background:linear-gradient(135deg,#38bdf8,#8b5cf6)!important;
+      box-shadow:0 14px 34px rgba(96,165,250,.22)!important;
+    }
+    .kpi,.regionCard,.panel,.goal,.recordsPanel{border-radius:30px!important}
+    .kpiIcon{
+      background:radial-gradient(circle at 30% 22%,rgba(255,255,255,.28),rgba(125,211,252,.12) 42%,rgba(255,255,255,.04))!important;
+      border-color:rgba(125,211,252,.36)!important;
+      box-shadow:0 0 24px rgba(125,211,252,.18),inset 0 1px 0 rgba(255,255,255,.24)!important;
+    }
+    .kpiLabel,.panelHead h3,.goal h3{color:#f2fbff!important}
+    .kpiUsdRow,.regionUsdRow,.totalUsdMini{
+      background:linear-gradient(135deg,rgba(125,211,252,.12),rgba(167,139,250,.08))!important;
+      border-color:rgba(125,211,252,.22)!important;
+    }
+    .kpiUsdVal,.regionUsdVal,#goalDone{color:#7dd3fc!important}
+    .kpiUsdCur,.regionUsdCur{color:#dbeafe!important}
+    .avgRateMini{
+      padding:5px 8px;border-radius:10px;background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .regionCard{padding:20px 18px!important}
+    .regionBody{gap:16px!important}
+    .regionVisual{
+      width:142px!important;height:126px!important;flex:0 0 142px!important;
+      position:relative;display:grid;place-items:center;perspective:760px;transform-style:preserve-3d;
+      border-radius:32px;
+      background:
+        radial-gradient(circle at 36% 20%,rgba(255,255,255,.22),transparent 24%),
+        linear-gradient(145deg,rgba(255,255,255,.11),rgba(125,211,252,.052),rgba(6,12,30,.20));
+      border:1px solid rgba(220,245,255,.15);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 20px 44px rgba(0,0,0,.20);
+      overflow:visible;
+    }
+    .regionVisual::before{
+      content:"";position:absolute;inset:22px 8px 2px;border-radius:50%;
+      background:radial-gradient(ellipse,rgba(125,211,252,.22),transparent 70%);
+      filter:blur(10px);transform:translateY(38px) rotateX(70deg);opacity:.9;
+    }
+    .regionVisual .mapShape{
+      position:absolute!important;width:116px!important;height:78px!important;opacity:.24!important;
+      filter:blur(.2px) drop-shadow(0 18px 18px rgba(0,0,0,.20))!important;
+      background:linear-gradient(140deg,rgba(125,211,252,.36),rgba(167,139,250,.16))!important;
+    }
+    .glassLock3D,.lockShackle,.lockBody,.lockKey{display:none!important}
+    .glassBox3D{
+      position:relative;width:84px;height:76px;z-index:5;transform-style:preserve-3d;
+      transform:perspective(740px) rotateX(12deg) rotateY(-22deg) translateZ(18px);
+      filter:drop-shadow(0 24px 22px rgba(0,0,0,.36));
+      animation:boxFloat 5.8s ease-in-out infinite;
+    }
+    .glassBox3D span{position:absolute;display:block}
+    .glassBox3D .boxFace{
+      left:10px;top:28px;width:58px;height:38px;border-radius:12px;
+      background:linear-gradient(155deg,rgba(255,255,255,.54),rgba(125,211,252,.16) 52%,rgba(15,23,42,.34));
+      border:1px solid rgba(235,250,255,.44);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.72),inset 0 -16px 24px rgba(15,23,42,.18),0 0 34px rgba(125,211,252,.18);
+      transform:translateZ(24px);
+      backdrop-filter:blur(8px);
+    }
+    .glassBox3D .boxTop{
+      left:13px;top:10px;width:58px;height:35px;border-radius:12px 14px 9px 10px;
+      background:linear-gradient(135deg,rgba(255,255,255,.62),rgba(186,230,253,.22) 62%,rgba(96,165,250,.08));
+      border:1px solid rgba(235,250,255,.42);
+      transform:rotateX(62deg) rotateZ(-8deg) translateZ(34px);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.88),0 14px 24px rgba(0,0,0,.16),0 0 24px rgba(125,211,252,.20);
+    }
+    .glassBox3D .boxSide{
+      right:7px;top:26px;width:28px;height:40px;border-radius:8px 12px 12px 8px;
+      background:linear-gradient(120deg,rgba(125,211,252,.20),rgba(167,139,250,.11),rgba(15,23,42,.28));
+      border:1px solid rgba(219,245,255,.22);
+      transform:skewY(-20deg) translateZ(10px);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.34);
+    }
+    .glassBox3D .boxGlow{
+      left:20px;bottom:2px;width:52px;height:13px;border-radius:999px;
+      background:radial-gradient(ellipse,rgba(125,211,252,.42),transparent 72%);
+      filter:blur(8px);transform:rotateX(72deg) translateZ(-8px);
+    }
+    @keyframes boxFloat{
+      0%,100%{transform:perspective(740px) rotateX(12deg) rotateY(-22deg) translateY(0) translateZ(18px)}
+      50%{transform:perspective(740px) rotateX(9deg) rotateY(-12deg) translateY(-8px) translateZ(24px)}
+    }
+    #chart.card{
+      background:
+        radial-gradient(circle at 18% 16%,rgba(125,211,252,.15),transparent 30%),
+        linear-gradient(145deg,rgba(255,255,255,.10),rgba(10,18,42,.50))!important;
+    }
+    .chartWrap{
+      height:310px!important;
+      padding:12px 10px 4px;
+      border-radius:24px;
+      background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+      border:1px solid rgba(210,238,255,.09);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+    }
+    .chartWrap::before{
+      content:"";position:absolute;left:12%;right:12%;bottom:8px;height:22px;border-radius:50%;
+      background:radial-gradient(ellipse,rgba(125,211,252,.16),transparent 70%);
+      filter:blur(8px);pointer-events:none;
+    }
+    .ring{
+      background:conic-gradient(#7dd3fc calc(var(--p) * 1%),rgba(255,255,255,.07) 0)!important;
+      box-shadow:0 0 0 1px rgba(125,211,252,.12),0 0 58px rgba(125,211,252,.18)!important;
+    }
+    .ring::before{background:linear-gradient(145deg,#071020,#050817)!important}
+    .copyToast{
+      position:fixed;left:24px;bottom:24px;z-index:1000;
+      padding:13px 18px;border-radius:16px;
+      background:rgba(6,14,34,.86);
+      color:#eefbff;border:1px solid rgba(125,211,252,.32);
+      box-shadow:0 20px 56px rgba(0,0,0,.38),0 0 26px rgba(125,211,252,.12);
+      backdrop-filter:blur(18px);
+      opacity:0;transform:translateY(12px);pointer-events:none;
+      transition:.22s ease;font-weight:900;
+    }
+    .copyToast.show{opacity:1;transform:translateY(0)}
+    @media(max-width:700px){
+      .topbar{grid-template-columns:1fr!important}
+      .topActions{justify-content:stretch!important;flex-wrap:wrap}
+      .topActions .btnFilter{flex:1;justify-content:center}
+      .regionBody{flex-direction:row!important}
+      .regionVisual{width:118px!important;height:112px!important;flex-basis:118px!important}
+      .glassBox3D{transform:scale(.86) perspective(740px) rotateX(12deg) rotateY(-22deg) translateZ(18px)}
+    }
+
+  
+    /* ═════ IMAD REAL GLASS TREASURE BOX V2 ═════ */
+    .bottomGrid{
+      grid-template-columns:minmax(0,1.45fr) minmax(300px,.72fr)!important;
+      align-items:stretch!important;
+    }
+    @media(max-width:1280px){
+      .bottomGrid{grid-template-columns:1fr!important}
+      .goal{grid-column:auto!important}
+    }
+
+    .regionVisual{
+      width:152px!important;
+      height:134px!important;
+      flex:0 0 152px!important;
+      border-radius:36px!important;
+      background:
+        radial-gradient(circle at 28% 16%,rgba(255,255,255,.24),transparent 24%),
+        radial-gradient(circle at 78% 76%,rgba(125,211,252,.15),transparent 34%),
+        linear-gradient(145deg,rgba(255,255,255,.115),rgba(125,211,252,.045) 45%,rgba(3,7,20,.22))!important;
+      border:1px solid rgba(226,247,255,.17)!important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.22),
+        inset 0 -1px 0 rgba(125,211,252,.10),
+        0 24px 52px rgba(0,0,0,.26)!important;
+      overflow:visible!important;
+    }
+    .regionVisual::after{
+      content:"";
+      position:absolute;
+      inset:16px;
+      border-radius:28px;
+      background:linear-gradient(135deg,rgba(255,255,255,.075),transparent 54%,rgba(125,211,252,.07));
+      border:1px solid rgba(255,255,255,.06);
+      pointer-events:none;
+    }
+
+    .glassBox3D{
+      width:104px!important;
+      height:92px!important;
+      transform-style:preserve-3d!important;
+      transform:perspective(860px) rotateX(16deg) rotateY(-25deg) rotateZ(-2deg) translateZ(22px)!important;
+      animation:realBoxFloat 6.4s ease-in-out infinite!important;
+      filter:
+        drop-shadow(0 28px 24px rgba(0,0,0,.40))
+        drop-shadow(0 0 22px rgba(125,211,252,.15))!important;
+    }
+    .glassBox3D span{display:block!important;position:absolute!important}
+
+    .glassBox3D .boxFace{
+      left:13px!important;
+      top:36px!important;
+      width:72px!important;
+      height:46px!important;
+      border-radius:14px 14px 18px 18px!important;
+      background:
+        linear-gradient(152deg,
+          rgba(255,255,255,.68) 0%,
+          rgba(219,245,255,.32) 18%,
+          rgba(125,211,252,.18) 46%,
+          rgba(29,78,216,.22) 72%,
+          rgba(2,6,23,.38) 100%)!important;
+      border:1px solid rgba(240,253,255,.55)!important;
+      box-shadow:
+        inset 0 2px 0 rgba(255,255,255,.82),
+        inset 8px 0 18px rgba(255,255,255,.12),
+        inset 0 -20px 26px rgba(3,7,18,.26),
+        0 0 36px rgba(125,211,252,.18)!important;
+      transform:translateZ(34px)!important;
+      backdrop-filter:blur(10px) saturate(1.25)!important;
+      overflow:hidden;
+    }
+    .glassBox3D .boxFace::before{
+      content:"";
+      position:absolute;
+      inset:7px 10px auto auto;
+      width:30px;
+      height:9px;
+      border-radius:999px;
+      background:rgba(255,255,255,.62);
+      filter:blur(.4px);
+      transform:rotate(-12deg);
+      box-shadow:0 0 12px rgba(255,255,255,.35);
+    }
+    .glassBox3D .boxFace::after{
+      content:"";
+      position:absolute;
+      left:10px;
+      right:10px;
+      bottom:8px;
+      height:8px;
+      border-radius:999px;
+      background:linear-gradient(90deg,transparent,rgba(125,211,252,.42),transparent);
+      filter:blur(1px);
+    }
+
+    .glassBox3D .boxTop{
+      left:16px!important;
+      top:10px!important;
+      width:76px!important;
+      height:48px!important;
+      border-radius:18px 20px 13px 13px!important;
+      background:
+        linear-gradient(135deg,
+          rgba(255,255,255,.78) 0%,
+          rgba(238,250,255,.43) 24%,
+          rgba(125,211,252,.19) 58%,
+          rgba(167,139,250,.11) 100%)!important;
+      border:1px solid rgba(240,253,255,.52)!important;
+      transform:rotateX(62deg) rotateZ(-8deg) translateZ(48px)!important;
+      box-shadow:
+        inset 0 2px 0 rgba(255,255,255,.90),
+        inset 0 -14px 20px rgba(96,165,250,.12),
+        0 15px 26px rgba(0,0,0,.18),
+        0 0 30px rgba(125,211,252,.18)!important;
+      overflow:hidden;
+    }
+    .glassBox3D .boxTop::before{
+      content:"";
+      position:absolute;
+      left:12px;
+      top:8px;
+      width:48px;
+      height:10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.66);
+      filter:blur(.6px);
+      transform:rotate(-10deg);
+    }
+
+    .glassBox3D .boxSide{
+      right:3px!important;
+      top:31px!important;
+      width:34px!important;
+      height:49px!important;
+      border-radius:9px 17px 18px 8px!important;
+      background:
+        linear-gradient(118deg,
+          rgba(191,219,254,.34),
+          rgba(125,211,252,.18) 44%,
+          rgba(88,28,135,.14) 72%,
+          rgba(3,7,18,.34))!important;
+      border:1px solid rgba(219,245,255,.30)!important;
+      transform:skewY(-22deg) translateZ(13px)!important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.42),
+        inset -12px 0 20px rgba(2,6,23,.14)!important;
+    }
+
+    .glassBox3D .boxGlow{
+      left:18px!important;
+      bottom:-5px!important;
+      width:72px!important;
+      height:20px!important;
+      border-radius:999px!important;
+      background:radial-gradient(ellipse,rgba(125,211,252,.55),rgba(167,139,250,.16) 44%,transparent 75%)!important;
+      filter:blur(9px)!important;
+      transform:rotateX(74deg) translateZ(-12px)!important;
+      opacity:.95!important;
+    }
+
+    .glassBox3D::before{
+      content:"";
+      position:absolute;
+      left:32px;
+      top:47px;
+      width:34px;
+      height:8px;
+      border-radius:999px;
+      background:linear-gradient(90deg,rgba(255,255,255,.82),rgba(125,211,252,.30),rgba(255,255,255,.56));
+      transform:translateZ(46px) rotate(-6deg);
+      box-shadow:0 0 16px rgba(255,255,255,.24);
+      z-index:20;
+    }
+    .glassBox3D::after{
+      content:"";
+      position:absolute;
+      left:46px;
+      top:56px;
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      background:radial-gradient(circle at 34% 28%,#fff,rgba(125,211,252,.52) 42%,rgba(15,23,42,.20));
+      border:1px solid rgba(255,255,255,.38);
+      transform:translateZ(50px);
+      box-shadow:0 0 18px rgba(125,211,252,.22);
+      z-index:21;
+    }
+
+    @keyframes realBoxFloat{
+      0%,100%{
+        transform:perspective(860px) rotateX(16deg) rotateY(-25deg) rotateZ(-2deg) translateY(0) translateZ(22px)!important;
+      }
+      50%{
+        transform:perspective(860px) rotateX(12deg) rotateY(-17deg) rotateZ(1deg) translateY(-9px) translateZ(30px)!important;
+      }
+    }
+
+    .regionCard:nth-child(1) .glassBox3D .boxFace{background:linear-gradient(152deg,rgba(255,255,255,.68),rgba(125,211,252,.22),rgba(14,165,233,.22),rgba(2,6,23,.36))!important}
+    .regionCard:nth-child(2) .glassBox3D .boxFace{background:linear-gradient(152deg,rgba(255,255,255,.68),rgba(196,181,253,.27),rgba(124,58,237,.20),rgba(2,6,23,.36))!important}
+    .regionCard:nth-child(3) .glassBox3D .boxFace{background:linear-gradient(152deg,rgba(255,255,255,.68),rgba(110,231,183,.24),rgba(5,150,105,.18),rgba(2,6,23,.36))!important}
+    .regionCard:nth-child(4) .glassBox3D .boxFace{background:linear-gradient(152deg,rgba(255,255,255,.68),rgba(240,171,252,.24),rgba(192,38,211,.17),rgba(2,6,23,.36))!important}
+
+    @media(max-width:700px){
+      .regionVisual{
+        width:126px!important;
+        height:116px!important;
+        flex-basis:126px!important;
+      }
+      .glassBox3D{
+        transform:scale(.84) perspective(860px) rotateX(16deg) rotateY(-25deg) rotateZ(-2deg) translateZ(22px)!important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -383,7 +1303,7 @@
         <button data-jump="chart">
           <span class="ico">⇄</span>المقارنات
         </button>
-        <button data-jump="table">
+        <button data-jump="goal">
           <span class="ico">◎</span>الأهداف
         </button>
         <button id="notifyBtn">
@@ -438,6 +1358,9 @@
         <!-- Actions -->
         <div class="topActions">
           <button class="btnIcon" id="notifyTopBtn">🔔</button>
+          <button class="btnFilter copyBtn" id="copy24Btn" title="نسخ تقرير آخر 24 ساعة">
+            <span style="font-size:15px">⧉</span> نسخ 24 ساعة
+          </button>
           <button class="btnFilter" id="filterBtnMain">
             <span style="font-size:14px">☰</span> تصفية
           </button>
@@ -458,7 +1381,7 @@
               </select>
             </div>
             <div><label>بحث مندوب</label><input id="repSearch" placeholder="اسم المندوب" type="text"></div>
-            <div><label>الهدف الشهري USD</label><input id="monthlyTarget" type="number" class="ltr" value="40000000"></div>
+            <div><label>الهدف الشهري SYP</label><input id="monthlyTarget" type="number" class="ltr" value="40000000"></div>
             <div><label>سعر افتراضي SYP/USD</label><input id="defaultRate" type="number" class="ltr" value="15000"></div>
             <button class="btnPrimary full" id="applyFilters">تطبيق الفلتر</button>
           </div>
@@ -528,16 +1451,20 @@
           </div>
         </article>
 
-        <!-- بطاقة 4: متوسط سعر الصرف -->
-        <article class="card kpi">
+        <!-- بطاقة 4: الدولار الإجمالي + متوسط سعر الصرف -->
+        <article class="card kpi rateKpi">
           <div class="kpiTop">
-            <div class="kpiIcon">💲</div>
-            <div class="kpiLabel">متوسط سعر الصرف</div>
+            <div class="kpiIcon">◈</div>
+            <div class="kpiLabel">الدولار الإجمالي وسعر الصرف</div>
           </div>
           <div class="kpiAmounts">
-            <div class="kpiSypRow">
+            <div class="kpiUsdRow totalUsdMini">
+              <span class="kpiUsdVal" id="totalUsdAll">0</span>
+              <span class="kpiUsdCur">USD إجمالي</span>
+            </div>
+            <div class="kpiSypRow avgRateMini">
               <span class="kpiSypVal" id="avgRate">0</span>
-              <span class="kpiSypCur">SYP/USD</span>
+              <span class="kpiSypCur">SYP/USD وسطي</span>
             </div>
           </div>
           <div class="kpiSub">
@@ -569,23 +1496,9 @@
           <div class="chartWrap"><canvas id="trendChart"></canvas></div>
         </article>
 
-        <!-- Region Table -->
-        <article class="card panel" id="table">
-          <div class="panelHead"><h3>إجمالي الإيرادات حسب المنطقة</h3></div>
-          <table class="table">
-            <thead>
-              <tr>
-                <th>المنطقة</th>
-                <th>إجمالي الإيرادات (USD)</th>
-                <th>نسبة من الإجمالي</th>
-              </tr>
-            </thead>
-            <tbody id="regionTable"></tbody>
-          </table>
-        </article>
 
         <!-- Goal Ring -->
-        <article class="card goal">
+        <article class="card goal" id="goal">
           <h3>تقدم الهدف الشهري</h3>
           <div class="ring" id="goalRing" style="--p:0">
             <div class="ringTxt">
@@ -594,8 +1507,8 @@
             </div>
           </div>
           <div class="goalMeta">
-            <div>الهدف: &nbsp;<b class="amount" id="goalTarget">40,000,000 USD</b></div>
-            <div>المحقق: <b class="amount" id="goalDone">0 USD</b></div>
+            <div>الهدف: &nbsp;<b class="amount" id="goalTarget">40,000,000 SYP</b></div>
+            <div>المحقق: <b class="amount" id="goalDone">0 SYP</b></div>
           </div>
         </article>
 
@@ -611,21 +1524,6 @@
           </div>
         </div>
         <div id="recordsBody_wrap">
-        <div class="toolbar">
-          <div><label>من تاريخ</label><input id="recordsFrom" type="date"></div>
-          <div><label>إلى تاريخ</label><input id="recordsTo" type="date"></div>
-          <div><label>المنطقة</label>
-            <select id="recordsRegion">
-              <option value="">الكل</option>
-              <option value="R1">Region 1</option>
-              <option value="R2">Region 2</option>
-              <option value="R3">Region 3</option>
-              <option value="R4">Region 4</option>
-            </select>
-          </div>
-          <div><label>بحث</label><input id="recordsSearch" type="text" placeholder="مندوب / ملاحظات"></div>
-          <div><label>&nbsp;</label><button class="btnSecondary" id="syncFilters">تطبيق</button></div>
-        </div>
         <div class="toolbar">
           <div><label>من تاريخ</label><input id="recordsFrom" type="date"></div>
           <div><label>إلى تاريخ</label><input id="recordsTo" type="date"></div>
@@ -657,6 +1555,7 @@
 
     </main><!-- /main -->
   </div><!-- /shell -->
+  <div class="copyToast" id="copyToast">تم نسخ التقرير ✅</div>
 
 <!-- ══ FIREBASE + LOGIC (unchanged) ══════════════════════════ -->
 <script type="module">
@@ -670,7 +1569,7 @@ const $=id=>document.getElementById(id);
 const ar="٠١٢٣٤٥٦٧٨٩", fa="۰۱۲۳۴۵۶۷۸۹";
 const REGIONS=["R1","R2","R3","R4"];
 const regionNames={R1:"Region 1",R2:"Region 2",R3:"Region 3",R4:"Region 4"};
-const colors={R1:"#ff6b00",R2:"#ffad20",R3:"#55aaff",R4:"#c69a74"};
+const colors={R1:"#38bdf8",R2:"#a78bfa",R3:"#34d399",R4:"#f0abfc"};
 let trendChart=null,sparkChart=null,chartMode="daily";
 const state={user:null,profile:null,reps:[],offices:[],sales:[],deliveries:[],manual:[],withdrawals:[],settings:{},ratesByDate:new Map(),filtered:[]};
 function n(v){if(v===null||v===undefined)return 0;let s=String(v).trim().replace(/[٠-٩]/g,d=>String(ar.indexOf(d))).replace(/[۰-۹]/g,d=>String(fa.indexOf(d))).replace(/,/g,"").replace(/\s/g,"").replace(/[^\d.-]/g,"");return Number(s||0)}
@@ -734,6 +1633,8 @@ function renderKpis(){
   $("monthUsd").textContent=fmt(mo.usd,2);
 
   /* كارد 4 */
+  const filterTotal=sumRows(rows);
+  if($("totalUsdAll")) $("totalUsdAll").textContent=fmt(filterTotal.usd,2);
   $("avgRate").textContent=fmt(avg,2);
   renderSpark(rates.slice(-20));
 }
@@ -749,7 +1650,15 @@ function renderOrigins(){
         ${regionNames[rg]}
       </div>
       <div class="regionBody">
-        <div class="mapShape"></div>
+        <div class="regionVisual">
+          <div class="mapShape"></div>
+          <div class="glassBox3D" aria-hidden="true">
+            <span class="boxTop"></span>
+            <span class="boxFace"></span>
+            <span class="boxSide"></span>
+            <span class="boxGlow"></span>
+          </div>
+        </div>
         <div class="regionNums">
           <div class="lbl">إجمالي الإيرادات</div>
           <div class="regionSypRow">
@@ -769,13 +1678,127 @@ function renderOrigins(){
     </article>`;
   }).join("");
 }
-function renderOriginTable(){const rows=state.filtered,total=sumRows(rows);let html=REGIONS.map(rg=>{const s=sumRows(rows.filter(r=>regionOf(r)===rg));const pct=total.usd>0?s.usd/total.usd*100:0;return `<tr><td><span class="regionDot" style="display:inline-block;color:${colors[rg]};background:${colors[rg]}"></span> ${regionNames[rg]}</td><td class="amount">${fmt(s.usd,2)}</td><td class="amount">${fmt(pct,1)}%</td></tr>`}).join("");html+=`<tr class="totalRow"><td>الإجمالي</td><td class="amount">${fmt(total.usd,2)}</td><td class="amount">100%</td></tr>`;$("regionTable").innerHTML=html;}
+function renderOriginTable(){const el=$("regionTable"); if(!el) return;}
 function groupKey(d,mode){if(mode==="monthly")return d.slice(0,7);if(mode==="weekly"){const dt=new Date(d);if(isNaN(dt))return d;const onejan=new Date(dt.getFullYear(),0,1);const week=Math.ceil((((dt-onejan)/86400000)+onejan.getDay()+1)/7);return `${dt.getFullYear()}-W${String(week).padStart(2,"0")}`}return d}
-function renderChart(){const rows=state.filtered;const labels=[...new Set(rows.map(r=>groupKey(dateVal(r),chartMode)).filter(Boolean))].sort().slice(-12);const datasets=REGIONS.map(rg=>({label:regionNames[rg],data:labels.map(l=>sumRows(rows.filter(r=>regionOf(r)===rg&&groupKey(dateVal(r),chartMode)===l)).usd),borderColor:colors[rg],backgroundColor:colors[rg]+"33",tension:.38,pointRadius:4,pointHoverRadius:7,borderWidth:2.5,fill:false}));const ctx=$("trendChart");if(trendChart)trendChart.destroy();trendChart=new Chart(ctx,{type:"line",data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#d4c9bf",usePointStyle:true,pointStyleWidth:10}}},scales:{x:{ticks:{color:"#857d74"},grid:{color:"rgba(255,255,255,.06)"}},y:{ticks:{color:"#857d74",callback:v=>v>=1000000?(v/1000000).toFixed(1)+"M":v>=1000?(v/1000).toFixed(0)+"K":v},grid:{color:"rgba(255,255,255,.07)"}}}}});}
+function renderChart(){
+  const rows=state.filtered;
+  const labels=[...new Set(rows.map(r=>groupKey(dateVal(r),chartMode)).filter(Boolean))].sort().slice(-12);
+  const ctx=$("trendChart");
+  const canvasCtx=ctx.getContext("2d");
+  const gradient=(base)=>{
+    const g=canvasCtx.createLinearGradient(0,0,0,290);
+    g.addColorStop(0, base+"ee");
+    g.addColorStop(.45, base+"88");
+    g.addColorStop(1, base+"18");
+    return g;
+  };
+  const datasets=REGIONS.map((rg,idx)=>({
+    label:regionNames[rg],
+    data:labels.map(l=>sumRows(rows.filter(r=>regionOf(r)===rg&&groupKey(dateVal(r),chartMode)===l)).syp),
+    backgroundColor:gradient(colors[rg]),
+    borderColor:colors[rg],
+    borderWidth:1.5,
+    borderRadius:14,
+    borderSkipped:false,
+    hoverBorderWidth:2.5,
+    barPercentage:.68,
+    categoryPercentage:.72
+  }));
+  if(trendChart)trendChart.destroy();
+  trendChart=new Chart(ctx,{
+    type:"bar",
+    data:{labels,datasets},
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      animation:{duration:850,easing:"easeOutQuart"},
+      plugins:{
+        legend:{labels:{color:"#d9edff",usePointStyle:true,pointStyleWidth:10,font:{weight:"800"}}},
+        tooltip:{
+          rtl:true,
+          backgroundColor:"rgba(7,13,31,.92)",
+          titleColor:"#fff",
+          bodyColor:"#dbeafe",
+          borderColor:"rgba(125,211,252,.28)",
+          borderWidth:1,
+          padding:12,
+          callbacks:{label:(c)=>`${c.dataset.label}: ${fmt(c.raw)} SYP`}
+        }
+      },
+      scales:{
+        x:{
+          stacked:false,
+          ticks:{color:"#9fb6d4",font:{weight:"800"}},
+          grid:{display:false}
+        },
+        y:{
+          beginAtZero:true,
+          ticks:{
+            color:"#9fb6d4",
+            callback:v=>v>=1000000000?(v/1000000000).toFixed(1)+"B":v>=1000000?(v/1000000).toFixed(0)+"M":v>=1000?(v/1000).toFixed(0)+"K":v
+          },
+          grid:{color:"rgba(180,220,255,.075)",drawBorder:false}
+        }
+      }
+    }
+  });
+}
 function renderSpark(vals){const data=(vals.length?vals:[defaultRate()]).slice(-12);const ctx=$("spark");if(sparkChart)sparkChart.destroy();sparkChart=new Chart(ctx,{type:"line",data:{labels:data.map((_,i)=>i+1),datasets:[{data,borderColor:"#ff9f1a",borderWidth:2,pointRadius:0,tension:.45}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}})}
-function renderGoal(){const month=sumRows(rowsForMonth());const target=n($("monthlyTarget").value)||40000000;const pct=Math.max(0,Math.min(100,target?month.usd/target*100:0));$("goalRing").style.setProperty("--p",pct);$("goalPct").textContent=`${fmt(pct,0)}%`;$("goalTarget").textContent=`${fmt(target)} USD`;$("goalDone").textContent=`${fmt(month.usd,2)} USD`;}
+function renderGoal(){const month=sumRows(rowsForMonth());const target=n($("monthlyTarget").value)||40000000;const pct=Math.max(0,Math.min(100,target?month.syp/target*100:0));$("goalRing").style.setProperty("--p",pct);$("goalPct").textContent=`${fmt(pct,0)}%`;$("goalTarget").textContent=`${fmt(target)} SYP`;$("goalDone").textContent=`${fmt(month.syp)} SYP`;}
 function renderRecords(){const from=$("recordsFrom").value||$("fromDate").value||"",to=$("recordsTo").value||$("toDate").value||"",org=$("recordsRegion").value||$("regionFilter").value||"",term=cleanKey($("recordsSearch").value||$("repSearch").value||"");const rows=dedupe(active(state.sales)).filter(r=>{const d=dateVal(r),rg=regionOf(r),hay=cleanKey([repName(r),r.notes,r.description,rg,regionNames[rg]].join(" "));return(!from||d>=from)&&(!to||d<=to)&&(!org||rg===org)&&(!term||hay.includes(term));}).sort((a,b)=>String(dateVal(b)).localeCompare(String(dateVal(a)))||(createdMs(b)-createdMs(a)));const total=sumRows(rows);$("recordsCount").textContent=`${fmt(rows.length)} سجل — المجموع ${fmt(total.syp)} SYP / ${fmt(total.usd,2)} USD`;$("recordsBody").innerHTML=rows.map(r=>{const d=dateVal(r),rate=rateForDate(d,r),cm=createdMs(r);return `<tr><td>${esc(d)}</td><td>${cm?new Date(cm).toLocaleString("ar"):"—"}</td><td>${regionNames[regionOf(r)]||esc(regionOf(r))}</td><td>${esc(repName(r))}</td><td class="amount">${fmt(rowAmountSyp(r))}</td><td class="amount">${fmt(usdValue(r),2)}</td><td class="amount">${fmt(rate,2)}</td><td>${esc(r.notes||r.description||"—")}</td></tr>`}).join("")||`<tr><td colspan="8" class="empty">لا توجد سجلات ضمن هذا الفلتر</td></tr>`;}
 function syncRecordFilterInputs(){["recordsFrom","fromDate"].forEach(id=>$(id).value=$("fromDate").value||$("recordsFrom").value);["recordsTo","toDate"].forEach(id=>$(id).value=$("toDate").value||$("recordsTo").value);["recordsRegion","regionFilter"].forEach(id=>$(id).value=$("regionFilter").value||$("recordsRegion").value)}
+
+function arabicWeekday(d){
+  try{
+    const dt=new Date(d+"T12:00:00");
+    if(!isNaN(dt)) return dt.toLocaleDateString("ar-SY",{weekday:"long"});
+  }catch(e){}
+  return d||"";
+}
+function uniqueDayLabel(rows){
+  const days=[...new Set(rows.map(r=>dateVal(r)).filter(Boolean))].sort().map(arabicWeekday);
+  const clean=[...new Set(days.filter(Boolean))];
+  if(clean.length===0) return "آخر 24 ساعة";
+  if(clean.length===1) return clean[0];
+  if(clean.length===2) return `${clean[0]} والخميس`.replace(`${clean[0]} والخميس`, `${clean[0]} و${clean[1]}`);
+  return clean.slice(0,-1).join("، ")+" و"+clean.at(-1);
+}
+function avgRateForRows(rows){
+  const rates=rows.map(r=>rateForDate(dateVal(r),r)).filter(x=>x>0);
+  return rates.length?rates.reduce((a,b)=>a+b,0)/rates.length:defaultRate();
+}
+async function copyLast24Report(){
+  const rows=new24Rows();
+  const total=sumRows(rows);
+  const avg=avgRateForRows(rows);
+  const dayText=uniqueDayLabel(rows);
+  const lines=[];
+  lines.push(`إيراد ${dayText} — الجديد المضاف آخر 24 ساعة`);
+  lines.push(``);
+  REGIONS.forEach(rg=>{
+    const s=sumRows(rows.filter(r=>regionOf(r)===rg));
+    lines.push(`${regionNames[rg]}: ${fmt(s.syp)} SYP / ${fmt(s.usd,2)} USD`);
+  });
+  lines.push(``);
+  lines.push(`المجموع الكلي للريجينات الأربعة: ${fmt(total.syp)} SYP / ${fmt(total.usd,2)} USD`);
+  lines.push(`سعر الصرف الوسطي: ${fmt(avg,2)} SYP/USD`);
+  lines.push(`عدد السجلات الجديدة: ${fmt(rows.length)}`);
+  const txt=lines.join("\\n");
+  try{
+    await navigator.clipboard.writeText(txt);
+    showCopyToast("تم نسخ تقرير آخر 24 ساعة ✅");
+  }catch(e){
+    const ta=document.createElement("textarea");
+    ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();
+    showCopyToast("تم النسخ ✅");
+  }
+}
+function showCopyToast(t){
+  const el=$("copyToast"); if(!el) return;
+  el.textContent=t; el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"),1800);
+}
+
 function renderAll(){state.filtered=filteredRows();renderKpis();renderOrigins();renderOriginTable();renderChart();renderGoal();renderRecords();}
 function jump(id){document.getElementById(id)?.scrollIntoView({behavior:"smooth",block:"start"})}
 
@@ -826,6 +1849,7 @@ function bind(){
 
   $("refreshSide").onclick=$("refreshMobile").onclick=()=>loadAll();
   $("logoutSide").onclick=$("logoutMobile").onclick=()=>signOut(auth);
+  if($("copy24Btn")) $("copy24Btn").onclick=copyLast24Report;
 
   /* زر إخفاء السجلات */
   $("toggleRecords").onclick=()=>{
