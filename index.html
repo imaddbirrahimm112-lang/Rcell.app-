@@ -1,1887 +1,817 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>لوحة الإيرادات — صندوق زجاجي فاخر</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة الإيرادات - Regions 1-4</title>
   <style>
-    /* ── VARIABLES ─────────────────────────────────────────── */
-    :root {
-      --bg:       #050817;
-      --sidebar:  #07101e;
-      --amber:    #67e8ff;
-      --amber2:   #8b5cf6;
-      --gold:     #dbeafe;
-      --blue:     #60a5fa;
-      --green:    #34d399;
-      --red:      #fb7185;
-      --muted:    #91a4bd;
-      --soft:     #d6e6ff;
-      --text:     #f7fbff;
-      --card-bg:  rgba(11,22,39,0.72);
-      --cb:       rgba(255,255,255,0.15);
-      --cb-h:     rgba(103,232,255,0.42);
-      --shadow:   0 26px 90px rgba(0,0,0,.58);
-      --r:        26px;
+    *{box-sizing:border-box}
+    :root{
+      --bg1:#08101f;
+      --bg2:#0c1730;
+      --glass:rgba(255,255,255,.12);
+      --glass2:rgba(255,255,255,.07);
+      --line:rgba(255,255,255,.16);
+      --text:#f8fbff;
+      --muted:rgba(236,245,255,.72);
+      --blue:#54a8ff;
+      --cyan:#79d6ff;
+      --violet:#8d84ff;
+      --green:#62ffb1;
+      --orange:#ffbf6e;
+      --shadow:0 18px 60px rgba(10,18,35,.28);
     }
-
-    /* ── RESET ─────────────────────────────────────────────── */
-    *,*::before,*::after{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);
-      font-family:'Segoe UI',Tahoma,system-ui,-apple-system,Arial,sans-serif;
-      overflow-x:hidden}
-
-    /* ── GLOBAL BACKGROUND ─────────────────────────────────── */
-    body::before{content:"";position:fixed;inset:0;pointer-events:none;
-      background:
-        radial-gradient(ellipse at 56% 0%, rgba(255,140,0,.24) 0%, transparent 28%),
-        radial-gradient(ellipse at 92% 8%,  rgba(255,78,0,.16) 0%,  transparent 22%),
-        radial-gradient(ellipse at 18% 96%, rgba(255,130,0,.11) 0%, transparent 22%),
-        linear-gradient(165deg, #070a0d 0%, #030405 100%);
-      z-index:-3}
-    body::after{content:"";position:fixed;inset:0;pointer-events:none;
-      background-image:
-        linear-gradient(rgba(255,255,255,.021) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(255,255,255,.019) 1px,transparent 1px);
-      background-size:52px 52px;
-      mask-image:radial-gradient(ellipse at 50% 28%, #000 0%, transparent 78%);
-      z-index:-2}
-
-    /* ── LAYOUT ────────────────────────────────────────────── */
-    .shell{width:100%;min-height:100vh;display:grid;grid-template-columns:190px 1fr}
-
-    /* ── SIDEBAR ───────────────────────────────────────────── */
-    .side{
-      background:linear-gradient(180deg,rgba(7,9,12,.98) 0%,rgba(5,7,10,.96) 100%);
-      border-left:1px solid rgba(255,255,255,.07);
-      display:flex;flex-direction:column;padding:26px 14px;
-      position:sticky;top:0;height:100vh;overflow:hidden;
-    }
-    /* logo */
-    .logo{
-      width:52px;height:52px;margin:0 auto 26px;border-radius:14px;
-      background:conic-gradient(from 45deg, #ff6200, #ffc87a, #ff9f1a, #ff6200);
-      box-shadow:0 0 32px rgba(255,159,26,.48), 0 0 70px rgba(255,100,0,.18);
-      display:flex;align-items:center;justify-content:center;position:relative;
-    }
-    .logo::after{content:"";width:24px;height:24px;background:var(--bg);transform:rotate(45deg);border-radius:5px}
-    /* nav */
-    .nav{flex:1;display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
-    .nav button{
-      display:flex;align-items:center;gap:11px;padding:12px 14px;
-      border-radius:13px;border:1px solid transparent;background:transparent;
-      color:#7a7267;font-size:13.5px;font-weight:700;cursor:pointer;
-      text-align:right;direction:rtl;width:100%;transition:all .18s ease;box-shadow:none;min-height:0;
-    }
-    .nav button:hover{color:#c0b8b0;background:rgba(255,255,255,.04)}
-    .nav button.active{
-      color:#fff;
-      background:linear-gradient(135deg,rgba(255,159,26,.28),rgba(255,107,0,.14));
-      border-color:rgba(255,159,26,.45);
-      box-shadow:0 0 24px rgba(255,145,20,.22),inset 0 0 18px rgba(255,159,26,.07);
-    }
-    .ico{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-    /* sidebar footer */
-    .sideFooter{
-      border:1px solid rgba(255,255,255,.08);border-radius:15px;
-      padding:13px 14px;background:rgba(255,255,255,.028);font-size:12px;color:var(--muted);
-    }
-    .sideFooter .dot{display:inline-block;width:8px;height:8px;border-radius:50%;
-      background:var(--amber);box-shadow:0 0 10px var(--amber);margin-left:6px;vertical-align:middle}
-    .sideFooter b{display:block;color:var(--gold);margin-top:3px}
-    .sideFooter .copy{font-size:11px;color:#5a544e;margin-top:4px}
-
-    /* ── GLASS CARD ────────────────────────────────────────── */
-    .card{
-      position:relative;border:1px solid var(--cb);border-radius:var(--r);
-      background:linear-gradient(148deg,rgba(255,255,255,.068),rgba(255,255,255,.018));
-      box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.14);
-      backdrop-filter:blur(20px);overflow:hidden;
-      transition:border-color .22s,box-shadow .22s;
-    }
-    .card::before{content:"";position:absolute;inset:0;border-radius:inherit;
-      background:
-        radial-gradient(circle at 14% 14%,rgba(255,159,26,.12),transparent 28%),
-        linear-gradient(118deg,rgba(255,255,255,.11),transparent 20%,transparent 80%,rgba(255,159,26,.08));
-      pointer-events:none}
-    .card:hover{border-color:rgba(255,159,26,.36);box-shadow:var(--shadow),0 0 26px rgba(255,122,0,.08),inset 0 1px 0 rgba(255,255,255,.17)}
-
-    /* ── MAIN ──────────────────────────────────────────────── */
-    .main{padding:22px 24px;display:flex;flex-direction:column;gap:15px;min-height:100vh;
-      background:radial-gradient(ellipse at 50% -5%,rgba(255,145,30,.16),transparent 22%),
-                 linear-gradient(140deg,rgba(13,15,19,.90),rgba(4,5,7,.84));}
-
-    /* ── TOP BAR ───────────────────────────────────────────── */
-    .topbar{display:grid;grid-template-columns:290px 1fr 220px;align-items:center;gap:16px;position:relative}
-    .dateBox{display:flex;align-items:center;gap:9px;
-      background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);
-      border-radius:15px;padding:10px 15px;font-size:13.5px;font-weight:700;color:var(--soft)}
-    .dateBox input[type=date]{background:transparent;border:none;color:var(--text);
-      font-size:13.5px;font-family:inherit;outline:none;cursor:pointer;min-height:0;padding:0;width:auto;font-weight:700}
-    .titleWrap{display:flex;align-items:center;justify-content:center;gap:20px}
-    .titleLine{height:2px;width:110px;background:linear-gradient(90deg,transparent,var(--amber),transparent);
-      position:relative;flex-shrink:0}
-    .titleLine::after{content:"";position:absolute;top:50%;left:50%;
-      transform:translate(-50%,-50%);width:8px;height:8px;
-      background:var(--amber);border-radius:50%;box-shadow:0 0 14px var(--amber)}
-    .title{font-size:44px;font-weight:900;margin:0;color:#fff4e6;white-space:nowrap;
-      text-shadow:0 0 36px rgba(255,153,35,.22),0 2px 10px rgba(0,0,0,.72)}
-    .topActions{display:flex;align-items:center;justify-content:flex-start;gap:10px}
-    .btnIcon{
-      width:46px;height:46px;border-radius:13px;
-      background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);
-      display:flex;align-items:center;justify-content:center;font-size:18px;
-      cursor:pointer;color:var(--text);transition:all .18s;box-shadow:none;min-height:0;padding:0;
-    }
-    .btnIcon:hover{background:rgba(255,255,255,.09);border-color:rgba(255,159,26,.35)}
-    .btnFilter{
-      display:flex;align-items:center;gap:8px;padding:0 18px;height:46px;
-      background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);
-      border-radius:13px;font-size:13.5px;font-weight:800;cursor:pointer;
-      color:var(--text);transition:all .18s;box-shadow:none;min-height:0;
-    }
-    .btnFilter:hover{border-color:rgba(255,159,26,.35)}
-    /* filter panel */
-    .filterPanel{display:none;position:absolute;top:62px;left:0;z-index:20;
-      width:min(400px,calc(100% - 0px));padding:20px}
-    .filterPanel.show{display:block}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .full{grid-column:1/-1}
-    label{display:block;color:var(--muted);font-size:12px;margin:0 2px 6px}
-    input,select{width:100%;min-height:44px;border-radius:13px;border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.055);color:var(--text);outline:none;padding:0 12px;font-family:inherit;font-size:13px}
-    select option{background:#111;color:#fff}
-    input:focus,select:focus{border-color:rgba(255,159,26,.65);box-shadow:0 0 0 3px rgba(255,159,26,.12)}
-    button{font:inherit;cursor:pointer;transition:all .18s}
-    .btnPrimary{min-height:44px;padding:0 20px;border-radius:13px;border:none;
-      background:linear-gradient(135deg,rgba(255,159,26,.96),rgba(255,107,0,.90));
-      color:#fff;font-weight:800;font-size:13.5px;cursor:pointer;
-      box-shadow:0 10px 28px rgba(255,122,0,.24)}
-    .btnPrimary:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(255,122,0,.30)}
-    .btnSecondary{min-height:44px;padding:0 16px;border-radius:13px;
-      border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);
-      color:var(--text);font-weight:700;font-size:13px;box-shadow:none}
-
-    /* ── STATUS BAR ────────────────────────────────────────── */
-    .statusBar{display:flex;align-items:center;justify-content:space-between;
-      padding:9px 16px;background:rgba(255,159,26,.05);
-      border:1px solid rgba(255,159,26,.18);border-radius:13px;font-size:13px;color:var(--soft)}
-    .dot{display:inline-block;width:8px;height:8px;border-radius:50%;
-      background:var(--amber);box-shadow:0 0 10px var(--amber);margin-left:7px;vertical-align:middle}
-
-    /* ── KPI CARDS ─────────────────────────────────────────── */
-    .kpiGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-    .kpi{padding:20px 18px 18px;display:flex;flex-direction:column;gap:10px;min-height:0}
-    .kpiTop{display:flex;align-items:center;gap:10px}
-    .kpiIcon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;
-      font-size:18px;flex-shrink:0;
-      background:radial-gradient(circle,rgba(255,159,26,.26),rgba(255,255,255,.03));
-      border:1px solid rgba(255,159,26,.34);
-      box-shadow:0 0 18px rgba(255,159,26,.18),inset 0 0 12px rgba(255,159,26,.08)}
-    .kpiLabel{color:#d4c9bf;font-size:13px;font-weight:800;line-height:1.3}
-    .kpiAmounts{display:flex;flex-direction:column;gap:5px}
-    .kpiSypRow{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
-    .kpiSypVal{font-size:clamp(16px,1.9vw,28px);font-weight:900;color:#fff;direction:ltr;line-height:1.1;word-break:break-all}
-    .kpiSypCur{font-size:11px;font-weight:700;color:var(--muted);flex-shrink:0}
-    .kpiUsdRow{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;
-      background:rgba(255,159,26,.07);border-radius:8px;padding:4px 8px;border:1px solid rgba(255,159,26,.15)}
-    .kpiUsdVal{font-size:clamp(13px,1.5vw,20px);font-weight:900;color:var(--amber);direction:ltr;line-height:1.1;word-break:break-all}
-    .kpiUsdCur{font-size:11px;font-weight:700;color:var(--gold);flex-shrink:0}
-    .kpiSub{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-top:2px}
-    .up{color:var(--green);font-weight:900;font-size:11px}
-    .spark{height:22px;width:80px}
-    .amount{direction:ltr;text-align:right;white-space:nowrap}
-    .muted{color:var(--muted)}
-    .hide{display:none!important}
-    .ltr{direction:ltr;text-align:left}
-
-    /* ── REGION CARDS ──────────────────────────────────────── */
-    .regionGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-    .regionCard{padding:18px 16px;display:flex;flex-direction:column;gap:14px}
-    .regionHead{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:900}
-    .regionDot{width:10px;height:10px;border-radius:50%;display:inline-block;
-      box-shadow:0 0 14px currentColor;flex-shrink:0}
-    /* Saudi-ish map shape */
-    .mapShape{
-      width:110px;height:72px;flex-shrink:0;align-self:center;
-      background:linear-gradient(140deg,rgba(255,159,26,.90),rgba(100,48,14,.78));
-      clip-path:polygon(
-        6% 46%, 10% 30%, 16% 18%, 24% 12%, 34% 10%, 43% 16%, 51% 22%,
-        58% 17%, 66% 14%, 74% 20%, 80% 30%, 86% 40%, 88% 52%,
-        82% 64%, 74% 74%, 62% 82%, 50% 86%, 40% 80%, 30% 76%,
-        20% 78%, 12% 68%, 7% 56%
-      );
-      transform:perspective(560px) rotateX(48deg) rotateZ(-9deg);
-      filter:drop-shadow(0 14px 18px rgba(255,107,0,.30));
-      position:relative;
-    }
-    .mapShape::after{content:"";position:absolute;inset:6px 0 -14px 0;
-      background:rgba(0,0,0,.30);filter:blur(14px);z-index:-1;transform:translateY(22px)}
-    .regionCard:nth-child(1) .mapShape{background:linear-gradient(140deg,rgba(255,140,20,.92),rgba(100,48,14,.80));filter:drop-shadow(0 14px 18px rgba(255,107,0,.32))}
-    .regionCard:nth-child(2) .mapShape{background:linear-gradient(140deg,rgba(255,185,32,.90),rgba(105,65,0,.78));filter:drop-shadow(0 14px 18px rgba(255,185,32,.22))}
-    .regionCard:nth-child(3) .mapShape{background:linear-gradient(140deg,rgba(88,108,124,.92),rgba(18,24,30,.80));filter:drop-shadow(0 14px 18px rgba(85,170,255,.14))}
-    .regionCard:nth-child(4) .mapShape{background:linear-gradient(140deg,rgba(136,102,72,.92),rgba(36,24,18,.82));filter:drop-shadow(0 14px 18px rgba(180,140,100,.16))}
-    /* body row: map + numbers side by side */
-    .regionBody{display:flex;align-items:center;gap:12px}
-    .regionNums{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
-    .regionNums .lbl{color:var(--muted);font-size:11px;font-weight:700;margin-bottom:1px}
-    /* SYP row */
-    .regionSypRow{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap}
-    .regionSypVal{font-size:clamp(13px,1.5vw,22px);font-weight:900;color:#fff;direction:ltr;line-height:1.1;word-break:break-all}
-    .regionSypCur{font-size:10px;font-weight:700;color:var(--muted);flex-shrink:0}
-    /* USD row */
-    .regionUsdRow{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;
-      background:rgba(255,159,26,.08);border:1px solid rgba(255,159,26,.18);
-      border-radius:8px;padding:4px 8px}
-    .regionUsdVal{font-size:clamp(12px,1.4vw,20px);font-weight:900;color:var(--amber);direction:ltr;line-height:1.1;word-break:break-all}
-    .regionUsdCur{font-size:10px;font-weight:700;color:var(--gold);flex-shrink:0}
-    /* pct bar */
-    .regionPctRow{display:flex;align-items:center;gap:8px;margin-top:2px}
-    .regionPctBar{flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
-    .regionPctFill{height:100%;border-radius:2px;transition:width .6s ease}
-    .regionPctTxt{font-size:12px;font-weight:900;flex-shrink:0}
-
-    /* ── BOTTOM SECTION ────────────────────────────────────── */
-    .bottomGrid{display:grid;grid-template-columns:1.36fr .85fr .62fr;gap:14px}
-    .panel{padding:22px}
-    .panelHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
-    .panelHead h3{margin:0;font-size:21px;color:#fff6ea;font-weight:900}
-    .panelMenu{color:var(--muted);font-size:20px;letter-spacing:2px;cursor:pointer;user-select:none}
-    /* tabs */
-    .tabs{display:flex;border:1px solid rgba(255,255,255,.12);border-radius:12px;overflow:hidden}
-    .tabs button{min-height:32px;padding:0 14px;border-radius:0;border:none;
-      border-right:1px solid rgba(255,255,255,.10);background:transparent;
-      color:#bdb5ad;font-size:12px;font-weight:700;cursor:pointer;box-shadow:none;transition:all .16s}
-    .tabs button:last-child{border-right:none}
-    .tabs button.active{background:rgba(255,159,26,.20);color:var(--gold)}
-    .chartWrap{height:288px;position:relative}
-    /* region table */
-    .table{width:100%;border-collapse:collapse}
-    .table th,.table td{padding:13px 10px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px;text-align:right}
-    .table th{color:var(--muted);font-weight:800;background:rgba(255,255,255,.02)}
-    .table td{color:#f0e9e0}
-    .totalRow td{font-weight:900;color:var(--amber);font-size:17px}
-    /* goal */
-    .goal{display:flex;flex-direction:column;align-items:center;justify-content:center;
-      padding:22px 18px;gap:14px;text-align:center}
-    .goal h3{margin:0;font-size:18px;color:#fff6ea}
-    .ring{
-      width:218px;height:218px;border-radius:50%;display:grid;place-items:center;
-      background:conic-gradient(
-        var(--amber) calc(var(--p) * 1%),
-        rgba(255,255,255,.07) 0
-      );
-      box-shadow:0 0 0 1px rgba(255,159,26,.10), 0 0 52px rgba(255,159,26,.20);
-      position:relative;
-    }
-    .ring::before{content:"";position:absolute;inset:17px;border-radius:50%;
-      background:#090a0c;border:1px solid rgba(255,255,255,.09)}
-    .ringTxt{position:relative;z-index:1;text-align:center}
-    .ringTxt b{display:block;font-size:56px;font-weight:900;color:#fff;line-height:1}
-    .ringTxt span{color:var(--muted);font-size:12.5px}
-    .goalMeta{font-size:13px;line-height:2;color:var(--soft);text-align:center}
-    .goalMeta b{color:var(--text)}
-    .goalMeta #goalDone{color:var(--amber)}
-
-    /* ── RECORDS ───────────────────────────────────────────── */
-    .recordsPanel{padding:22px}
-    .toolbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}
-    .recordsScroll{max-height:380px;overflow:auto;border:1px solid rgba(255,255,255,.08);
-      border-radius:16px;background:rgba(0,0,0,.10)}
-    .recordsScroll table{min-width:860px}
-    .empty{padding:22px;text-align:center;color:var(--muted)}
-
-    /* ── LOGIN OVERLAY ─────────────────────────────────────── */
-    .loginOverlay{position:fixed;inset:0;background:rgba(0,0,0,.82);
-      display:grid;place-items:center;z-index:50;padding:18px;backdrop-filter:blur(20px)}
-    .loginBox{width:min(460px,100%);padding:28px}
-    .loginBox h1{margin:0 0 6px;font-size:30px}
-    .formGrid{display:grid;gap:12px;margin-top:18px}
-    .msg{margin-top:12px;border:1px solid rgba(255,99,118,.35);border-radius:13px;
-      padding:12px;color:#ffd6dc;background:rgba(255,99,118,.10);display:none;line-height:1.6}
-    .msg.show{display:block}
-    .safeNote{font-size:12px;color:var(--muted);line-height:1.7;margin-top:10px}
-
-    /* ── MOBILE NAV ────────────────────────────────────────── */
-    .mobileTopNav{display:none;gap:8px;overflow:auto;padding-bottom:4px}
-    .mobileTopNav button{white-space:nowrap;min-height:40px;
-      background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);
-      border-radius:12px;font-size:13px;padding:0 14px;cursor:pointer;
-      color:var(--text);box-shadow:none}
-
-    /* ── RESPONSIVE ────────────────────────────────────────── */
-    @media(max-width:1280px){
-      .shell{grid-template-columns:1fr}
-      .side{display:none}
-      .mobileTopNav{display:flex}
-      .main{padding:14px}
-      .topbar{grid-template-columns:1fr}
-      .kpiGrid,.regionGrid{grid-template-columns:repeat(2,1fr)}
-      .bottomGrid{grid-template-columns:1fr 1fr}
-      .goal{grid-column:1/-1}
-    }
-    @media(max-width:700px){
-      .kpiGrid,.regionGrid,.bottomGrid,.grid2,.toolbar{grid-template-columns:1fr}
-      .title{font-size:32px}
-      .kpi{padding:14px 14px}
-      .kpiSypVal{font-size:clamp(14px,5vw,22px)}
-      .kpiUsdVal{font-size:clamp(12px,4vw,18px)}
-      .kpiIcon{width:32px;height:32px;font-size:15px}
-      .mapShape{width:120px;height:84px}
-      .chartWrap{height:240px}
-      .ring{width:180px;height:180px}
-      .ringTxt b{font-size:42px}
-      .recordsScroll{max-height:420px}
-    }
-    @media print{
-      .side,.topActions,.filterPanel,.loginOverlay,.mobileTopNav,.toolbar button{display:none!important}
-      .shell{display:block}
-      .card{break-inside:avoid}
-    }
-  
-    /* ══════════════════════════════════════════════════════════
-       IMAD PREMIUM ROYAL GLASS 3D SKIN
-       تغيير كامل للون + بطاقات Region أفخم + قفل زجاجي 3D
-       ══════════════════════════════════════════════════════════ */
+    html,body{margin:0;min-height:100%;font-family:Arial,system-ui,sans-serif;color:var(--text)}
     body{
       background:
-        radial-gradient(circle at 18% 5%, rgba(103,232,255,.20), transparent 30%),
-        radial-gradient(circle at 82% 12%, rgba(139,92,246,.18), transparent 32%),
-        linear-gradient(145deg,#030712 0%,#07111f 45%,#020617 100%) !important;
+        radial-gradient(circle at 8% 8%, rgba(121,214,255,.22), transparent 27%),
+        radial-gradient(circle at 90% 12%, rgba(141,132,255,.18), transparent 28%),
+        radial-gradient(circle at 52% 100%, rgba(98,255,177,.09), transparent 40%),
+        linear-gradient(135deg,#eef6ff 0%,#dceeff 0.1%, #0a1222 0.1%, #10203f 58%, #091120 100%);
+      overflow-x:hidden;
+    }
+    .ambient{
+      position:fixed; inset:0; pointer-events:none; z-index:-1;
+      background:
+        radial-gradient(circle at 25% 55%, rgba(84,168,255,.10), transparent 24%),
+        radial-gradient(circle at 70% 70%, rgba(255,255,255,.03), transparent 30%);
+      filter:blur(10px);
+    }
+    .glass{
+      background:linear-gradient(135deg,rgba(255,255,255,.13),rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.16);
+      box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.12);
+      backdrop-filter:blur(24px);
+      -webkit-backdrop-filter:blur(24px);
+    }
+    .login{
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:18px;
+    }
+    .login-card{
+      width:min(430px,94vw);
+      border-radius:30px;
+      padding:22px;
+    }
+    .login-card h1{margin:0 0 14px;font-size:28px}
+    .login-card p{margin:0 0 14px;color:var(--muted);line-height:1.7}
+    input,select,button{
+      font-family:inherit;
+      font-size:14px;
+      border-radius:16px;
+      padding:12px 13px;
+      outline:none;
+      border:1px solid rgba(255,255,255,.16);
+    }
+    input,select{
+      width:100%;
       color:var(--text);
+      background:rgba(9,18,34,.35);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
     }
-    body::before{
-      background:
-        radial-gradient(ellipse at 50% -8%, rgba(103,232,255,.24) 0%, transparent 32%),
-        radial-gradient(ellipse at 88% 8%, rgba(167,139,250,.22) 0%, transparent 26%),
-        radial-gradient(ellipse at 7% 94%, rgba(52,211,153,.12) 0%, transparent 28%),
-        linear-gradient(162deg,#061326 0%,#020617 62%,#030712 100%) !important;
-      opacity:1;
+    input::placeholder{color:rgba(236,245,255,.46)}
+    option{color:#111}
+    button{
+      cursor:pointer;
+      color:white;
+      font-weight:900;
+      background:linear-gradient(135deg,var(--blue),var(--cyan));
+      box-shadow:0 12px 30px rgba(84,168,255,.20);
     }
-    body::after{
-      background-image:
-        linear-gradient(rgba(103,232,255,.038) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(167,139,250,.030) 1px,transparent 1px) !important;
-      background-size:64px 64px !important;
-      opacity:.72;
-    }
-
-    .main{
-      background:
-        radial-gradient(ellipse at 48% -6%, rgba(103,232,255,.20), transparent 30%),
-        radial-gradient(ellipse at 92% 24%, rgba(167,139,250,.10), transparent 25%),
-        linear-gradient(140deg,rgba(5,13,27,.92),rgba(2,6,23,.88)) !important;
-    }
-    .side{
-      background:
-        linear-gradient(180deg,rgba(6,18,33,.94),rgba(2,8,19,.97)) !important;
-      border-left:1px solid rgba(180,220,255,.12) !important;
-      box-shadow:inset -1px 0 0 rgba(255,255,255,.04), 18px 0 70px rgba(0,0,0,.24);
+    button.secondary{background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.05));box-shadow:none}
+    button.good{background:linear-gradient(135deg,#3dd391,#68ffbd)}
+    button.danger{background:linear-gradient(135deg,#ff6a70,#ff9d5e)}
+    .login-card input,.login-card button{margin-top:10px}
+    .status{
+      display:none;
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:18px;
+      line-height:1.7;
+      white-space:pre-wrap;
+      color:rgba(248,251,255,.90);
+      background:rgba(8,17,32,.28);
+      border:1px solid rgba(255,255,255,.12);
     }
 
+    .app{display:none}
+    .wrap{
+      width:min(1500px,97vw);
+      margin:0 auto;
+      padding:16px 0 36px;
+      display:grid;
+      gap:16px;
+    }
+    .topbar,.section{border-radius:30px}
+    .topbar{
+      padding:18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:58px;height:58px;border-radius:20px;
+      display:grid;place-items:center;
+      font-weight:900;font-size:18px;
+      letter-spacing:.4px;
+      background:linear-gradient(135deg,rgba(121,214,255,.34),rgba(141,132,255,.20));
+      border:1px solid rgba(255,255,255,.18);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 0 24px rgba(121,214,255,.18);
+    }
+    .topbar h1{margin:0;font-size:27px}
+    .topbar p{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.7}
+    .toolbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+    .toolbar button{min-width:92px}
+
+    .section{padding:16px}
+    .section-head{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px
+    }
+    .section-head h2{margin:0;font-size:21px}
+    .section-head small{display:block;margin-top:5px;color:var(--muted);line-height:1.7}
+    .filters,.settings{
+      display:grid;gap:10px;grid-template-columns:repeat(6,minmax(140px,1fr))
+    }
+    .settings{display:none;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.10)}
+    .settings.show{display:grid}
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field label{font-size:12px;color:rgba(236,245,255,.72);font-weight:900}
+
+    .kpis,.regions{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(220px,1fr));
+      gap:16px;
+    }
+    .regions{grid-template-columns:repeat(4,minmax(220px,1fr))}
     .card{
+      position:relative;
+      overflow:hidden;
+      min-height:138px;
+      border-radius:30px;
+      padding:18px;
       background:
-        linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.030) 46%,rgba(103,232,255,.030)) !important;
-      border:1px solid rgba(210,235,255,.16) !important;
+        radial-gradient(circle at 14% 18%,rgba(255,255,255,.22),transparent 18%),
+        radial-gradient(circle at 86% 18%,rgba(121,214,255,.18),transparent 24%),
+        linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.065) 52%,rgba(255,255,255,.10));
+      border:1px solid rgba(255,255,255,.20);
       box-shadow:
-        0 28px 90px rgba(0,0,0,.55),
-        0 0 0 1px rgba(103,232,255,.055),
-        inset 0 1px 0 rgba(255,255,255,.20),
-        inset 0 -1px 0 rgba(255,255,255,.055) !important;
-      backdrop-filter:blur(26px) saturate(1.45) !important;
-      -webkit-backdrop-filter:blur(26px) saturate(1.45) !important;
-      isolation:isolate;
+        0 22px 55px rgba(0,0,0,.28),
+        0 8px 18px rgba(84,168,255,.08),
+        inset 0 1px 0 rgba(255,255,255,.24),
+        inset 0 -18px 38px rgba(0,0,0,.12);
+      transform:translateZ(0);
     }
     .card::before{
+      content:"";
+      position:absolute;
+      top:12px;left:12px;
+      width:42px;height:42px;border-radius:16px;
       background:
-        radial-gradient(circle at 12% 10%,rgba(103,232,255,.18),transparent 32%),
-        radial-gradient(circle at 88% 0%,rgba(167,139,250,.14),transparent 28%),
-        linear-gradient(118deg,rgba(255,255,255,.16),transparent 22%,transparent 73%,rgba(103,232,255,.08)) !important;
-      z-index:-1;
+        linear-gradient(145deg,rgba(121,214,255,.58),rgba(141,132,255,.25));
+      box-shadow:
+        0 0 28px rgba(121,214,255,.26),
+        inset 0 1px 0 rgba(255,255,255,.35),
+        inset 0 -10px 20px rgba(0,0,0,.12);
     }
     .card::after{
       content:"";
       position:absolute;
-      inset:1px;
-      border-radius:inherit;
+      inset:-45% -20% auto auto;
+      width:70%;
+      height:120%;
+      background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.18),transparent 58%);
+      transform:rotate(10deg);
+      opacity:.38;
       pointer-events:none;
-      background:linear-gradient(135deg,rgba(255,255,255,.16),transparent 24%,transparent 74%,rgba(103,232,255,.08));
-      opacity:.56;
-      z-index:-1;
     }
     .card:hover{
-      border-color:rgba(103,232,255,.38) !important;
+      border-color:rgba(121,214,255,.32);
       box-shadow:
-        0 34px 100px rgba(0,0,0,.62),
-        0 0 34px rgba(103,232,255,.12),
-        inset 0 1px 0 rgba(255,255,255,.22) !important;
-      transform:translateY(-1px);
+        0 26px 70px rgba(0,0,0,.32),
+        0 10px 28px rgba(84,168,255,.15),
+        inset 0 1px 0 rgba(255,255,255,.28),
+        inset 0 -18px 38px rgba(0,0,0,.12);
     }
-
-    .title{
-      color:#f8fbff !important;
-      letter-spacing:-.8px;
-      text-shadow:
-        0 0 32px rgba(103,232,255,.28),
-        0 0 64px rgba(167,139,250,.18),
-        0 3px 14px rgba(0,0,0,.70) !important;
+    .card .label,.card .value,.card .sub,.card .mini{position:relative;z-index:2}
+    .label{font-size:13px;color:rgba(239,247,255,.74);font-weight:900}
+    .value{
+      margin-top:14px;
+      direction:ltr;
+      text-align:right;
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:.1px;
+      font-variant-numeric:tabular-nums;
+      text-shadow:0 0 16px rgba(121,214,255,.10);
     }
-    .titleLine{
-      background:linear-gradient(90deg,transparent,#67e8ff,#a78bfa,transparent) !important;
+    .sub{
+      margin-top:7px;
+      color:rgba(239,247,255,.60);
+      font-size:12px;
+      line-height:1.6;
+      font-weight:800;
     }
-    .titleLine::after{
-      background:#67e8ff !important;
-      box-shadow:0 0 18px #67e8ff,0 0 34px rgba(167,139,250,.55) !important;
+    .mini{
+      margin-top:10px;
+      direction:ltr;
+      text-align:right;
+      font-size:15px;
+      color:var(--green);
+      font-weight:900;
     }
-
-    .logo{
-      width:62px !important;
-      height:62px !important;
-      border-radius:22px !important;
-      margin-bottom:30px !important;
-      position:relative !important;
-      transform-style:preserve-3d;
-      background:
-        linear-gradient(145deg,rgba(255,255,255,.24),rgba(103,232,255,.10) 42%,rgba(167,139,250,.14)) !important;
-      border:1px solid rgba(224,242,254,.30);
-      box-shadow:
-        0 22px 48px rgba(0,0,0,.42),
-        0 0 34px rgba(103,232,255,.26),
-        inset 0 1px 0 rgba(255,255,255,.42),
-        inset 0 -16px 26px rgba(2,6,23,.30) !important;
+    .region-card .value{color:var(--green)}
+    .region-top{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;z-index:2
     }
-    .logo::before{
-      content:"" !important;
-      position:absolute !important;
-      width:28px !important;
-      height:25px !important;
-      left:50% !important;
-      top:10px !important;
-      transform:translateX(-50%) perspective(280px) rotateX(15deg) !important;
-      border:5px solid rgba(230,250,255,.88) !important;
-      border-bottom:0 !important;
-      border-radius:18px 18px 6px 6px !important;
-      background:transparent !important;
-      box-shadow:0 0 15px rgba(103,232,255,.42), inset 0 0 8px rgba(103,232,255,.18) !important;
-    }
-    .logo::after{
-      content:"" !important;
-      position:absolute !important;
-      width:38px !important;
-      height:30px !important;
-      left:50% !important;
-      top:28px !important;
-      transform:translateX(-50%) perspective(280px) rotateX(7deg) rotateY(-10deg) !important;
-      border-radius:12px !important;
-      background:
-        linear-gradient(145deg,rgba(255,255,255,.56),rgba(103,232,255,.18) 42%,rgba(15,23,42,.34)) !important;
-      border:1px solid rgba(240,249,255,.50) !important;
-      box-shadow:
-        0 12px 24px rgba(0,0,0,.32),
-        0 0 20px rgba(103,232,255,.30),
-        inset 0 1px 0 rgba(255,255,255,.72),
-        inset 0 -10px 18px rgba(2,6,23,.28) !important;
-    }
-
-    .nav button{
-      color:#9fb4cc !important;
-      border:1px solid transparent !important;
-    }
-    .nav button:hover{
-      color:#eaf6ff !important;
-      background:rgba(103,232,255,.07) !important;
-      border-color:rgba(103,232,255,.10) !important;
-    }
-    .nav button.active{
-      color:#fff !important;
-      background:linear-gradient(135deg,rgba(103,232,255,.18),rgba(167,139,250,.15)) !important;
-      border-color:rgba(103,232,255,.34) !important;
-      box-shadow:0 0 28px rgba(103,232,255,.14),inset 0 0 18px rgba(255,255,255,.06) !important;
-    }
-
-    .dateBox,.btnIcon,.btnFilter,.btnSecondary,input,select,.statusBar,.sideFooter{
-      background:rgba(255,255,255,.055) !important;
-      border-color:rgba(210,235,255,.14) !important;
-      color:var(--text) !important;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
-    }
-    input:focus,select:focus{
-      border-color:rgba(103,232,255,.70) !important;
-      box-shadow:0 0 0 3px rgba(103,232,255,.13) !important;
-    }
-    .btnPrimary{
-      background:linear-gradient(135deg,#67e8ff,#8b5cf6) !important;
-      color:#04111f !important;
-      box-shadow:0 14px 34px rgba(103,232,255,.20),0 10px 30px rgba(139,92,246,.18) !important;
-    }
-    .btnPrimary:hover{
-      box-shadow:0 18px 44px rgba(103,232,255,.27),0 14px 38px rgba(139,92,246,.22) !important;
-    }
-    .dot{
-      background:#67e8ff !important;
-      box-shadow:0 0 12px #67e8ff,0 0 24px rgba(139,92,246,.45) !important;
-    }
-
-    .kpiGrid{gap:16px !important}
-    .kpi{
-      min-height:154px !important;
-      padding:22px 20px !important;
-      overflow:hidden;
-    }
-    .kpiIcon{
-      background:
-        linear-gradient(145deg,rgba(255,255,255,.20),rgba(103,232,255,.12),rgba(167,139,250,.10)) !important;
-      border-color:rgba(103,232,255,.34) !important;
-      box-shadow:
-        0 12px 30px rgba(0,0,0,.24),
-        0 0 24px rgba(103,232,255,.18),
-        inset 0 1px 0 rgba(255,255,255,.40) !important;
-    }
-    .kpiLabel{color:#d8e7f8 !important}
-    .kpiSypVal,.regionSypVal{
-      color:#ffffff !important;
-      text-shadow:0 0 22px rgba(103,232,255,.10);
-    }
-    .kpiUsdRow,.regionUsdRow{
-      background:linear-gradient(135deg,rgba(103,232,255,.105),rgba(167,139,250,.075)) !important;
-      border-color:rgba(103,232,255,.20) !important;
-    }
-    .kpiUsdVal,.regionUsdVal,.totalRow td,#goalDone{
-      color:#67e8ff !important;
-    }
-    .kpiUsdCur,.regionUsdCur{
-      color:#dbeafe !important;
-    }
-
-    .regionGrid{
-      grid-template-columns:repeat(4,minmax(250px,1fr)) !important;
-      gap:16px !important;
-    }
-    .regionCard{
-      min-height:236px;
-      padding:22px 20px !important;
-      overflow:hidden;
-    }
-    .regionCard::after{
-      background:
-        linear-gradient(135deg,rgba(255,255,255,.18),transparent 24%,transparent 72%,rgba(103,232,255,.12)),
-        radial-gradient(circle at 16% 18%,rgba(103,232,255,.14),transparent 34%) !important;
-    }
-    .regionHead{
-      font-size:18px !important;
-      color:#f8fbff;
-      justify-content:space-between;
-    }
-    .regionHead::after{
-      content:"زجاجي 3D";
-      font-size:10.5px;
-      color:#bfeeff;
-      padding:5px 9px;
+    .region-name{font-size:18px;font-weight:900}
+    .badge{
+      direction:ltr;
+      padding:6px 10px;
       border-radius:999px;
-      border:1px solid rgba(103,232,255,.22);
-      background:rgba(103,232,255,.08);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.16);
-    }
-    .regionBody{
-      align-items:center !important;
-      gap:16px !important;
-      min-height:150px;
-    }
-    .regionVisual{
-      width:136px;
-      height:122px;
-      flex:0 0 136px;
-      position:relative;
-      display:grid;
-      place-items:center;
-      perspective:700px;
-      transform-style:preserve-3d;
-      border-radius:30px;
-      background:
-        radial-gradient(circle at 38% 22%,rgba(255,255,255,.20),transparent 24%),
-        linear-gradient(145deg,rgba(255,255,255,.10),rgba(103,232,255,.045),rgba(2,6,23,.18));
-      border:1px solid rgba(220,245,255,.12);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 20px 42px rgba(0,0,0,.20);
-      overflow:visible;
-    }
-    .regionVisual::before{
-      content:"";
-      position:absolute;
-      inset:18px 8px 4px;
-      border-radius:50%;
-      background:radial-gradient(ellipse,rgba(103,232,255,.20),transparent 68%);
-      filter:blur(8px);
-      transform:translateY(36px) rotateX(70deg);
-      opacity:.86;
-    }
-    .regionVisual .mapShape{
-      position:absolute !important;
-      width:112px !important;
-      height:76px !important;
-      left:12px;
-      bottom:5px;
-      opacity:.64;
-      transform:perspective(620px) rotateX(57deg) rotateZ(-10deg) translateZ(-20px) !important;
-      background:linear-gradient(140deg,rgba(103,232,255,.40),rgba(167,139,250,.22)) !important;
-      filter:drop-shadow(0 18px 18px rgba(103,232,255,.16)) !important;
-      z-index:1;
-    }
-    .glassLock3D{
-      position:relative;
-      width:80px;
-      height:92px;
-      transform:perspective(680px) rotateX(8deg) rotateY(-16deg) translateZ(18px);
-      transform-style:preserve-3d;
-      z-index:3;
-      filter:drop-shadow(0 22px 22px rgba(0,0,0,.34));
-      animation:lockFloat 5.8s ease-in-out infinite;
-    }
-    .glassLock3D .lockShackle{
-      position:absolute;
-      left:50%;
-      top:0;
-      width:46px;
-      height:42px;
-      transform:translateX(-50%) translateZ(24px);
-      border:7px solid rgba(235,250,255,.82);
-      border-bottom:0;
-      border-radius:26px 26px 8px 8px;
-      background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(103,232,255,.04));
-      box-shadow:
-        0 0 18px rgba(103,232,255,.32),
-        inset 0 2px 4px rgba(255,255,255,.36),
-        inset 0 -8px 16px rgba(2,6,23,.18);
-    }
-    .glassLock3D .lockBody{
-      position:absolute;
-      left:50%;
-      top:34px;
-      width:70px;
-      height:54px;
-      transform:translateX(-50%) translateZ(34px);
-      border-radius:18px 18px 22px 22px;
-      background:
-        linear-gradient(145deg,rgba(255,255,255,.62) 0%,rgba(103,232,255,.26) 33%,rgba(167,139,250,.16) 70%,rgba(15,23,42,.36) 100%);
-      border:1px solid rgba(240,249,255,.52);
-      box-shadow:
-        0 18px 36px rgba(0,0,0,.32),
-        0 0 28px rgba(103,232,255,.24),
-        inset 0 2px 0 rgba(255,255,255,.68),
-        inset 12px 0 22px rgba(255,255,255,.14),
-        inset -10px -18px 22px rgba(2,6,23,.26);
-    }
-    .glassLock3D .lockBody::before{
-      content:"";
-      position:absolute;
-      inset:7px 10px auto auto;
-      width:28px;
-      height:10px;
-      border-radius:999px;
-      background:rgba(255,255,255,.38);
-      filter:blur(.3px);
-      transform:rotate(-18deg);
-    }
-    .glassLock3D .lockKey{
-      position:absolute;
-      left:50%;
-      top:54px;
-      width:10px;
-      height:24px;
-      transform:translateX(-50%) translateZ(46px);
-      border-radius:999px;
-      background:linear-gradient(180deg,#04111f,#0f172a);
-      box-shadow:0 0 0 4px rgba(255,255,255,.16),0 0 14px rgba(103,232,255,.18);
-    }
-    .glassLock3D .lockKey::before{
-      content:"";
-      position:absolute;
-      left:50%;
-      top:-11px;
-      width:14px;
-      height:14px;
-      border-radius:50%;
-      transform:translateX(-50%);
-      background:#04111f;
-      box-shadow:0 0 0 4px rgba(255,255,255,.16);
-    }
-    @keyframes lockFloat{
-      0%,100%{transform:perspective(680px) rotateX(8deg) rotateY(-16deg) translateY(0) translateZ(18px)}
-      50%{transform:perspective(680px) rotateX(11deg) rotateY(-10deg) translateY(-5px) translateZ(26px)}
+      background:rgba(98,255,177,.09);
+      border:1px solid rgba(98,255,177,.18);
+      color:rgba(98,255,177,.95);
+      font-size:12px;
+      font-weight:900;
     }
 
-    .regionNums{
-      gap:8px !important;
-      min-width:0;
+    .bars{display:grid;gap:12px}
+    .bar-row{
+      display:grid;grid-template-columns:120px 1fr 150px;gap:10px;align-items:center
     }
-    .regionNums .lbl{
-      color:#9db7cf !important;
-      font-size:12px !important;
-    }
-    .regionSypVal{
-      font-size:clamp(16px,1.7vw,27px) !important;
-      line-height:1.05 !important;
-      overflow-wrap:anywhere;
-    }
-    .regionUsdVal{
-      font-size:clamp(14px,1.45vw,22px) !important;
-      overflow-wrap:anywhere;
-    }
-    .regionPctBar{
-      background:rgba(255,255,255,.11) !important;
-      height:5px !important;
-    }
-    .regionPctFill{
-      box-shadow:0 0 14px currentColor;
-    }
-
-    .regionCard:nth-child(1) .glassLock3D .lockBody{background:linear-gradient(145deg,rgba(255,255,255,.64),rgba(103,232,255,.30),rgba(14,165,233,.20),rgba(15,23,42,.36))}
-    .regionCard:nth-child(2) .glassLock3D .lockBody{background:linear-gradient(145deg,rgba(255,255,255,.64),rgba(167,139,250,.30),rgba(139,92,246,.18),rgba(15,23,42,.36))}
-    .regionCard:nth-child(3) .glassLock3D .lockBody{background:linear-gradient(145deg,rgba(255,255,255,.64),rgba(52,211,153,.28),rgba(16,185,129,.17),rgba(15,23,42,.36))}
-    .regionCard:nth-child(4) .glassLock3D .lockBody{background:linear-gradient(145deg,rgba(255,255,255,.64),rgba(240,201,135,.30),rgba(245,158,11,.16),rgba(15,23,42,.36))}
-
-    .regionCard:nth-child(1) .mapShape{background:linear-gradient(140deg,rgba(103,232,255,.50),rgba(14,165,233,.20)) !important}
-    .regionCard:nth-child(2) .mapShape{background:linear-gradient(140deg,rgba(167,139,250,.50),rgba(139,92,246,.20)) !important}
-    .regionCard:nth-child(3) .mapShape{background:linear-gradient(140deg,rgba(52,211,153,.50),rgba(16,185,129,.20)) !important}
-    .regionCard:nth-child(4) .mapShape{background:linear-gradient(140deg,rgba(240,201,135,.48),rgba(245,158,11,.18)) !important}
-
-    .table th{
-      color:#a9bed5 !important;
-      background:rgba(103,232,255,.035) !important;
-    }
-    .table td{color:#edf7ff !important}
-    .tabs button.active{
-      background:linear-gradient(135deg,rgba(103,232,255,.16),rgba(167,139,250,.12)) !important;
-      color:#dff8ff !important;
-    }
-    .ring{
-      background:conic-gradient(#67e8ff calc(var(--p) * 1%), rgba(255,255,255,.08) 0) !important;
-      box-shadow:0 0 0 1px rgba(103,232,255,.12),0 0 58px rgba(103,232,255,.20) !important;
-    }
-    .ring::before{
-      background:#061326 !important;
-      border-color:rgba(210,235,255,.13) !important;
-    }
-
-    .loginOverlay{
-      background:
-        radial-gradient(circle at 50% 0%,rgba(103,232,255,.18),transparent 34%),
-        radial-gradient(circle at 86% 16%,rgba(167,139,250,.18),transparent 30%),
-        rgba(0,0,0,.84) !important;
-    }
-    .loginBox > div:first-child{
-      width:76px !important;
-      height:76px !important;
-      border-radius:26px !important;
-      background:
-        linear-gradient(145deg,rgba(255,255,255,.22),rgba(103,232,255,.12),rgba(167,139,250,.14)) !important;
-      border:1px solid rgba(224,242,254,.28) !important;
-      box-shadow:
-        0 22px 48px rgba(0,0,0,.42),
-        0 0 38px rgba(103,232,255,.24),
-        inset 0 1px 0 rgba(255,255,255,.42),
-        inset 0 -16px 26px rgba(2,6,23,.28) !important;
-      position:relative !important;
-    }
-    .loginBox > div:first-child::before{
-      content:"";
-      position:absolute;
-      width:32px;
-      height:28px;
-      left:50%;
-      top:13px;
-      transform:translateX(-50%);
-      border:6px solid rgba(238,250,255,.88);
-      border-bottom:0;
-      border-radius:20px 20px 6px 6px;
-      box-shadow:0 0 17px rgba(103,232,255,.38);
-    }
-    .loginBox > div:first-child > div{
-      width:44px !important;
-      height:34px !important;
-      border-radius:13px !important;
-      background:
-        linear-gradient(145deg,rgba(255,255,255,.56),rgba(103,232,255,.20),rgba(15,23,42,.32)) !important;
-      transform:translateY(13px) !important;
-      border:1px solid rgba(240,249,255,.44) !important;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.58),0 12px 22px rgba(0,0,0,.26) !important;
-    }
-
-    @media(max-width:1280px){
-      .regionGrid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
-    }
-    @media(max-width:700px){
-      .regionGrid{grid-template-columns:1fr !important}
-      .regionCard{min-height:0}
-      .regionBody{gap:12px !important}
-      .regionVisual{width:116px;height:108px;flex-basis:116px}
-      .glassLock3D{transform:scale(.86) perspective(680px) rotateX(8deg) rotateY(-16deg) translateZ(18px)}
-      .regionVisual .mapShape{width:98px !important;height:66px !important}
-      .kpi{min-height:138px !important}
-    }
-
-  
-    /* ═════════ IMAD LIQUID BOX UPDATE ═════════ */
-    :root{
-      --bg:#040617;
-      --sidebar:#050a1d;
-      --amber:#7dd3fc;
-      --amber2:#a78bfa;
-      --gold:#e0f2fe;
-      --blue:#60a5fa;
-      --green:#38f8b5;
-      --red:#fb7185;
-      --muted:#93a9c9;
-      --soft:#dbeafe;
-      --text:#f8fbff;
-      --card-bg:rgba(8,16,38,.62);
-      --cb:rgba(210,238,255,.16);
-      --cb-h:rgba(125,211,252,.46);
-      --shadow:0 28px 90px rgba(0,0,0,.55);
-      --r:30px;
-    }
-    body::before{
-      background:
-        radial-gradient(circle at 18% 6%,rgba(96,165,250,.34),transparent 28%),
-        radial-gradient(circle at 78% 0%,rgba(167,139,250,.30),transparent 26%),
-        radial-gradient(circle at 84% 78%,rgba(45,212,191,.16),transparent 30%),
-        radial-gradient(circle at 14% 88%,rgba(56,189,248,.12),transparent 28%),
-        linear-gradient(145deg,#030514 0%,#07101f 48%,#030412 100%);
-    }
-    body::after{background-size:44px 44px;opacity:.76}
-    .main{
-      background:
-        radial-gradient(ellipse at 50% -10%,rgba(96,165,250,.18),transparent 28%),
-        linear-gradient(140deg,rgba(8,13,32,.88),rgba(3,5,17,.92))!important;
-    }
-    .side{
-      background:linear-gradient(180deg,rgba(5,10,29,.96),rgba(3,6,18,.98))!important;
-      border-left:1px solid rgba(164,220,255,.14);
-      box-shadow:inset -1px 0 0 rgba(255,255,255,.05);
-    }
-    .logo{
-      background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(125,211,252,.08))!important;
-      border:1px solid rgba(219,245,255,.22);
-      border-radius:19px!important;
-      box-shadow:0 22px 54px rgba(0,0,0,.34),0 0 38px rgba(125,211,252,.18)!important;
-      overflow:hidden;
-    }
-    .logo::before{
-      content:"";position:absolute;width:34px;height:28px;border-radius:9px;
-      background:linear-gradient(145deg,rgba(255,255,255,.58),rgba(125,211,252,.10) 62%,rgba(20,35,70,.22));
-      border:1px solid rgba(235,250,255,.42);
-      transform:perspective(300px) rotateX(58deg) rotateZ(-12deg) translateY(-5px);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 14px 20px rgba(0,0,0,.22),0 0 28px rgba(125,211,252,.24);
-      animation:boxFloat 5.5s ease-in-out infinite;
-    }
-    .logo::after{
-      content:"";position:absolute;width:30px;height:24px;border-radius:8px;
-      background:linear-gradient(160deg,rgba(186,230,253,.48),rgba(59,130,246,.14) 54%,rgba(15,23,42,.38));
-      border:1px solid rgba(219,245,255,.26);
-      transform:perspective(300px) rotateX(22deg) rotateY(-24deg) translateY(8px);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -12px 18px rgba(15,23,42,.20);
-    }
-    .nav button{color:#8ea5c6}
-    .nav button.active{
-      color:#fff;
-      background:linear-gradient(135deg,rgba(96,165,250,.22),rgba(167,139,250,.16),rgba(45,212,191,.08));
-      border-color:rgba(125,211,252,.35);
-      box-shadow:0 0 30px rgba(96,165,250,.18),inset 0 0 18px rgba(255,255,255,.05);
-    }
-    .card{
-      background:
-        linear-gradient(145deg,rgba(255,255,255,.105),rgba(125,211,252,.035) 44%,rgba(255,255,255,.018))!important;
-      border-color:rgba(210,238,255,.16)!important;
-      box-shadow:0 24px 80px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(125,211,252,.08)!important;
-      backdrop-filter:blur(24px) saturate(1.25)!important;
-    }
-    .card::before{
-      background:
-        radial-gradient(circle at 18% 12%,rgba(255,255,255,.18),transparent 25%),
-        radial-gradient(circle at 82% 90%,rgba(125,211,252,.10),transparent 35%),
-        linear-gradient(120deg,rgba(255,255,255,.15),transparent 20%,transparent 76%,rgba(167,139,250,.09))!important;
-    }
-    .card:hover{
-      transform:translateY(-2px);
-      border-color:rgba(125,211,252,.42)!important;
-      box-shadow:0 30px 96px rgba(0,0,0,.48),0 0 36px rgba(96,165,250,.12),inset 0 1px 0 rgba(255,255,255,.22)!important;
-    }
-    .topbar{grid-template-columns:minmax(250px,320px) 1fr minmax(310px,390px)!important}
-    .title{color:#effaff!important;text-shadow:0 0 32px rgba(125,211,252,.24),0 2px 12px rgba(0,0,0,.7)!important}
-    .titleLine{background:linear-gradient(90deg,transparent,#7dd3fc,#a78bfa,transparent)!important}
-    .titleLine::after,.dot{background:#7dd3fc!important;box-shadow:0 0 14px #7dd3fc!important}
-    .dateBox,.btnIcon,.btnFilter,input,select,.statusBar{
-      background:rgba(255,255,255,.055)!important;
-      border-color:rgba(210,238,255,.14)!important;
-    }
-    .copyBtn{
-      background:linear-gradient(135deg,rgba(125,211,252,.20),rgba(167,139,250,.15))!important;
-      border-color:rgba(125,211,252,.30)!important;
-      box-shadow:0 12px 34px rgba(56,189,248,.10)!important;
-    }
-    .btnPrimary{
-      background:linear-gradient(135deg,#38bdf8,#8b5cf6)!important;
-      box-shadow:0 14px 34px rgba(96,165,250,.22)!important;
-    }
-    .kpi,.regionCard,.panel,.goal,.recordsPanel{border-radius:30px!important}
-    .kpiIcon{
-      background:radial-gradient(circle at 30% 22%,rgba(255,255,255,.28),rgba(125,211,252,.12) 42%,rgba(255,255,255,.04))!important;
-      border-color:rgba(125,211,252,.36)!important;
-      box-shadow:0 0 24px rgba(125,211,252,.18),inset 0 1px 0 rgba(255,255,255,.24)!important;
-    }
-    .kpiLabel,.panelHead h3,.goal h3{color:#f2fbff!important}
-    .kpiUsdRow,.regionUsdRow,.totalUsdMini{
-      background:linear-gradient(135deg,rgba(125,211,252,.12),rgba(167,139,250,.08))!important;
-      border-color:rgba(125,211,252,.22)!important;
-    }
-    .kpiUsdVal,.regionUsdVal,#goalDone{color:#7dd3fc!important}
-    .kpiUsdCur,.regionUsdCur{color:#dbeafe!important}
-    .avgRateMini{
-      padding:5px 8px;border-radius:10px;background:rgba(255,255,255,.045);
+    .bar-name{font-weight:900;color:rgba(244,249,255,.92)}
+    .track{
+      height:16px;border-radius:999px;overflow:hidden;
+      background:rgba(255,255,255,.08);
       border:1px solid rgba(255,255,255,.08);
     }
-    .regionCard{padding:20px 18px!important}
-    .regionBody{gap:16px!important}
-    .regionVisual{
-      width:142px!important;height:126px!important;flex:0 0 142px!important;
-      position:relative;display:grid;place-items:center;perspective:760px;transform-style:preserve-3d;
-      border-radius:32px;
-      background:
-        radial-gradient(circle at 36% 20%,rgba(255,255,255,.22),transparent 24%),
-        linear-gradient(145deg,rgba(255,255,255,.11),rgba(125,211,252,.052),rgba(6,12,30,.20));
-      border:1px solid rgba(220,245,255,.15);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 20px 44px rgba(0,0,0,.20);
-      overflow:visible;
+    .fill{
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg,var(--blue),var(--cyan),var(--green));
+      box-shadow:0 0 18px rgba(121,214,255,.18);
+      width:0%;
+      transition:.35s ease;
     }
-    .regionVisual::before{
-      content:"";position:absolute;inset:22px 8px 2px;border-radius:50%;
-      background:radial-gradient(ellipse,rgba(125,211,252,.22),transparent 70%);
-      filter:blur(10px);transform:translateY(38px) rotateX(70deg);opacity:.9;
-    }
-    .regionVisual .mapShape{
-      position:absolute!important;width:116px!important;height:78px!important;opacity:.24!important;
-      filter:blur(.2px) drop-shadow(0 18px 18px rgba(0,0,0,.20))!important;
-      background:linear-gradient(140deg,rgba(125,211,252,.36),rgba(167,139,250,.16))!important;
-    }
-    .glassLock3D,.lockShackle,.lockBody,.lockKey{display:none!important}
-    .glassBox3D{
-      position:relative;width:84px;height:76px;z-index:5;transform-style:preserve-3d;
-      transform:perspective(740px) rotateX(12deg) rotateY(-22deg) translateZ(18px);
-      filter:drop-shadow(0 24px 22px rgba(0,0,0,.36));
-      animation:boxFloat 5.8s ease-in-out infinite;
-    }
-    .glassBox3D span{position:absolute;display:block}
-    .glassBox3D .boxFace{
-      left:10px;top:28px;width:58px;height:38px;border-radius:12px;
-      background:linear-gradient(155deg,rgba(255,255,255,.54),rgba(125,211,252,.16) 52%,rgba(15,23,42,.34));
-      border:1px solid rgba(235,250,255,.44);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.72),inset 0 -16px 24px rgba(15,23,42,.18),0 0 34px rgba(125,211,252,.18);
-      transform:translateZ(24px);
-      backdrop-filter:blur(8px);
-    }
-    .glassBox3D .boxTop{
-      left:13px;top:10px;width:58px;height:35px;border-radius:12px 14px 9px 10px;
-      background:linear-gradient(135deg,rgba(255,255,255,.62),rgba(186,230,253,.22) 62%,rgba(96,165,250,.08));
-      border:1px solid rgba(235,250,255,.42);
-      transform:rotateX(62deg) rotateZ(-8deg) translateZ(34px);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.88),0 14px 24px rgba(0,0,0,.16),0 0 24px rgba(125,211,252,.20);
-    }
-    .glassBox3D .boxSide{
-      right:7px;top:26px;width:28px;height:40px;border-radius:8px 12px 12px 8px;
-      background:linear-gradient(120deg,rgba(125,211,252,.20),rgba(167,139,250,.11),rgba(15,23,42,.28));
-      border:1px solid rgba(219,245,255,.22);
-      transform:skewY(-20deg) translateZ(10px);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.34);
-    }
-    .glassBox3D .boxGlow{
-      left:20px;bottom:2px;width:52px;height:13px;border-radius:999px;
-      background:radial-gradient(ellipse,rgba(125,211,252,.42),transparent 72%);
-      filter:blur(8px);transform:rotateX(72deg) translateZ(-8px);
-    }
-    @keyframes boxFloat{
-      0%,100%{transform:perspective(740px) rotateX(12deg) rotateY(-22deg) translateY(0) translateZ(18px)}
-      50%{transform:perspective(740px) rotateX(9deg) rotateY(-12deg) translateY(-8px) translateZ(24px)}
-    }
-    #chart.card{
-      background:
-        radial-gradient(circle at 18% 16%,rgba(125,211,252,.15),transparent 30%),
-        linear-gradient(145deg,rgba(255,255,255,.10),rgba(10,18,42,.50))!important;
-    }
-    .chartWrap{
-      height:310px!important;
-      padding:12px 10px 4px;
+    .bar-val{direction:ltr;text-align:right;font-weight:900}
+
+    .table-toggle{display:flex;justify-content:flex-end;margin-bottom:10px}
+    .table-wrap{
+      overflow:auto;
       border-radius:24px;
-      background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
-      border:1px solid rgba(210,238,255,.09);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.12);
+      display:none;
     }
-    .chartWrap::before{
-      content:"";position:absolute;left:12%;right:12%;bottom:8px;height:22px;border-radius:50%;
-      background:radial-gradient(ellipse,rgba(125,211,252,.16),transparent 70%);
-      filter:blur(8px);pointer-events:none;
+    .table-wrap.show{display:block}
+    table{
+      width:100%;
+      min-width:820px;
+      border-collapse:collapse;
+      background:rgba(10,18,36,.28);
     }
-    .ring{
-      background:conic-gradient(#7dd3fc calc(var(--p) * 1%),rgba(255,255,255,.07) 0)!important;
-      box-shadow:0 0 0 1px rgba(125,211,252,.12),0 0 58px rgba(125,211,252,.18)!important;
+    th,td{
+      padding:13px 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      text-align:right;
+      white-space:nowrap;
     }
-    .ring::before{background:linear-gradient(145deg,#071020,#050817)!important}
-    .copyToast{
-      position:fixed;left:24px;bottom:24px;z-index:1000;
-      padding:13px 18px;border-radius:16px;
-      background:rgba(6,14,34,.86);
-      color:#eefbff;border:1px solid rgba(125,211,252,.32);
-      box-shadow:0 20px 56px rgba(0,0,0,.38),0 0 26px rgba(125,211,252,.12);
-      backdrop-filter:blur(18px);
-      opacity:0;transform:translateY(12px);pointer-events:none;
-      transition:.22s ease;font-weight:900;
+    th{
+      font-size:13px;
+      color:rgba(236,245,255,.68);
+      background:rgba(255,255,255,.04);
     }
-    .copyToast.show{opacity:1;transform:translateY(0)}
-    @media(max-width:700px){
-      .topbar{grid-template-columns:1fr!important}
-      .topActions{justify-content:stretch!important;flex-wrap:wrap}
-      .topActions .btnFilter{flex:1;justify-content:center}
-      .regionBody{flex-direction:row!important}
-      .regionVisual{width:118px!important;height:112px!important;flex-basis:118px!important}
-      .glassBox3D{transform:scale(.86) perspective(740px) rotateX(12deg) rotateY(-22deg) translateZ(18px)}
+    td{font-weight:800}
+    .ltr{direction:ltr;text-align:right;font-variant-numeric:tabular-nums;font-weight:900}
+    .empty{
+      padding:20px;
+      text-align:center;
+      color:rgba(236,245,255,.58);
+      border-radius:22px;
+      background:rgba(10,18,36,.25);
+      border:1px solid rgba(255,255,255,.08);
     }
 
-  
-    /* ═════ IMAD REAL GLASS TREASURE BOX V2 ═════ */
-    .bottomGrid{
-      grid-template-columns:minmax(0,1.45fr) minmax(300px,.72fr)!important;
-      align-items:stretch!important;
+    @media(max-width:1200px){
+      .kpis{grid-template-columns:repeat(2,minmax(220px,1fr))}
+      .regions{grid-template-columns:repeat(2,minmax(220px,1fr))}
+      .filters,.settings{grid-template-columns:repeat(3,minmax(140px,1fr))}
     }
-    @media(max-width:1280px){
-      .bottomGrid{grid-template-columns:1fr!important}
-      .goal{grid-column:auto!important}
+    @media(max-width:760px){
+      .topbar,.section-head{flex-direction:column;align-items:stretch}
+      .toolbar{justify-content:stretch}
+      .toolbar button,.filters button,.filters select,.filters input{width:100%}
+      .kpis,.regions,.filters,.settings{grid-template-columns:1fr}
+      .bar-row{grid-template-columns:1fr}
+      .value{font-size:24px}
     }
-
-    .regionVisual{
-      width:152px!important;
-      height:134px!important;
-      flex:0 0 152px!important;
-      border-radius:36px!important;
-      background:
-        radial-gradient(circle at 28% 16%,rgba(255,255,255,.24),transparent 24%),
-        radial-gradient(circle at 78% 76%,rgba(125,211,252,.15),transparent 34%),
-        linear-gradient(145deg,rgba(255,255,255,.115),rgba(125,211,252,.045) 45%,rgba(3,7,20,.22))!important;
-      border:1px solid rgba(226,247,255,.17)!important;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.22),
-        inset 0 -1px 0 rgba(125,211,252,.10),
-        0 24px 52px rgba(0,0,0,.26)!important;
-      overflow:visible!important;
-    }
-    .regionVisual::after{
-      content:"";
-      position:absolute;
-      inset:16px;
-      border-radius:28px;
-      background:linear-gradient(135deg,rgba(255,255,255,.075),transparent 54%,rgba(125,211,252,.07));
-      border:1px solid rgba(255,255,255,.06);
-      pointer-events:none;
-    }
-
-    .glassBox3D{
-      width:104px!important;
-      height:92px!important;
-      transform-style:preserve-3d!important;
-      transform:perspective(860px) rotateX(16deg) rotateY(-25deg) rotateZ(-2deg) translateZ(22px)!important;
-      animation:realBoxFloat 6.4s ease-in-out infinite!important;
-      filter:
-        drop-shadow(0 28px 24px rgba(0,0,0,.40))
-        drop-shadow(0 0 22px rgba(125,211,252,.15))!important;
-    }
-    .glassBox3D span{display:block!important;position:absolute!important}
-
-    .glassBox3D .boxFace{
-      left:13px!important;
-      top:36px!important;
-      width:72px!important;
-      height:46px!important;
-      border-radius:14px 14px 18px 18px!important;
-      background:
-        linear-gradient(152deg,
-          rgba(255,255,255,.68) 0%,
-          rgba(219,245,255,.32) 18%,
-          rgba(125,211,252,.18) 46%,
-          rgba(29,78,216,.22) 72%,
-          rgba(2,6,23,.38) 100%)!important;
-      border:1px solid rgba(240,253,255,.55)!important;
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.82),
-        inset 8px 0 18px rgba(255,255,255,.12),
-        inset 0 -20px 26px rgba(3,7,18,.26),
-        0 0 36px rgba(125,211,252,.18)!important;
-      transform:translateZ(34px)!important;
-      backdrop-filter:blur(10px) saturate(1.25)!important;
-      overflow:hidden;
-    }
-    .glassBox3D .boxFace::before{
-      content:"";
-      position:absolute;
-      inset:7px 10px auto auto;
-      width:30px;
-      height:9px;
-      border-radius:999px;
-      background:rgba(255,255,255,.62);
-      filter:blur(.4px);
-      transform:rotate(-12deg);
-      box-shadow:0 0 12px rgba(255,255,255,.35);
-    }
-    .glassBox3D .boxFace::after{
-      content:"";
-      position:absolute;
-      left:10px;
-      right:10px;
-      bottom:8px;
-      height:8px;
-      border-radius:999px;
-      background:linear-gradient(90deg,transparent,rgba(125,211,252,.42),transparent);
-      filter:blur(1px);
-    }
-
-    .glassBox3D .boxTop{
-      left:16px!important;
-      top:10px!important;
-      width:76px!important;
-      height:48px!important;
-      border-radius:18px 20px 13px 13px!important;
-      background:
-        linear-gradient(135deg,
-          rgba(255,255,255,.78) 0%,
-          rgba(238,250,255,.43) 24%,
-          rgba(125,211,252,.19) 58%,
-          rgba(167,139,250,.11) 100%)!important;
-      border:1px solid rgba(240,253,255,.52)!important;
-      transform:rotateX(62deg) rotateZ(-8deg) translateZ(48px)!important;
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.90),
-        inset 0 -14px 20px rgba(96,165,250,.12),
-        0 15px 26px rgba(0,0,0,.18),
-        0 0 30px rgba(125,211,252,.18)!important;
-      overflow:hidden;
-    }
-    .glassBox3D .boxTop::before{
-      content:"";
-      position:absolute;
-      left:12px;
-      top:8px;
-      width:48px;
-      height:10px;
-      border-radius:999px;
-      background:rgba(255,255,255,.66);
-      filter:blur(.6px);
-      transform:rotate(-10deg);
-    }
-
-    .glassBox3D .boxSide{
-      right:3px!important;
-      top:31px!important;
-      width:34px!important;
-      height:49px!important;
-      border-radius:9px 17px 18px 8px!important;
-      background:
-        linear-gradient(118deg,
-          rgba(191,219,254,.34),
-          rgba(125,211,252,.18) 44%,
-          rgba(88,28,135,.14) 72%,
-          rgba(3,7,18,.34))!important;
-      border:1px solid rgba(219,245,255,.30)!important;
-      transform:skewY(-22deg) translateZ(13px)!important;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.42),
-        inset -12px 0 20px rgba(2,6,23,.14)!important;
-    }
-
-    .glassBox3D .boxGlow{
-      left:18px!important;
-      bottom:-5px!important;
-      width:72px!important;
-      height:20px!important;
-      border-radius:999px!important;
-      background:radial-gradient(ellipse,rgba(125,211,252,.55),rgba(167,139,250,.16) 44%,transparent 75%)!important;
-      filter:blur(9px)!important;
-      transform:rotateX(74deg) translateZ(-12px)!important;
-      opacity:.95!important;
-    }
-
-    .glassBox3D::before{
-      content:"";
-      position:absolute;
-      left:32px;
-      top:47px;
-      width:34px;
-      height:8px;
-      border-radius:999px;
-      background:linear-gradient(90deg,rgba(255,255,255,.82),rgba(125,211,252,.30),rgba(255,255,255,.56));
-      transform:translateZ(46px) rotate(-6deg);
-      box-shadow:0 0 16px rgba(255,255,255,.24);
-      z-index:20;
-    }
-    .glassBox3D::after{
-      content:"";
-      position:absolute;
-      left:46px;
-      top:56px;
-      width:12px;
-      height:12px;
-      border-radius:50%;
-      background:radial-gradient(circle at 34% 28%,#fff,rgba(125,211,252,.52) 42%,rgba(15,23,42,.20));
-      border:1px solid rgba(255,255,255,.38);
-      transform:translateZ(50px);
-      box-shadow:0 0 18px rgba(125,211,252,.22);
-      z-index:21;
-    }
-
-    @keyframes realBoxFloat{
-      0%,100%{
-        transform:perspective(860px) rotateX(16deg) rotateY(-25deg) rotateZ(-2deg) translateY(0) translateZ(22px)!important;
-      }
-      50%{
-        transform:perspective(860px) rotateX(12deg) rotateY(-17deg) rotateZ(1deg) translateY(-9px) translateZ(30px)!important;
-      }
-    }
-
-    .regionCard:nth-child(1) .glassBox3D .boxFace{background:linear-gradient(152deg,rgba(255,255,255,.68),rgba(125,211,252,.22),rgba(14,165,233,.22),rgba(2,6,23,.36))!important}
-    .regionCard:nth-child(2) .glassBox3D .boxFace{background:linear-gradient(152deg,rgba(255,255,255,.68),rgba(196,181,253,.27),rgba(124,58,237,.20),rgba(2,6,23,.36))!important}
-    .regionCard:nth-child(3) .glassBox3D .boxFace{background:linear-gradient(152deg,rgba(255,255,255,.68),rgba(110,231,183,.24),rgba(5,150,105,.18),rgba(2,6,23,.36))!important}
-    .regionCard:nth-child(4) .glassBox3D .boxFace{background:linear-gradient(152deg,rgba(255,255,255,.68),rgba(240,171,252,.24),rgba(192,38,211,.17),rgba(2,6,23,.36))!important}
-
-    @media(max-width:700px){
-      .regionVisual{
-        width:126px!important;
-        height:116px!important;
-        flex-basis:126px!important;
-      }
-      .glassBox3D{
-        transform:scale(.84) perspective(860px) rotateX(16deg) rotateY(-25deg) rotateZ(-2deg) translateZ(22px)!important;
-      }
-    }
-
   </style>
 </head>
 <body>
+  <div class="ambient"></div>
 
-  <!-- ══ LOGIN OVERLAY ══════════════════════════════════════ -->
-  <div class="loginOverlay" id="loginOverlay">
-    <div class="loginBox card">
-      <div style="width:48px;height:48px;margin:0 0 16px auto;border-radius:13px;
-        background:conic-gradient(from 45deg,#ff6200,#ffc87a,#ff9f1a,#ff6200);
-        box-shadow:0 0 28px rgba(255,159,26,.44);display:flex;align-items:center;justify-content:center;">
-        <div style="width:22px;height:22px;background:#030405;transform:rotate(45deg);border-radius:4px"></div>
-      </div>
-      <h1>لوحة الإيرادات</h1>
-      <div style="color:var(--muted);font-size:13px;margin-top:4px">
-        لوحة إيرادات مستقلة، تقرأ بيانات تطبيق المندوبين والمكاتب فقط.
-      </div>
-      <div class="formGrid">
-        <div><label>البريد الإلكتروني</label><input id="email" type="email" class="ltr" placeholder="name@example.com"></div>
-        <div><label>كلمة المرور</label><input id="password" type="password" class="ltr" placeholder="••••••••"></div>
-        <button class="btnPrimary" id="loginBtn">دخول</button>
-      </div>
-      <div class="msg" id="loginMsg"></div>
-      <div class="safeNote">🔒 لا يحذف ولا يكتب أي بيانات. القراءة فقط من نفس Firebase.</div>
+  <div id="loginScreen" class="login">
+    <div class="login-card glass">
+      <h1>تسجيل الدخول</h1>
+      <p>لوحة Regions 1 - 4 فقط</p>
+      <input id="loginEmail" type="email" placeholder="الإيميل">
+      <input id="loginPassword" type="password" placeholder="كلمة المرور">
+      <button onclick="login()">دخول</button>
+      <div id="loginStatus" class="status"></div>
     </div>
   </div>
 
-  <!-- ══ SHELL ══════════════════════════════════════════════ -->
-  <div class="shell">
-
-    <!-- ── SIDEBAR ─────────────────────────────────────────── -->
-    <aside class="side">
-      <div class="logo"></div>
-
-      <nav class="nav">
-        <button class="active" data-jump="home">
-          <span class="ico">⊞</span>الرئيسية
-        </button>
-        <button data-jump="records">
-          <span class="ico">☰</span>التقارير
-        </button>
-        <button data-jump="chart">
-          <span class="ico">⇄</span>المقارنات
-        </button>
-        <button data-jump="goal">
-          <span class="ico">◎</span>الأهداف
-        </button>
-        <button id="notifyBtn">
-          <span class="ico">🔔</span>التنبيهات
-        </button>
-        <button id="filterBtn" style="display:none"><!-- hidden clone --></button>
-        <button onclick="document.getElementById('filterPanel').classList.toggle('show')">
-          <span class="ico">⚙</span>الإعدادات
-        </button>
-        <button id="refreshSide">
-          <span class="ico">↻</span>تحديث
-        </button>
-        <button id="logoutSide">
-          <span class="ico">⎋</span>خروج
-        </button>
-      </nav>
-
-      <div class="sideFooter">
-        <div><span class="dot"></span>آخر تحديث</div>
-        <b id="lastUpdate">—</b>
-        <div class="copy">منذ 5 دقائق · Read-only v2</div>
-      </div>
-    </aside>
-
-    <!-- ── MAIN ────────────────────────────────────────────── -->
-    <main class="main" id="home">
-
-      <!-- Mobile Nav -->
-      <div class="mobileTopNav">
-        <button data-jump="home">الرئيسية</button>
-        <button data-jump="records">السجلات</button>
-        <button data-jump="chart">الاتجاه</button>
-        <button id="refreshMobile">↻ تحديث</button>
-        <button id="logoutMobile">⎋ خروج</button>
-      </div>
-
-      <!-- ── TOP BAR ──────────────────────────────────────── -->
-      <header class="topbar">
-        <!-- Date -->
-        <div class="dateBox">
-          <span style="font-size:18px">📅</span>
-          <span style="color:var(--muted)">اليوم:</span>
-          <input id="mainDate" type="date" style="width:auto;min-height:0;border:none;background:transparent;padding:0;color:var(--text);font-weight:700;font-size:13.5px">
-          <span style="color:var(--muted);font-size:12px;margin-right:4px">▾</span>
-        </div>
-        <!-- Title -->
-        <div class="titleWrap">
-          <div class="titleLine"></div>
-          <h1 class="title">لوحة الإيرادات</h1>
-          <div class="titleLine"></div>
-        </div>
-        <!-- Actions -->
-        <div class="topActions">
-          <button class="btnIcon" id="notifyTopBtn">🔔</button>
-          <button class="btnFilter copyBtn" id="copy24Btn" title="نسخ تقرير آخر 24 ساعة">
-            <span style="font-size:15px">⧉</span> نسخ 24 ساعة
-          </button>
-          <button class="btnFilter" id="filterBtnMain">
-            <span style="font-size:14px">☰</span> تصفية
-          </button>
-        </div>
-
-        <!-- Filter Panel (absolute) -->
-        <section class="filterPanel card" id="filterPanel">
-          <div class="grid2">
-            <div><label>من تاريخ</label><input id="fromDate" type="date"></div>
-            <div><label>إلى تاريخ</label><input id="toDate" type="date"></div>
-            <div><label>المنطقة</label>
-              <select id="regionFilter">
-                <option value="">الكل</option>
-                <option value="R1">Region 1</option>
-                <option value="R2">Region 2</option>
-                <option value="R3">Region 3</option>
-                <option value="R4">Region 4</option>
-              </select>
-            </div>
-            <div><label>بحث مندوب</label><input id="repSearch" placeholder="اسم المندوب" type="text"></div>
-            <div><label>الهدف الشهري SYP</label><input id="monthlyTarget" type="number" class="ltr" value="40000000"></div>
-            <div><label>سعر افتراضي SYP/USD</label><input id="defaultRate" type="number" class="ltr" value="15000"></div>
-            <button class="btnPrimary full" id="applyFilters">تطبيق الفلتر</button>
-          </div>
-        </section>
-      </header>
-
-      <!-- ── STATUS ───────────────────────────────────────── -->
-      <div class="statusBar">
-        <div><span class="dot"></span><span id="readStatus">جاهز للاتصال</span></div>
-        <div id="userInfo" style="color:var(--muted);font-size:13px">—</div>
-      </div>
-
-      <!-- ── KPI CARDS ─────────────────────────────────────── -->
-      <section class="kpiGrid">
-
-        <!-- بطاقة 1: إجمالي التاريخ المحدد -->
-        <article class="card kpi">
-          <div class="kpiTop">
-            <div class="kpiIcon">💼</div>
-            <div class="kpiLabel" id="todayLabel">إجمالي المحدد</div>
-          </div>
-          <div class="kpiAmounts">
-            <div class="kpiSypRow">
-              <span class="kpiSypVal" id="todaySypVal">0</span>
-              <span class="kpiSypCur">SYP</span>
-            </div>
-            <div class="kpiUsdRow">
-              <span class="kpiUsdVal" id="todayUsd">0</span>
-              <span class="kpiUsdCur">USD</span>
-            </div>
-          </div>
-        </article>
-
-        <!-- بطاقة 2: آخر 24 ساعة مضافة -->
-        <article class="card kpi">
-          <div class="kpiTop">
-            <div class="kpiIcon">🕐</div>
-            <div class="kpiLabel">آخر 24 ساعة مضافة</div>
-          </div>
-          <div class="kpiAmounts">
-            <div class="kpiSypRow">
-              <span class="kpiSypVal" id="new24SypVal">0</span>
-              <span class="kpiSypCur">SYP</span>
-            </div>
-            <div class="kpiUsdRow">
-              <span class="kpiUsdVal" id="new24Usd">0</span>
-              <span class="kpiUsdCur">USD</span>
-            </div>
-          </div>
-        </article>
-
-        <!-- بطاقة 3: إجمالي الشهر -->
-        <article class="card kpi">
-          <div class="kpiTop">
-            <div class="kpiIcon">📅</div>
-            <div class="kpiLabel" id="monthLabel">إجمالي هذا الشهر</div>
-          </div>
-          <div class="kpiAmounts">
-            <div class="kpiSypRow">
-              <span class="kpiSypVal" id="monthSypVal">0</span>
-              <span class="kpiSypCur">SYP</span>
-            </div>
-            <div class="kpiUsdRow">
-              <span class="kpiUsdVal" id="monthUsd">0</span>
-              <span class="kpiUsdCur">USD</span>
-            </div>
-          </div>
-        </article>
-
-        <!-- بطاقة 4: الدولار الإجمالي + متوسط سعر الصرف -->
-        <article class="card kpi rateKpi">
-          <div class="kpiTop">
-            <div class="kpiIcon">◈</div>
-            <div class="kpiLabel">الدولار الإجمالي وسعر الصرف</div>
-          </div>
-          <div class="kpiAmounts">
-            <div class="kpiUsdRow totalUsdMini">
-              <span class="kpiUsdVal" id="totalUsdAll">0</span>
-              <span class="kpiUsdCur">USD إجمالي</span>
-            </div>
-            <div class="kpiSypRow avgRateMini">
-              <span class="kpiSypVal" id="avgRate">0</span>
-              <span class="kpiSypCur">SYP/USD وسطي</span>
-            </div>
-          </div>
-          <div class="kpiSub">
-            <canvas class="spark" id="spark"></canvas>
-          </div>
-        </article>
-
-      </section>
-
-      <!-- ── REGION CARDS (JS-generated inside) ────────────── -->
-      <section class="regionGrid" id="regionCards"></section>
-
-      <!-- ── BOTTOM GRID ───────────────────────────────────── -->
-      <section class="bottomGrid">
-
-        <!-- Trend Chart -->
-        <article class="card panel" id="chart">
-          <div class="panelHead">
-            <h3>اتجاه الإيرادات</h3>
-            <div style="display:flex;align-items:center;gap:12px">
-              <div class="tabs">
-                <button data-chart="daily"   class="active">يومي</button>
-                <button data-chart="weekly">أسبوعي</button>
-                <button data-chart="monthly">شهري</button>
-              </div>
-              <span class="panelMenu">···</span>
-            </div>
-          </div>
-          <div class="chartWrap"><canvas id="trendChart"></canvas></div>
-        </article>
-
-
-        <!-- Goal Ring -->
-        <article class="card goal" id="goal">
-          <h3>تقدم الهدف الشهري</h3>
-          <div class="ring" id="goalRing" style="--p:0">
-            <div class="ringTxt">
-              <b id="goalPct">0%</b>
-              <span>من الهدف الشهري</span>
-            </div>
-          </div>
-          <div class="goalMeta">
-            <div>الهدف: &nbsp;<b class="amount" id="goalTarget">40,000,000 SYP</b></div>
-            <div>المحقق: <b class="amount" id="goalDone">0 SYP</b></div>
-          </div>
-        </article>
-
-      </section>
-
-      <!-- ── RECORDS ────────────────────────────────────────── -->
-      <section class="card recordsPanel" id="records">
-        <div class="panelHead">
-          <h3>سجلات إيرادات المندوبين</h3>
-          <div style="display:flex;align-items:center;gap:12px">
-            <span class="muted" id="recordsCount">0 سجل</span>
-            <button class="btnSecondary" id="toggleRecords" style="min-height:36px;padding:0 14px;font-size:13px">إخفاء ↑</button>
+  <div id="app" class="app">
+    <div class="wrap">
+      <div class="topbar glass">
+        <div class="brand">
+          <div class="logo">R1-4</div>
+          <div>
+            <h1>لوحة الإيرادات</h1>
+            <p>تعرض فقط Region 1 إلى Region 4، مع إجماليات أوضح وسعر صرف وسطي محسوب من قص المندوبين والمكاتب.</p>
           </div>
         </div>
-        <div id="recordsBody_wrap">
         <div class="toolbar">
-          <div><label>من تاريخ</label><input id="recordsFrom" type="date"></div>
-          <div><label>إلى تاريخ</label><input id="recordsTo" type="date"></div>
-          <div><label>المنطقة</label>
-            <select id="recordsRegion">
-              <option value="">الكل</option>
-              <option value="R1">Region 1</option>
-              <option value="R2">Region 2</option>
-              <option value="R3">Region 3</option>
-              <option value="R4">Region 4</option>
-            </select>
-          </div>
-          <div><label>بحث</label><input id="recordsSearch" type="text" placeholder="مندوب / ملاحظات"></div>
-          <div><label>&nbsp;</label><button class="btnSecondary" id="syncFilters">تطبيق</button></div>
+          <button class="secondary" onclick="toggleSettings()">إعدادات</button>
+          <button class="secondary" onclick="manualRefresh()">تحديث</button>
+          <button class="danger" onclick="logout()">خروج</button>
         </div>
-        <div class="recordsScroll">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>التاريخ</th><th>وقت الإضافة</th><th>المنطقة</th>
-                <th>المندوب</th><th>SYP</th><th>USD</th><th>سعر الصرف</th><th>ملاحظات</th>
-              </tr>
-            </thead>
-            <tbody id="recordsBody"></tbody>
-          </table>
-        </div>
-        </div><!-- /recordsBody_wrap -->
-      </section>
-
-    </main><!-- /main -->
-  </div><!-- /shell -->
-  <div class="copyToast" id="copyToast">تم نسخ التقرير ✅</div>
-
-<!-- ══ FIREBASE + LOGIC (unchanged) ══════════════════════════ -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, query, getDocs, getDoc, doc, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig={apiKey:"AIzaSyDoVPtyKtuY5LBRw6plvwDVJv4TDIk0Klk",authDomain:"mandob-app-82843.firebaseapp.com",projectId:"mandob-app-82843",storageBucket:"mandob-app-82843.firebasestorage.app",messagingSenderId:"749939721927",appId:"1:749939721927:web:4c1c63aacca39ec41fe0e2",measurementId:"G-40ZG8YVETG"};
-const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getFirestore(app);
-const $=id=>document.getElementById(id);
-const ar="٠١٢٣٤٥٦٧٨٩", fa="۰۱۲۳۴۵۶۷۸۹";
-const REGIONS=["R1","R2","R3","R4"];
-const regionNames={R1:"Region 1",R2:"Region 2",R3:"Region 3",R4:"Region 4"};
-const colors={R1:"#38bdf8",R2:"#a78bfa",R3:"#34d399",R4:"#f0abfc"};
-let trendChart=null,sparkChart=null,chartMode="daily";
-const state={user:null,profile:null,reps:[],offices:[],sales:[],deliveries:[],manual:[],withdrawals:[],settings:{},ratesByDate:new Map(),filtered:[]};
-function n(v){if(v===null||v===undefined)return 0;let s=String(v).trim().replace(/[٠-٩]/g,d=>String(ar.indexOf(d))).replace(/[۰-۹]/g,d=>String(fa.indexOf(d))).replace(/,/g,"").replace(/\s/g,"").replace(/[^\d.-]/g,"");return Number(s||0)}
-function fmt(v,max=0){return n(v).toLocaleString("en-US",{maximumFractionDigits:max})}
-function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]))}
-function today(){return new Date().toISOString().slice(0,10)}
-function monthStart(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-01`}
-function createdMs(x){const c=x?.createdAt||x?.created_at||x?.timestamp||x?.updatedAt||x?.addedAt;if(!c)return 0;if(typeof c.toDate==="function")return c.toDate().getTime();if(c.seconds)return c.seconds*1000;if(c._seconds)return c._seconds*1000;const t=Date.parse(c);return Number.isFinite(t)?t:0}
-function dateFromTimestamp(ms){if(!ms)return "";const d=new Date(ms);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
-function dateVal(x){return x?.date||x?.saleDate||x?.day||x?.recordDate||dateFromTimestamp(createdMs(x))||""}
-function cleanKey(v){return String(v||"").trim().replace(/\s+/g," ").toLowerCase()}
-function sameKey(a,b){return cleanKey(a)&&cleanKey(a)===cleanKey(b)}
-function normalizeRegion(v){const s=String(v||"").trim();if(!s)return "";const low=s.toLowerCase().replace(/[٠-٩]/g,d=>String(ar.indexOf(d))).replace(/[۰-۹]/g,d=>String(fa.indexOf(d))).replace(/[_\-ـ]+/g," ");const m=low.match(/(?:^|\s)(?:r|region|reg|origin|ريجن|منطقة|منطقه)?\s*([1-4])(?:\s|$)/);return m?`R${m[1]}`:s}
-function repForRow(row){return state.reps.find(r=>String(r.id)===String(row.representativeId||row.repId||row.mandobId||"")||sameKey(r.name,row.representativeName||row.repName||row.mandobName))}
-function regionOf(row){return normalizeRegion(row.region||row.origin||row.area||repForRow(row)?.region)||"R1"}
-function repName(row){return row.representativeName||row.repName||row.mandobName||repForRow(row)?.name||"—"}
-function defaultRate(){return n($("defaultRate")?.value)||n(state.settings.defaultExchangeRate||state.settings.exchangeRate)||15000}
-function active(rows){return (rows||[]).filter(x=>!x.deleted&&!x.permanentDeleted&&!x.hiddenDeleted&&!x.archived)}
-function rowAmountSyp(row){const s=n(row.amountSyp||row.syp||row.amount_syp||row.sourceSyp||row.totalSyp||row.amount);if(s>0)return s;const u=n(row.amountUsd||row.usd||row.amount_usd);const r=rateForDate(dateVal(row),row);return u>0&&r>0?u*r:0}
-function rawUsd(row){return n(row.amountUsd||row.usd||row.amount_usd||row.convertedUsd)}
-function explicitRate(row){let r=n(row.exchangeRate||row.usdRate||row.rate||row.dollarRate||row.sypUsdRate||row.avgRate);if(r>0)return r;const s=n(row.amountSyp||row.sourceSyp), u=n(row.amountUsd||row.convertedUsd);return s>0&&u>0?s/u:0}
-function collectRates(){const map=new Map();const add=(d,r)=>{r=n(r);if(!d||r<=0||r<100)return;if(!map.has(d))map.set(d,[]);map.get(d).push(r)};[...state.sales,...state.deliveries,...state.manual,...state.withdrawals].forEach(x=>{const d=dateVal(x);const r=explicitRate(x);if(r)add(d,r)});state.ratesByDate=new Map([...map.entries()].map(([d,a])=>[d,a.reduce((x,y)=>x+y,0)/a.length]));}
-function rateForDate(d,row=null){return explicitRate(row)||state.ratesByDate.get(d)||defaultRate()}
-function usdValue(row){const direct=rawUsd(row);if(direct>0)return direct;const s=rowAmountSyp(row), r=rateForDate(dateVal(row),row);return s>0&&r>0?s/r:0}
-function fingerprint(row){return [dateVal(row),repName(row),Math.round(rowAmountSyp(row)),Math.round(usdValue(row)*100),cleanKey(row.notes||row.description||"")].join("|")}
-function dedupe(rows){const seen=new Map(),out=[];for(const r of rows){const fp=fingerprint(r),cm=createdMs(r);const p=seen.get(fp);if(p&&cm&&p.cm&&Math.abs(cm-p.cm)<25000)continue;seen.set(fp,{cm});out.push(r)}return out}
-async function loadCollection(name,max=3000){try{const snap=await getDocs(query(collection(db,name),limit(max)));return snap.docs.map(d=>({id:d.id,...d.data()}))}catch(e){console.warn(name,e);return []}}
-async function loadSettings(){try{const s=await getDoc(doc(db,"app_settings","main"));state.settings=s.exists()?s.data():{}}catch(e){state.settings={}}}
-async function loadAll(){setStatus("جاري القراءة من Firebase...");state.reps=await loadCollection("representatives",1500);state.offices=await loadCollection("offices",800);state.sales=await loadCollection("sales_reports",4000);state.deliveries=await loadCollection("deliveries",4000);state.manual=await loadCollection("manual_amounts",2000);state.withdrawals=await loadCollection("office_withdrawals",2000);await loadSettings();collectRates();renderAll();setStatus(`آخر قراءة ناجحة: ${new Date().toLocaleTimeString("ar")}`);$("lastUpdate").textContent=new Date().toLocaleTimeString("ar");}
-function setStatus(t){$("readStatus").textContent=t}
-function filteredRows(){const from=$("fromDate").value||"",to=$("toDate").value||"",org=$("regionFilter").value||"",term=cleanKey($("repSearch").value||"");return dedupe(active(state.sales)).filter(r=>{const d=dateVal(r), rg=regionOf(r);const hay=cleanKey([repName(r),r.notes,r.description,rg,regionNames[rg]].join(" "));return (!from||d>=from)&&(!to||d<=to)&&(!org||rg===org)&&(!term||hay.includes(term));}).sort((a,b)=>String(dateVal(b)).localeCompare(String(dateVal(a)))||(createdMs(b)-createdMs(a)))}
-function sumRows(rows){return rows.reduce((a,r)=>{a.syp+=rowAmountSyp(r);a.usd+=usdValue(r);return a},{syp:0,usd:0})}
-function rowsForDate(d){return dedupe(active(state.sales)).filter(r=>dateVal(r)===d)}
-function rowsForMonth(dateStr){const base=dateStr||today();const m=base.slice(0,7);const end=base.slice(0,10);return dedupe(active(state.sales)).filter(r=>dateVal(r)>=m+"-01"&&dateVal(r)<=end)}
-function new24Rows(){const cut=Date.now()-24*3600*1000;return dedupe(active(state.sales)).filter(r=>createdMs(r)>=cut)}
-function renderKpis(){
-  const sel=$("mainDate").value||today();
-  const t=sumRows(rowsForDate(sel)),
-        nw=sumRows(new24Rows()),
-        mo=sumRows(rowsForMonth(sel));
-  const rows=state.filtered;
-  const rates=rows.map(r=>rateForDate(dateVal(r),r)).filter(x=>x>0);
-  const avg=rates.length?rates.reduce((a,b)=>a+b,0)/rates.length:defaultRate();
-
-  /* كارد 1 */
-  const selDate=new Date(sel+"T00:00:00");
-  const dayName=isNaN(selDate)?"":" — "+selDate.toLocaleDateString("ar-SA",{weekday:"long",day:"numeric",month:"long"});
-  $("todayLabel").textContent="إجمالي"+dayName;
-  $("todaySypVal").textContent=fmt(t.syp);
-  $("todayUsd").textContent=fmt(t.usd,2);
-
-  /* كارد 2 */
-  $("new24SypVal").textContent=fmt(nw.syp);
-  $("new24Usd").textContent=fmt(nw.usd,2);
-
-  /* كارد 3 */
-  const monthNames=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
-  const mIdx=isNaN(selDate)?new Date().getMonth():selDate.getMonth();
-  $("monthLabel").textContent=`إجمالي ${monthNames[mIdx]}`;
-  $("monthSypVal").textContent=fmt(mo.syp);
-  $("monthUsd").textContent=fmt(mo.usd,2);
-
-  /* كارد 4 */
-  const filterTotal=sumRows(rows);
-  if($("totalUsdAll")) $("totalUsdAll").textContent=fmt(filterTotal.usd,2);
-  $("avgRate").textContent=fmt(avg,2);
-  renderSpark(rates.slice(-20));
-}
-function renderOrigins(){
-  const rows=state.filtered, total=sumRows(rows);
-  $("regionCards").innerHTML=REGIONS.map((rg)=>{
-    const s=sumRows(rows.filter(r=>regionOf(r)===rg));
-    const pct=total.usd>0?s.usd/total.usd*100:0;
-    return `
-    <article class="card regionCard">
-      <div class="regionHead">
-        <span class="regionDot" style="color:${colors[rg]};background:${colors[rg]}"></span>
-        ${regionNames[rg]}
       </div>
-      <div class="regionBody">
-        <div class="regionVisual">
-          <div class="mapShape"></div>
-          <div class="glassBox3D" aria-hidden="true">
-            <span class="boxTop"></span>
-            <span class="boxFace"></span>
-            <span class="boxSide"></span>
-            <span class="boxGlow"></span>
+
+      <div id="status" class="status glass"></div>
+
+      <div class="section glass">
+        <div class="section-head">
+          <div>
+            <h2>الفلاتر</h2>
+            <small>اختار مدة أو ريجين. السجلات تُقرأ مباشرة من Firebase.</small>
           </div>
         </div>
-        <div class="regionNums">
-          <div class="lbl">إجمالي الإيرادات</div>
-          <div class="regionSypRow">
-            <span class="regionSypVal">${fmt(s.syp)}</span>
-            <span class="regionSypCur">SYP</span>
+        <div class="filters">
+          <select id="periodFilter" onchange="applyPeriod(); renderAll()">
+            <option value="all">كل المدة</option>
+            <option value="today">اليوم</option>
+            <option value="yesterday">أمس</option>
+            <option value="last7">آخر 7 أيام</option>
+            <option value="month">هذا الشهر</option>
+            <option value="custom">من / إلى</option>
+          </select>
+          <input id="fromDate" type="date" onchange="renderAll()">
+          <input id="toDate" type="date" onchange="renderAll()">
+          <select id="regionFilter" onchange="renderAll()">
+            <option value="">كل الريجينات</option>
+            <option value="Region 1">Region 1</option>
+            <option value="Region 2">Region 2</option>
+            <option value="Region 3">Region 3</option>
+            <option value="Region 4">Region 4</option>
+          </select>
+          <button class="secondary" onclick="clearFilters()">مسح</button>
+          <button class="secondary" onclick="toggleRecentTable()">إظهار / إخفاء السجلات</button>
+        </div>
+
+        <div id="settingsBox" class="settings">
+          <div class="field">
+            <label>Collection الإيرادات</label>
+            <input id="collectionName" placeholder="dailyRevenues">
           </div>
-          <div class="regionUsdRow">
-            <span class="regionUsdVal">${fmt(s.usd,2)}</span>
-            <span class="regionUsdCur">USD</span>
+          <div class="field">
+            <label>Collection قص المندوبين</label>
+            <input id="deliveriesCollection" placeholder="officeDeliveries">
           </div>
-          <div class="regionPctRow">
-            <div class="regionPctBar"><div class="regionPctFill" style="width:${fmt(pct,1)}%;background:${colors[rg]}"></div></div>
-            <span class="regionPctTxt" style="color:${colors[rg]}">${fmt(pct,1)}%</span>
+          <div class="field">
+            <label>Collection قص المكاتب / الحوالات</label>
+            <input id="movesCollection" placeholder="officeMoves">
+          </div>
+          <div class="field">
+            <label>عدد السجلات الحديثة</label>
+            <input id="recentLimit" inputmode="numeric" placeholder="20">
+          </div>
+          <div class="field">
+            <label>سعر صرف احتياطي</label>
+            <input id="fallbackRate" inputmode="numeric" placeholder="15000">
+          </div>
+          <div class="field">
+            <label>حفظ</label>
+            <button class="good" onclick="saveSettings()">حفظ الإعدادات</button>
           </div>
         </div>
       </div>
-    </article>`;
-  }).join("");
-}
-function renderOriginTable(){const el=$("regionTable"); if(!el) return;}
-function groupKey(d,mode){if(mode==="monthly")return d.slice(0,7);if(mode==="weekly"){const dt=new Date(d);if(isNaN(dt))return d;const onejan=new Date(dt.getFullYear(),0,1);const week=Math.ceil((((dt-onejan)/86400000)+onejan.getDay()+1)/7);return `${dt.getFullYear()}-W${String(week).padStart(2,"0")}`}return d}
-function renderChart(){
-  const rows=state.filtered;
-  const labels=[...new Set(rows.map(r=>groupKey(dateVal(r),chartMode)).filter(Boolean))].sort().slice(-12);
-  const ctx=$("trendChart");
-  const canvasCtx=ctx.getContext("2d");
-  const gradient=(base)=>{
-    const g=canvasCtx.createLinearGradient(0,0,0,290);
-    g.addColorStop(0, base+"ee");
-    g.addColorStop(.45, base+"88");
-    g.addColorStop(1, base+"18");
-    return g;
-  };
-  const datasets=REGIONS.map((rg,idx)=>({
-    label:regionNames[rg],
-    data:labels.map(l=>sumRows(rows.filter(r=>regionOf(r)===rg&&groupKey(dateVal(r),chartMode)===l)).syp),
-    backgroundColor:gradient(colors[rg]),
-    borderColor:colors[rg],
-    borderWidth:1.5,
-    borderRadius:14,
-    borderSkipped:false,
-    hoverBorderWidth:2.5,
-    barPercentage:.68,
-    categoryPercentage:.72
-  }));
-  if(trendChart)trendChart.destroy();
-  trendChart=new Chart(ctx,{
-    type:"bar",
-    data:{labels,datasets},
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      animation:{duration:850,easing:"easeOutQuart"},
-      plugins:{
-        legend:{labels:{color:"#d9edff",usePointStyle:true,pointStyleWidth:10,font:{weight:"800"}}},
-        tooltip:{
-          rtl:true,
-          backgroundColor:"rgba(7,13,31,.92)",
-          titleColor:"#fff",
-          bodyColor:"#dbeafe",
-          borderColor:"rgba(125,211,252,.28)",
-          borderWidth:1,
-          padding:12,
-          callbacks:{label:(c)=>`${c.dataset.label}: ${fmt(c.raw)} SYP`}
-        }
-      },
-      scales:{
-        x:{
-          stacked:false,
-          ticks:{color:"#9fb6d4",font:{weight:"800"}},
-          grid:{display:false}
-        },
-        y:{
-          beginAtZero:true,
-          ticks:{
-            color:"#9fb6d4",
-            callback:v=>v>=1000000000?(v/1000000000).toFixed(1)+"B":v>=1000000?(v/1000000).toFixed(0)+"M":v>=1000?(v/1000).toFixed(0)+"K":v
-          },
-          grid:{color:"rgba(180,220,255,.075)",drawBorder:false}
-        }
+
+      <div class="section glass">
+        <div class="section-head">
+          <div>
+            <h2>ملخص الإيرادات</h2>
+            <small>الدولار الظاهر داخل البطاقات محسوب حسب سعر الصرف الوسطي من عمليات القص خلال نفس الفترة.</small>
+          </div>
+        </div>
+        <div class="kpis">
+          <div class="card glass">
+            <div class="label">إجمالي الكل</div>
+            <div id="totalSyp" class="value">0 SYP</div>
+            <div id="totalUsdSub" class="mini">0 USD</div>
+            <div class="sub">SYP + USD في نفس البطاقة</div>
+          </div>
+          <div class="card glass">
+            <div class="label">الإيراد المضاف حديثاً</div>
+            <div id="recentSyp" class="value">0 SYP</div>
+            <div id="recentUsdSub" class="mini">0 USD</div>
+            <div class="sub">آخر 24 ساعة</div>
+          </div>
+          <div class="card glass">
+            <div class="label">متوسط سعر الصرف</div>
+            <div id="avgRate" class="value">0</div>
+            <div class="sub">من قص المندوبين والمكاتب</div>
+          </div>
+          <div class="card glass">
+            <div class="label">أفضل ريجين</div>
+            <div id="bestRegion" class="value">-</div>
+            <div class="sub">حسب الفلتر الحالي</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section glass">
+        <div class="section-head">
+          <div>
+            <h2>Region 1 إلى Region 4</h2>
+            <small>يعرض فقط الريجينات بدون أسماء المندوبين.</small>
+          </div>
+        </div>
+        <div id="regionsGrid" class="regions"></div>
+      </div>
+
+      <div class="section glass">
+        <div class="section-head">
+          <div>
+            <h2>مقارنة الريجينات</h2>
+            <small>مقارنة بصرية سريعة وواضحة.</small>
+          </div>
+        </div>
+        <div id="bars" class="bars"></div>
+      </div>
+
+      <div class="section glass">
+        <div class="section-head">
+          <div>
+            <h2>سجل آخر الإيرادات</h2>
+            <small>زر واحد لإظهار أو إخفاء السجلات.</small>
+          </div>
+        </div>
+        <div class="table-toggle">
+          <button class="secondary" onclick="toggleRecentTable()">إظهار / إخفاء السجلات</button>
+        </div>
+        <div id="recentTable" class="table-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey:"AIzaSyA9wiCS89YeXlE3eRO5fNThwsJulxnfrgY",
+      authDomain:"frhad11-fb086.firebaseapp.com",
+      projectId:"frhad11-fb086",
+      storageBucket:"frhad11-fb086.firebasestorage.app",
+      messagingSenderId:"12163224746",
+      appId:"1:12163224746:web:32449165eb2e867c4c6cd3",
+      measurementId:"G-VP7L29R9L9"
+    };
+
+    const app=initializeApp(firebaseConfig);
+    const auth=getAuth(app);
+    const db=getFirestore(app);
+    const authReady=setPersistence(auth,browserLocalPersistence).catch(()=>{});
+    const $=id=>document.getElementById(id);
+
+    const REGIONS=["Region 1","Region 2","Region 3","Region 4"];
+    let revenueRows=[], deliveryRows=[], moveRows=[];
+    let unsubs=[];
+    let recentVisible=false;
+
+    function clean(v){return String(v??"").replace(/[,\s،٬]/g,"").replace(/\.(?=\d{3}(\D|$))/g,"")}
+    function num(v){const n=Number(clean(v));return Number.isFinite(n)?n:0}
+    function fmtSyp(v){return Math.round(num(v)).toLocaleString("en-US")+" SYP"}
+    function fmtUsd(v){return Number((Number(v)||0).toFixed(2)).toLocaleString("en-US")+" USD"}
+    function fmtRate(v){return Math.round(num(v)).toLocaleString("en-US")}
+    function todayISO(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+    function isoMinus(days){const d=new Date();d.setDate(d.getDate()-days);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+    function tsMs(v){
+      if(v && typeof v.toMillis==="function")return v.toMillis();
+      if(v && typeof v.seconds==="number")return v.seconds*1000;
+      return 0;
+    }
+    function setStatus(msg){
+      const el=$("status");
+      if(!msg){el.style.display="none";el.textContent="";return}
+      el.textContent=msg; el.style.display="block";
+    }
+    function setLoginStatus(msg){
+      const el=$("loginStatus");
+      if(!msg){el.style.display="none";el.textContent="";return}
+      el.textContent=msg; el.style.display="block";
+    }
+
+    function getSettings(){
+      return{
+        revenueCollection:localStorage.getItem("region_dash_revenues")||"dailyRevenues",
+        deliveriesCollection:localStorage.getItem("region_dash_deliveries")||"officeDeliveries",
+        movesCollection:localStorage.getItem("region_dash_moves")||"officeMoves",
+        recentLimit:num(localStorage.getItem("region_dash_recent_limit"))||20,
+        fallbackRate:num(localStorage.getItem("region_dash_fallback_rate"))||15000
+      };
+    }
+    function loadSettingsToInputs(){
+      const s=getSettings();
+      $("collectionName").value=s.revenueCollection;
+      $("deliveriesCollection").value=s.deliveriesCollection;
+      $("movesCollection").value=s.movesCollection;
+      $("recentLimit").value=s.recentLimit;
+      $("fallbackRate").value=s.fallbackRate;
+    }
+    window.toggleSettings=function(){
+      $("settingsBox").classList.toggle("show");
+      loadSettingsToInputs();
+    }
+    window.saveSettings=function(){
+      localStorage.setItem("region_dash_revenues", String($("collectionName").value||"dailyRevenues").trim() || "dailyRevenues");
+      localStorage.setItem("region_dash_deliveries", String($("deliveriesCollection").value||"officeDeliveries").trim() || "officeDeliveries");
+      localStorage.setItem("region_dash_moves", String($("movesCollection").value||"officeMoves").trim() || "officeMoves");
+      localStorage.setItem("region_dash_recent_limit", String(num($("recentLimit").value)||20));
+      localStorage.setItem("region_dash_fallback_rate", String(num($("fallbackRate").value)||15000));
+      setStatus("تم حفظ الإعدادات ✅");
+      startSync();
+    }
+
+    function normalizeRegion(raw){
+      const s=String(raw||"").trim();
+      if(REGIONS.includes(s))return s;
+      const m=s.match(/[1-4]/);
+      return m?`Region ${m[0]}`:"";
+    }
+    function normalizeRevenueRow(r,i){
+      const region=normalizeRegion(r.region||r.regionText||r.regionName||r.regionId);
+      const amountSyp=num(r.revenueSyp ?? r.amountSyp ?? r.amount ?? r.syp ?? 0);
+      const date=String(r.date||r.day||r.createdDate||"").slice(0,10);
+      const ms=tsMs(r.createdAt)||tsMs(r.updatedAt)|| (date ? new Date(date+"T12:00:00").getTime() : 0);
+      return {
+        id:r.id||String(i),
+        region,
+        amountSyp,
+        date,
+        ms,
+        type:r.revenueType||r.type||"-"
+      };
+    }
+    function revenueList(){
+      return revenueRows.map(normalizeRevenueRow).filter(x=>REGIONS.includes(x.region)&&x.amountSyp>0);
+    }
+
+    function normalizeRateRow(r,source){
+      const date=String(r.date||r.day||r.createdDate||"").slice(0,10);
+      const ms=tsMs(r.createdAt)||tsMs(r.updatedAt)|| (date ? new Date(date+"T12:00:00").getTime() : 0);
+      const rate=num(r.exchangeRate||r.rate||0);
+      if(rate<=0)return null;
+
+      let weight=0;
+      if(source==="delivery"){
+        if(String(r.mode||"")!=="cut") return null;
+        weight = num(r.cutSyp || r.totalDeliveredAsSyp || 0);
+      }else{
+        weight = num(r.amountSyp || r.sypAmount || r.cutSyp || r.fromAmountSyp || r.totalSyp || 0);
+      }
+      return {rate, weight: weight>0?weight:1, date, ms};
+    }
+    function rateRows(){
+      const arr=[];
+      for(const r of deliveryRows){
+        const x=normalizeRateRow(r,"delivery");
+        if(x)arr.push(x);
+      }
+      for(const r of moveRows){
+        const x=normalizeRateRow(r,"move");
+        if(x)arr.push(x);
+      }
+      return arr;
+    }
+
+    function currentDateRange(){
+      return {from:$("fromDate").value, to:$("toDate").value};
+    }
+    function withinDate(x){
+      const {from,to}=currentDateRange();
+      if(from && x.date && x.date<from)return false;
+      if(to && x.date && x.date>to)return false;
+      return true;
+    }
+
+    function filteredRevenues(){
+      const regionFilter=$("regionFilter").value;
+      return revenueList().filter(r=>{
+        if(regionFilter && r.region!==regionFilter)return false;
+        return withinDate(r);
+      });
+    }
+    function filteredRates(){
+      return rateRows().filter(withinDate);
+    }
+    function averageRate(){
+      const rates=filteredRates();
+      if(!rates.length)return getSettings().fallbackRate;
+      const w=rates.reduce((a,x)=>a+x.weight,0);
+      if(w<=0)return getSettings().fallbackRate;
+      return rates.reduce((a,x)=>a+(x.rate*x.weight),0)/w;
+    }
+    function usdFromSyp(syp){
+      const rate=averageRate();
+      return rate>0 ? num(syp)/rate : 0;
+    }
+
+    window.applyPeriod=function(){
+      const p=$("periodFilter").value;
+      if(p==="custom")return;
+      if(p==="all"){ $("fromDate").value=""; $("toDate").value=""; return; }
+      if(p==="today"){ $("fromDate").value=todayISO(); $("toDate").value=todayISO(); return; }
+      if(p==="yesterday"){ $("fromDate").value=isoMinus(1); $("toDate").value=isoMinus(1); return; }
+      if(p==="last7"){ $("fromDate").value=isoMinus(6); $("toDate").value=todayISO(); return; }
+      if(p==="month"){
+        const d=new Date();
+        $("fromDate").value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-01`;
+        $("toDate").value=todayISO();
       }
     }
-  });
-}
-function renderSpark(vals){const data=(vals.length?vals:[defaultRate()]).slice(-12);const ctx=$("spark");if(sparkChart)sparkChart.destroy();sparkChart=new Chart(ctx,{type:"line",data:{labels:data.map((_,i)=>i+1),datasets:[{data,borderColor:"#ff9f1a",borderWidth:2,pointRadius:0,tension:.45}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}})}
-function renderGoal(){const month=sumRows(rowsForMonth());const target=n($("monthlyTarget").value)||40000000;const pct=Math.max(0,Math.min(100,target?month.syp/target*100:0));$("goalRing").style.setProperty("--p",pct);$("goalPct").textContent=`${fmt(pct,0)}%`;$("goalTarget").textContent=`${fmt(target)} SYP`;$("goalDone").textContent=`${fmt(month.syp)} SYP`;}
-function renderRecords(){const from=$("recordsFrom").value||$("fromDate").value||"",to=$("recordsTo").value||$("toDate").value||"",org=$("recordsRegion").value||$("regionFilter").value||"",term=cleanKey($("recordsSearch").value||$("repSearch").value||"");const rows=dedupe(active(state.sales)).filter(r=>{const d=dateVal(r),rg=regionOf(r),hay=cleanKey([repName(r),r.notes,r.description,rg,regionNames[rg]].join(" "));return(!from||d>=from)&&(!to||d<=to)&&(!org||rg===org)&&(!term||hay.includes(term));}).sort((a,b)=>String(dateVal(b)).localeCompare(String(dateVal(a)))||(createdMs(b)-createdMs(a)));const total=sumRows(rows);$("recordsCount").textContent=`${fmt(rows.length)} سجل — المجموع ${fmt(total.syp)} SYP / ${fmt(total.usd,2)} USD`;$("recordsBody").innerHTML=rows.map(r=>{const d=dateVal(r),rate=rateForDate(d,r),cm=createdMs(r);return `<tr><td>${esc(d)}</td><td>${cm?new Date(cm).toLocaleString("ar"):"—"}</td><td>${regionNames[regionOf(r)]||esc(regionOf(r))}</td><td>${esc(repName(r))}</td><td class="amount">${fmt(rowAmountSyp(r))}</td><td class="amount">${fmt(usdValue(r),2)}</td><td class="amount">${fmt(rate,2)}</td><td>${esc(r.notes||r.description||"—")}</td></tr>`}).join("")||`<tr><td colspan="8" class="empty">لا توجد سجلات ضمن هذا الفلتر</td></tr>`;}
-function syncRecordFilterInputs(){["recordsFrom","fromDate"].forEach(id=>$(id).value=$("fromDate").value||$("recordsFrom").value);["recordsTo","toDate"].forEach(id=>$(id).value=$("toDate").value||$("recordsTo").value);["recordsRegion","regionFilter"].forEach(id=>$(id).value=$("regionFilter").value||$("recordsRegion").value)}
-
-function arabicWeekday(d){
-  try{
-    const dt=new Date(d+"T12:00:00");
-    if(!isNaN(dt)) return dt.toLocaleDateString("ar-SY",{weekday:"long"});
-  }catch(e){}
-  return d||"";
-}
-function uniqueDayLabel(rows){
-  const days=[...new Set(rows.map(r=>dateVal(r)).filter(Boolean))].sort().map(arabicWeekday);
-  const clean=[...new Set(days.filter(Boolean))];
-  if(clean.length===0) return "آخر 24 ساعة";
-  if(clean.length===1) return clean[0];
-  if(clean.length===2) return `${clean[0]} والخميس`.replace(`${clean[0]} والخميس`, `${clean[0]} و${clean[1]}`);
-  return clean.slice(0,-1).join("، ")+" و"+clean.at(-1);
-}
-function avgRateForRows(rows){
-  const rates=rows.map(r=>rateForDate(dateVal(r),r)).filter(x=>x>0);
-  return rates.length?rates.reduce((a,b)=>a+b,0)/rates.length:defaultRate();
-}
-async function copyLast24Report(){
-  const rows=new24Rows();
-  const total=sumRows(rows);
-  const avg=avgRateForRows(rows);
-  const dayText=uniqueDayLabel(rows);
-  const lines=[];
-  lines.push(`إيراد ${dayText} — الجديد المضاف آخر 24 ساعة`);
-  lines.push(``);
-  REGIONS.forEach(rg=>{
-    const s=sumRows(rows.filter(r=>regionOf(r)===rg));
-    lines.push(`${regionNames[rg]}: ${fmt(s.syp)} SYP / ${fmt(s.usd,2)} USD`);
-  });
-  lines.push(``);
-  lines.push(`المجموع الكلي للريجينات الأربعة: ${fmt(total.syp)} SYP / ${fmt(total.usd,2)} USD`);
-  lines.push(`سعر الصرف الوسطي: ${fmt(avg,2)} SYP/USD`);
-  lines.push(`عدد السجلات الجديدة: ${fmt(rows.length)}`);
-  const txt=lines.join("\\n");
-  try{
-    await navigator.clipboard.writeText(txt);
-    showCopyToast("تم نسخ تقرير آخر 24 ساعة ✅");
-  }catch(e){
-    const ta=document.createElement("textarea");
-    ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();
-    showCopyToast("تم النسخ ✅");
-  }
-}
-function showCopyToast(t){
-  const el=$("copyToast"); if(!el) return;
-  el.textContent=t; el.classList.add("show");
-  setTimeout(()=>el.classList.remove("show"),1800);
-}
-
-function renderAll(){state.filtered=filteredRows();renderKpis();renderOrigins();renderOriginTable();renderChart();renderGoal();renderRecords();}
-function jump(id){document.getElementById(id)?.scrollIntoView({behavior:"smooth",block:"start"})}
-
-function bind(){
-  const d=today();
-  $("mainDate").value=d;
-  $("fromDate").value=monthStart();
-  $("toDate").value=d;
-  $("recordsFrom").value=monthStart();
-  $("recordsTo").value=d;
-  $("monthlyTarget").value=localStorage.getItem("orb_goal")||"40000000";
-  $("defaultRate").value=localStorage.getItem("orb_rate")||"15000";
-
-  /* jump buttons (sidebar + mobile) */
-  document.querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>jump(b.dataset.jump));
-
-  /* filter panel toggle — main btn + hidden sidebar clone */
-  $("filterBtnMain").onclick=()=>$("filterPanel").classList.toggle("show");
-  /* the hidden #filterBtn still needed by applyFilters close */
-  $("filterBtn").onclick=()=>$("filterPanel").classList.toggle("show");
-
-  $("applyFilters").onclick=()=>{
-    localStorage.setItem("orb_goal",$("monthlyTarget").value);
-    localStorage.setItem("orb_rate",$("defaultRate").value);
-    syncRecordFilterInputs();renderAll();
-    $("filterPanel").classList.remove("show");
-  };
-
-  $("syncFilters").onclick=()=>{
-    $("fromDate").value=$("recordsFrom").value;
-    $("toDate").value=$("recordsTo").value;
-    $("regionFilter").value=$("recordsRegion").value;
-    $("repSearch").value=$("recordsSearch").value;
-    renderAll();
-  };
-
-  ["mainDate","fromDate","toDate","regionFilter","repSearch",
-   "recordsFrom","recordsTo","recordsRegion","recordsSearch"].forEach(id=>{
-    $(id).addEventListener("input",()=>{syncRecordFilterInputs();renderAll()});
-  });
-
-  document.querySelectorAll("[data-chart]").forEach(b=>b.onclick=()=>{
-    document.querySelectorAll("[data-chart]").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    chartMode=b.dataset.chart;
-    renderChart();
-  });
-
-  $("refreshSide").onclick=$("refreshMobile").onclick=()=>loadAll();
-  $("logoutSide").onclick=$("logoutMobile").onclick=()=>signOut(auth);
-  if($("copy24Btn")) $("copy24Btn").onclick=copyLast24Report;
-
-  /* زر إخفاء السجلات */
-  $("toggleRecords").onclick=()=>{
-    const wrap=$("recordsBody_wrap");
-    const btn=$("toggleRecords");
-    if(wrap.style.display==="none"){wrap.style.display="";btn.textContent="إخفاء ↑";}
-    else{wrap.style.display="none";btn.textContent="إظهار ↓";}
-  };
-
-  /* تحديث آخر 24 ساعة كل 24 ساعة تلقائياً */
-  setInterval(()=>{renderKpis();}, 24*3600*1000);
-
-  $("loginBtn").onclick=async()=>{
-    try{
-      $("loginMsg").classList.remove("show");
-      await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
-    }catch(e){
-      $("loginMsg").textContent=e.message||String(e);
-      $("loginMsg").classList.add("show");
+    window.clearFilters=function(){
+      $("periodFilter").value="all";
+      $("fromDate").value="";
+      $("toDate").value="";
+      $("regionFilter").value="";
+      renderAll();
     }
-  };
-}
 
-bind();
-await setPersistence(auth,browserLocalPersistence);
-onAuthStateChanged(auth,async user=>{
-  state.user=user;
-  if(!user){$("loginOverlay").style.display="grid";return}
-  $("loginOverlay").style.display="none";
-  $("userInfo").textContent=user.email||"متصل";
-  await loadAll();
-});
-</script>
+    function groupByRegion(list){
+      const map=Object.fromEntries(REGIONS.map(r=>[r,{region:r,syp:0,count:0}]));
+      for(const row of list){
+        if(!map[row.region])continue;
+        map[row.region].syp += row.amountSyp;
+        map[row.region].count += 1;
+      }
+      return REGIONS.map(r=>map[r]);
+    }
+
+    window.toggleRecentTable=function(){
+      recentVisible=!recentVisible;
+      $("recentTable").classList.toggle("show", recentVisible);
+    }
+
+    function renderAll(){
+      const filtered=filteredRevenues();
+      const grouped=groupByRegion(filtered);
+      const totalSyp=grouped.reduce((a,x)=>a+x.syp,0);
+      const totalUsd=usdFromSyp(totalSyp);
+      const avg=averageRate();
+
+      const allRev=revenueList();
+      const now=Date.now();
+      const recent24Rows=allRev.filter(r=>r.ms && now-r.ms <= 24*60*60*1000);
+      const recentSyp=recent24Rows.reduce((a,r)=>a+r.amountSyp,0);
+      const recentUsd=usdFromSyp(recentSyp);
+      const best=[...grouped].sort((a,b)=>b.syp-a.syp)[0] || {region:"-",syp:0};
+      $("totalSyp").textContent=fmtSyp(totalSyp);
+      $("totalUsdSub").textContent=fmtUsd(totalUsd);
+      $("recentSyp").textContent=fmtSyp(recentSyp);
+      $("recentUsdSub").textContent=fmtUsd(recentUsd);
+      
+      
+      $("avgRate").textContent=fmtRate(avg);
+      $("bestRegion").textContent=best && best.syp>0 ? best.region : "-";
+      
+      
+
+      $("regionsGrid").innerHTML=grouped.map(x=>`
+        <div class="card glass region-card">
+          <div class="region-top"><div class="region-name">${x.region}</div><div class="badge">${x.count} سجل</div></div>
+          <div class="value">${fmtSyp(x.syp)}</div>
+          <div class="mini">${fmtUsd(usdFromSyp(x.syp))}</div>
+          <div class="sub">إجمالي الريجين</div>
+        </div>
+      `).join("");
+
+      const max=Math.max(...grouped.map(x=>x.syp),1);
+      $("bars").innerHTML=grouped.map(x=>`
+        <div class="bar-row">
+          <div class="bar-name">${x.region}</div>
+          <div class="track"><div class="fill" style="width:${Math.max(2,(x.syp/max)*100)}%"></div></div>
+          <div class="bar-val">${fmtSyp(x.syp)}</div>
+        </div>
+      `).join("");
+
+      const recent=[...allRev].sort((a,b)=>b.ms-a.ms).slice(0,getSettings().recentLimit);
+      if(!recent.length){
+        $("recentTable").innerHTML='<div class="empty">لا توجد سجلات حالياً.</div>';
+      }else{
+        $("recentTable").innerHTML=`<table><thead><tr><th>التاريخ</th><th>الريجين</th><th>المبلغ SYP</th><th>المبلغ USD</th><th>النوع</th></tr></thead><tbody>${recent.map(r=>`
+          <tr>
+            <td>${r.date||"-"}</td>
+            <td>${r.region}</td>
+            <td class="ltr">${fmtSyp(r.amountSyp)}</td>
+            <td class="ltr">${fmtUsd(usdFromSyp(r.amountSyp))}</td>
+            <td>${r.type||"-"}</td>
+          </tr>`).join("")}</tbody></table>`;
+      }
+    }
+
+    function stopSync(){
+      for(const u of unsubs){ try{u&&u()}catch(_){} }
+      unsubs=[];
+    }
+
+    function watchCollection(name, assigner){
+      try{
+        const u=onSnapshot(collection(db,name),snap=>{
+          assigner(snap.docs.map(d=>({id:d.id,...d.data()})));
+          renderAll();
+          setStatus("");
+        },err=>setStatus("فشل قراءة البيانات: "+err.message));
+        unsubs.push(u);
+      }catch(e){
+        setStatus("فشل الاتصال بـ "+name+": "+e.message);
+      }
+    }
+
+    function startSync(){
+      stopSync();
+      const s=getSettings();
+      setStatus("جاري قراءة البيانات...");
+      watchCollection(s.revenueCollection, data=>{revenueRows=data});
+      watchCollection(s.deliveriesCollection, data=>{deliveryRows=data});
+      watchCollection(s.movesCollection, data=>{moveRows=data});
+    }
+
+    window.manualRefresh=async function(){
+      try{
+        const s=getSettings();
+        const [a,b,c]=await Promise.all([
+          getDocs(collection(db,s.revenueCollection)),
+          getDocs(collection(db,s.deliveriesCollection)),
+          getDocs(collection(db,s.movesCollection))
+        ]);
+        revenueRows=a.docs.map(d=>({id:d.id,...d.data()}));
+        deliveryRows=b.docs.map(d=>({id:d.id,...d.data()}));
+        moveRows=c.docs.map(d=>({id:d.id,...d.data()}));
+        renderAll();
+        setStatus("");
+      }catch(e){
+        setStatus("فشل التحديث: "+e.message);
+      }
+    }
+
+    window.login=async function(){
+      try{
+        const email=$("loginEmail").value.trim();
+        const password=$("loginPassword").value;
+        if(!email||!password)return setLoginStatus("اكتب الإيميل وكلمة المرور.");
+        setLoginStatus("");
+        await authReady;
+        await signInWithEmailAndPassword(auth,email,password);
+      }catch(e){
+        const code=e && e.code ? e.code : "";
+        let msg="فشل تسجيل الدخول";
+        if(code==="auth/invalid-email")msg="الإيميل مكتوب غلط.";
+        else if(code==="auth/invalid-credential"||code==="auth/wrong-password"||code==="auth/user-not-found")msg="الإيميل أو كلمة المرور غلط.";
+        else if(code==="auth/operation-not-allowed")msg="Email/Password غير مفعّل في Firebase.";
+        else if(code==="auth/unauthorized-domain")msg="الدومين غير مسموح في Firebase.";
+        else if(code==="auth/network-request-failed")msg="مشكلة اتصال أو VPN.";
+        setLoginStatus(msg+"\n"+(code||e.message||""));
+      }
+    }
+    window.logout=async function(){ await signOut(auth) }
+
+    document.addEventListener("keydown",e=>{
+      if(e.key==="Enter" && $("loginScreen").style.display!=="none"){
+        const a=document.activeElement;
+        if(a && (a.id==="loginEmail"||a.id==="loginPassword"))login();
+      }
+    });
+
+    onAuthStateChanged(auth,user=>{
+      $("loginScreen").style.display=user?"none":"grid";
+      $("app").style.display=user?"block":"none";
+      if(user){
+        loadSettingsToInputs();
+        renderAll();
+        startSync();
+      }else{
+        stopSync();
+      }
+    });
+
+    loadSettingsToInputs();
+    renderAll();
+  </script>
 </body>
 </html>
