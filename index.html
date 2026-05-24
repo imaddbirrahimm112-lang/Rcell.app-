@@ -555,6 +555,7 @@
               </div>
             </div>
             <div class="toolbar">
+              <button class="good" onclick="exportRegionsPdf()">تصدير PDF</button>
               <button class="secondary" onclick="toggleSettings()">إعدادات</button>
               <button class="secondary" onclick="manualRefresh()">تحديث</button>
               <button class="danger" onclick="logout()">خروج</button>
@@ -598,12 +599,12 @@
                 <input id="collectionName" placeholder="dailyRevenues">
               </div>
               <div class="field">
-                <label>Collection قص المندوبين</label>
-                <input id="deliveriesCollection" placeholder="officeDeliveries">
+                <label>Collection قص المندوبين من IMAD Pro</label>
+                <input id="deliveriesCollection" placeholder="officeDeliveries" readonly>
               </div>
               <div class="field">
-                <label>Collection قص المكاتب / الحوالات</label>
-                <input id="movesCollection" placeholder="officeMoves">
+                <label>Collection حركات المكاتب من IMAD Pro</label>
+                <input id="movesCollection" placeholder="officeMovements" readonly>
               </div>
               <div class="field">
                 <label>عدد السجلات الحديثة</label>
@@ -624,7 +625,7 @@
             <div class="section-head">
               <div>
                 <h2>ملخص الإيرادات</h2>
-                <small>الدولار الظاهر داخل البطاقات محسوب حسب سعر الصرف الوسطي من عمليات القص خلال نفس الفترة.</small>
+                <small>الدولار الظاهر داخل البطاقات محسوب دائماً من سعر الصرف الوسطي في IMAD Pro خلال نفس الفترة.</small>
               </div>
             </div>
             <div class="kpis">
@@ -643,7 +644,7 @@
               <div class="card glass">
                 <div class="label">متوسط سعر الصرف</div>
                 <div id="avgRate" class="value">0</div>
-                <div class="sub">من قص المندوبين والمكاتب</div>
+                <div class="sub">من IMAD Pro: المندوبين + المكاتب</div>
               </div>
               <div class="card glass">
                 <div class="label">أفضل ريجين</div>
@@ -690,6 +691,9 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -712,9 +716,14 @@
     const $=id=>document.getElementById(id);
 
     const REGIONS=["Region 1","Region 2","Region 3","Region 4"];
+    // مصدر سعر الصرف ثابت من IMAD Pro حتى لا يصير اختلاف بين التطبيقين.
+    const IMAD_PRO_RATE_DELIVERIES_COLLECTION="officeDeliveries";
+    const IMAD_PRO_RATE_MOVES_COLLECTION="officeMovements";
     let revenueRows=[], deliveryRows=[], moveRows=[];
     let unsubs=[];
     let recentVisible=false;
+    localStorage.setItem("region_dash_deliveries", IMAD_PRO_RATE_DELIVERIES_COLLECTION);
+    localStorage.setItem("region_dash_moves", IMAD_PRO_RATE_MOVES_COLLECTION);
 
     function clean(v){return String(v??"").replace(/[,\s،٬]/g,"").replace(/\.(?=\d{3}(\D|$))/g,"")}
     function num(v){const n=Number(clean(v));return Number.isFinite(n)?n:0}
@@ -742,8 +751,10 @@
     function getSettings(){
       return{
         revenueCollection:localStorage.getItem("region_dash_revenues")||"dailyRevenues",
-        deliveriesCollection:localStorage.getItem("region_dash_deliveries")||"officeDeliveries",
-        movesCollection:localStorage.getItem("region_dash_moves")||"officeMoves",
+        // لا نقرأ سعر الصرف من إعداد مستقل داخل Rcell Regions.
+        // المصدر الإجباري دائماً هو سجلات IMAD Pro.
+        deliveriesCollection:IMAD_PRO_RATE_DELIVERIES_COLLECTION,
+        movesCollection:IMAD_PRO_RATE_MOVES_COLLECTION,
         recentLimit:num(localStorage.getItem("region_dash_recent_limit"))||20,
         fallbackRate:num(localStorage.getItem("region_dash_fallback_rate"))||15000
       };
@@ -762,11 +773,12 @@
     }
     window.saveSettings=function(){
       localStorage.setItem("region_dash_revenues", String($("collectionName").value||"dailyRevenues").trim() || "dailyRevenues");
-      localStorage.setItem("region_dash_deliveries", String($("deliveriesCollection").value||"officeDeliveries").trim() || "officeDeliveries");
-      localStorage.setItem("region_dash_moves", String($("movesCollection").value||"officeMoves").trim() || "officeMoves");
+      localStorage.setItem("region_dash_deliveries", IMAD_PRO_RATE_DELIVERIES_COLLECTION);
+      localStorage.setItem("region_dash_moves", IMAD_PRO_RATE_MOVES_COLLECTION);
       localStorage.setItem("region_dash_recent_limit", String(num($("recentLimit").value)||20));
       localStorage.setItem("region_dash_fallback_rate", String(num($("fallbackRate").value)||15000));
-      setStatus("تم حفظ الإعدادات ✅");
+      loadSettingsToInputs();
+      setStatus("تم حفظ الإعدادات ✅\nسعر الصرف مربوط دائماً مع IMAD Pro.");
       startSync();
     }
 
@@ -794,29 +806,34 @@
       return revenueRows.map(normalizeRevenueRow).filter(x=>REGIONS.includes(x.region)&&x.amountSyp>0);
     }
 
-    function normalizeRateRow(r,source){
+    function normalizeImadProRateRow(r,source){
       const date=String(r.date||r.day||r.createdDate||"").slice(0,10);
       const ms=tsMs(r.createdAt)||tsMs(r.updatedAt)|| (date ? new Date(date+"T12:00:00").getTime() : 0);
       const rate=num(r.exchangeRate||r.rate||0);
       if(rate<=0)return null;
 
-      let weight=0;
       if(source==="delivery"){
-        if(String(r.mode||"")!=="cut") return null;
-        weight = num(r.cutSyp || r.totalDeliveredAsSyp || 0);
+        // نفس منطق IMAD Pro: يحسب السعر من قص المندوبين أو الدولار المباشر المسجل بسعر صرف.
+        const cutSyp=num(r.cutSyp);
+        const cutUsd=Number(r.cutUsd||0);
+        const directUsd=Number(r.directUsd||0);
+        const deliveredUsdAsSyp=rate>0 ? directUsd*rate : 0;
+        if(cutSyp+deliveredUsdAsSyp<=0 && cutUsd+directUsd<=0)return null;
       }else{
-        weight = num(r.amountSyp || r.sypAmount || r.cutSyp || r.fromAmountSyp || r.totalSyp || 0);
+        // نفس منطق IMAD Pro: حركات المكاتب تدخل بالمتوسط فقط عند قص رصيد مكتب سوري إلى دولار.
+        if(String(r.type||"")!=="office_convert_syp_to_usd")return null;
       }
-      return {rate, weight: weight>0?weight:1, date, ms};
+
+      return {rate,date,ms};
     }
     function rateRows(){
       const arr=[];
       for(const r of deliveryRows){
-        const x=normalizeRateRow(r,"delivery");
+        const x=normalizeImadProRateRow(r,"delivery");
         if(x)arr.push(x);
       }
       for(const r of moveRows){
-        const x=normalizeRateRow(r,"move");
+        const x=normalizeImadProRateRow(r,"move");
         if(x)arr.push(x);
       }
       return arr;
@@ -845,9 +862,8 @@
     function averageRate(){
       const rates=filteredRates();
       if(!rates.length)return getSettings().fallbackRate;
-      const w=rates.reduce((a,x)=>a+x.weight,0);
-      if(w<=0)return getSettings().fallbackRate;
-      return rates.reduce((a,x)=>a+(x.rate*x.weight),0)/w;
+      // مطابق لطريقة IMAD Pro: متوسط بسيط لأسعار القص المسجلة، وليس متوسطاً مستقلاً داخل هذا التطبيق.
+      return rates.reduce((a,x)=>a+x.rate,0)/rates.length;
     }
     function usdFromSyp(syp){
       const rate=averageRate();
@@ -946,6 +962,152 @@
           </tr>`).join("")}</tbody></table>`;
       }
     }
+
+    function pdfEscape(v){return String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]))}
+    function safePdfDate(v){
+      const s=String(v||"").trim();
+      return /^\d{4}-\d{2}-\d{2}$/.test(s)?s:"";
+    }
+    function ltrDateSpan(v){
+      return `<span class="pdf-date-ltr">${pdfEscape(v)}</span>`;
+    }
+    function reportDateRangeHTML(){
+      const from=safePdfDate($("fromDate")?.value||"");
+      const to=safePdfDate($("toDate")?.value||"");
+      if(from&&to&&from===to)return `التاريخ المحدد: ${ltrDateSpan(from)}`;
+      if(from&&to)return `التاريخ المحدد: ${ltrDateSpan(from)} <span class="pdf-date-word">إلى</span> ${ltrDateSpan(to)}`;
+      if(from)return `التاريخ المحدد من: ${ltrDateSpan(from)}`;
+      if(to)return `التاريخ المحدد حتى: ${ltrDateSpan(to)}`;
+      return "التاريخ المحدد: كل المدة";
+    }
+    function reportDateRangeText(){
+      const from=safePdfDate($("fromDate")?.value||"");
+      const to=safePdfDate($("toDate")?.value||"");
+      if(from&&to&&from===to)return `التاريخ المحدد: ${from}`;
+      if(from&&to)return `التاريخ المحدد: ${from} إلى ${to}`;
+      if(from)return `التاريخ المحدد من: ${from}`;
+      if(to)return `التاريخ المحدد حتى: ${to}`;
+      return "التاريخ المحدد: كل المدة";
+    }
+    function reportFilterText(){
+      const r=$("regionFilter")?.value||"";
+      return r ? `حسب الفلتر: ${r}` : "Region 1 / Region 2 / Region 3 / Region 4";
+    }
+    function reportTimestamp(){
+      const d=new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+    }
+    function buildRegionsPdfReport(){
+      const filtered=filteredRevenues();
+      const grouped=groupByRegion(filtered);
+      const totalSyp=grouped.reduce((a,x)=>a+x.syp,0);
+      const totalUsd=usdFromSyp(totalSyp);
+      const rate=averageRate();
+      const max=Math.max(...grouped.map(x=>x.syp),1);
+      const colors=["#32aee2","#7b4de6","#14a873","#f4a80c"];
+      const rows=grouped.map((x,i)=>{
+        const pct=totalSyp>0 ? (x.syp/totalSyp*100) : 0;
+        return { ...x, usd:usdFromSyp(x.syp), pct, color:colors[i%colors.length] };
+      });
+      const tableRows=rows.map(x=>`<tr><td>${pdfEscape(x.region)}</td><td>${fmtSyp(x.syp)}</td><td>${fmtUsd(x.usd)}</td><td>${x.pct.toFixed(1)}%</td></tr>`).join("");
+      const barRows=rows.map(x=>`<div class="pdf-bar-row">
+        <div class="pdf-bar-name">${pdfEscape(x.region)}</div>
+        <div class="pdf-bar-track"><div class="pdf-bar-fill" style="width:${Math.max(3,(x.syp/max)*100).toFixed(2)}%;background:${x.color}"></div></div>
+        <div class="pdf-bar-side"><b>${fmtSyp(x.syp)}</b><span>${x.pct.toFixed(1)}%</span></div>
+      </div>`).join("");
+      const report=document.createElement("div");
+      report.id="rcellPdfReportRuntime";
+      report.setAttribute("dir","rtl");
+      report.setAttribute("lang","ar");
+      report.innerHTML=`
+        <style>
+          #rcellPdfReportRuntime,*{box-sizing:border-box}
+          #rcellPdfReportRuntime{width:1120px;height:1584px;padding:42px;background:#eef3f8;color:#172033;font-family:Tahoma,Arial,"Segoe UI",sans-serif;position:fixed;left:-20000px;top:0;z-index:-1;overflow:hidden;direction:rtl}
+          #rcellPdfReportRuntime .pdf-header{height:180px;border-radius:18px;background:linear-gradient(135deg,#111f54,#2034a0);color:#fff;padding:34px 46px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:flex-end;text-align:right}
+          #rcellPdfReportRuntime .pdf-header::before{content:"";position:absolute;width:330px;height:330px;border-radius:50%;background:rgba(255,255,255,.10);right:-100px;top:-120px}
+          #rcellPdfReportRuntime .pdf-header::after{content:"";position:absolute;width:360px;height:360px;border-radius:50%;background:rgba(255,255,255,.08);left:-60px;bottom:-190px}
+          #rcellPdfReportRuntime .pdf-header h1{position:relative;z-index:2;margin:0;font-size:48px;line-height:1.1;font-weight:900;letter-spacing:0;direction:rtl;unicode-bidi:plaintext;font-family:Tahoma,Arial,"Segoe UI",sans-serif}
+          #rcellPdfReportRuntime .pdf-header p{position:relative;z-index:2;margin:14px 0 0;font-size:22px;color:rgba(255,255,255,.88);font-weight:800;direction:rtl;unicode-bidi:isolate;font-family:Tahoma,Arial,"Segoe UI",sans-serif}
+          #rcellPdfReportRuntime .pdf-date-ltr{direction:ltr;unicode-bidi:isolate;display:inline-block;font-family:Tahoma,Arial,"Segoe UI",sans-serif}
+          #rcellPdfReportRuntime .pdf-date-word{display:inline-block;margin:0 7px}
+          #rcellPdfReportRuntime .pdf-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
+          #rcellPdfReportRuntime .pdf-kpi{height:110px;border-radius:18px;background:#fff;border:1px solid #dde6f1;box-shadow:0 14px 30px rgba(16,32,70,.06);padding:20px 24px;text-align:right}
+          #rcellPdfReportRuntime .pdf-kpi .label{font-size:21px;font-weight:900;color:#657087;margin-bottom:8px}
+          #rcellPdfReportRuntime .pdf-kpi .value{font-size:26px;font-weight:900;color:#171d31;direction:ltr;text-align:right;white-space:nowrap}
+          #rcellPdfReportRuntime .pdf-kpi .sub{font-size:14px;color:#7d8798;margin-top:7px;font-weight:700}
+          #rcellPdfReportRuntime .pdf-block{background:#fff;border:1px solid #dde6f1;border-radius:24px;margin-top:34px;padding:30px 34px;box-shadow:0 14px 30px rgba(16,32,70,.055)}
+          #rcellPdfReportRuntime .pdf-title{font-size:34px;font-weight:900;color:#172033;margin:0 0 18px;text-align:right}
+          #rcellPdfReportRuntime table{width:100%;border-collapse:collapse;direction:rtl;overflow:hidden;border-radius:12px;font-size:20px}
+          #rcellPdfReportRuntime th{background:#142b88;color:#fff;padding:15px 14px;font-size:21px;font-weight:900;text-align:center}
+          #rcellPdfReportRuntime td{padding:17px 14px;text-align:center;font-weight:900;border:1px solid #dbe5f1;background:#fdfefe;color:#1d2639;direction:ltr}
+          #rcellPdfReportRuntime td:first-child{direction:ltr;color:#172033;background:#f8fafc}
+          #rcellPdfReportRuntime tr:nth-child(even) td{background:#f3f7fb}
+          #rcellPdfReportRuntime .pdf-chart-note{margin-top:-10px;margin-bottom:24px;color:#667085;font-size:19px;font-weight:700;text-align:right}
+          #rcellPdfReportRuntime .pdf-bar-row{display:grid;grid-template-columns:130px 1fr 190px;gap:18px;align-items:center;margin:22px 0;direction:ltr}
+          #rcellPdfReportRuntime .pdf-bar-name{font-size:22px;font-weight:900;color:#27304a;text-align:left}
+          #rcellPdfReportRuntime .pdf-bar-track{height:34px;background:#dfe6ee;border-radius:999px;overflow:hidden;box-shadow:inset 0 2px 6px rgba(0,0,0,.06)}
+          #rcellPdfReportRuntime .pdf-bar-fill{height:100%;border-radius:999px;box-shadow:0 8px 18px rgba(0,0,0,.14)}
+          #rcellPdfReportRuntime .pdf-bar-side{text-align:left;color:#172033;font-weight:900;font-size:18px;line-height:1.35}
+          #rcellPdfReportRuntime .pdf-bar-side b{display:block;direction:ltr;white-space:nowrap}
+          #rcellPdfReportRuntime .pdf-bar-side span{display:block;color:#667085;font-size:16px;margin-top:2px}
+          #rcellPdfReportRuntime .pdf-total-box{margin-top:24px;margin-right:auto;width:500px;border-radius:16px;border:1px solid #cfdae8;background:#eff5fb;padding:18px 22px;font-size:19px;color:#172033;text-align:right;font-weight:900}
+          #rcellPdfReportRuntime .pdf-total-box b{direction:ltr;display:inline-block;margin:0 8px;color:#0f1a30}
+          #rcellPdfReportRuntime .pdf-footer{position:absolute;bottom:36px;left:42px;right:42px;display:flex;justify-content:space-between;color:#687386;font-size:14px;direction:ltr}
+        </style>
+        <div class="pdf-header">
+          <div>
+            <h1>تقرير الإيرادات</h1>
+            <p>${reportDateRangeHTML()}</p>
+          </div>
+        </div>
+        <div class="pdf-kpis">
+          <div class="pdf-kpi"><div class="label">إجمالي السوري</div><div class="value">${fmtSyp(totalSyp)}</div><div class="sub">حسب الفلتر</div></div>
+          <div class="pdf-kpi"><div class="label">إجمالي الدولار</div><div class="value">${fmtUsd(totalUsd)}</div><div class="sub">حسب الفلتر</div></div>
+          <div class="pdf-kpi"><div class="label">سعر الصرف</div><div class="value">${fmtRate(rate)}</div><div class="sub">من بيانات الإدخال</div></div>
+        </div>
+        <div class="pdf-block">
+          <h2 class="pdf-title">جدول المجموع</h2>
+          <table><thead><tr><th>الريجين</th><th>المجموع السوري</th><th>المجموع الدولار</th><th>النسبة</th></tr></thead><tbody>${tableRows}</tbody></table>
+        </div>
+        <div class="pdf-block" style="min-height:520px">
+          <h2 class="pdf-title">الرسم البياني المجمع</h2>
+          <div class="pdf-chart-note">توزيع الإيرادات حسب الريجين - صفحة واحدة بدون سجلات تفصيلية</div>
+          ${barRows}
+          <div class="pdf-total-box">المجموع الكلي حسب الفلتر: <b>${fmtSyp(totalSyp)}</b> | <b>${fmtUsd(totalUsd)}</b></div>
+        </div>
+        <div class="pdf-footer"><span>Generated: ${reportTimestamp()}</span><span>Rcell Regions - Executive PDF</span></div>
+      `;
+      return report;
+    }
+    window.exportRegionsPdf=async function(){
+      try{
+        if(!window.html2canvas || !window.jspdf?.jsPDF){
+          setStatus("مكتبات تصدير PDF لم تُحمّل بعد. تأكد من الإنترنت ثم جرّب مرة ثانية.");
+          return;
+        }
+        setStatus("جاري تجهيز PDF...");
+        const report=buildRegionsPdfReport();
+        document.body.appendChild(report);
+        if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+        await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+        const canvas=await html2canvas(report,{backgroundColor:"#eef3f8",scale:2,useCORS:true,logging:false,windowWidth:1120,windowHeight:1584,scrollX:0,scrollY:0});
+        report.remove();
+        const {jsPDF}=window.jspdf;
+        const pdf=new jsPDF({orientation:"portrait",unit:"pt",format:"a4",compress:true});
+        const pageW=pdf.internal.pageSize.getWidth();
+        const pageH=pdf.internal.pageSize.getHeight();
+        const img=canvas.toDataURL("image/png");
+        pdf.addImage(img,"PNG",0,0,pageW,pageH,undefined,"FAST");
+        const stamp=new Date().toISOString().slice(0,10);
+        pdf.save(`تقرير_الايرادات_${stamp}.pdf`);
+        setStatus("");
+      }catch(e){
+        const old=document.getElementById("rcellPdfReportRuntime");
+        if(old)old.remove();
+        setStatus("فشل تصدير PDF: "+(e?.message||e));
+      }
+    };
+
 
     function stopSync(){
       for(const u of unsubs){ try{u&&u()}catch(_){} }
